@@ -1,0 +1,29 @@
+[1/4] CHECK THE WORKSHOP
+$ bun integration/cli.ts doctor
+  PASS bun
+  PASS hermes
+  PASS profile
+  PASS registry
+  PASS builtMemory
+  PASS builtSwarm
+  PASS workspace
+Local checks only; provider authentication is separate.
+
+[2/4] SAVE A DECISION
+$ bun integration/cli.ts memory store --entity demo \
+    --key choice --value "Use copper widgets"
+Stored demo.choice = Use copper widgets
+
+[3/4] RECALL IT THROUGH MCP
+MCP > memory_search({"query":"copper"})
+demo.choice = Use copper widgets
+Same SQLite fact, read by a new MCP process.
+
+[4/4] PREPARE A CAMPAIGN
+MCP > swarm_prepare(tasks: inspect -> summarize)
+Saved 2 tasks: inspect -> summarize
+Campaign: <temporary-profile>/campaigns/<id>.json
+Worker execution enabled: false
+Ready for review. No model calls made.
+
+Demo complete. Temporary profile and campaign removed.

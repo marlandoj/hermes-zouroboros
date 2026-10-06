@@ -1,5 +1,9 @@
 # Hermes × Zouroboros
 
+[![CI](https://github.com/marlandoj/hermes-zouroboros/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marlandoj/hermes-zouroboros/actions/workflows/ci.yml)
+[![Runtime: Node 20+ and Bun 1.3.12+](docs/assets/runtime-badge.svg)](#start-here)
+[![Maturity: 0.1.0 foundation](docs/assets/maturity-badge.svg)](#release-boundaries)
+
 ![Hermes × Zouroboros: a persistent workshop for your Linux VPS, combining shared memory, coordinated work, and factory intake.](docs/assets/hermes-zouroboros-hero.png)
 
 **A persistent workshop for Hermes Agent, running on your Linux VPS.**
@@ -7,6 +11,20 @@
 Hermes handles the conversation and tools. Zouroboros supplies shared work memory, task orchestration, and a path into the software factory. This repository brings those pieces together with an isolated Hermes profile, a local MCP connection, and source extracted from the Zouroboros VPS workspace.
 
 It is an independent repository with fresh history. Muse Zouroboros informed the product brief; no Muse code or Git history was used.
+
+## See it work
+
+![Four-step terminal demo: check local prerequisites, store a work decision, retrieve it through MCP, and save a two-task campaign for review with worker execution disabled.](docs/assets/terminal-demo.gif)
+
+**24 seconds: check → remember → recall → prepare.** Recorded CLI and MCP calls with condensed output, paced playback, and temporary paths replaced. No provider calls. [Read the transcript](docs/assets/terminal-demo.txt) or [run the demo yourself](docs/demo.md).
+
+## Put it to work
+
+| When you need to… | Try this | What you get |
+| --- | --- | --- |
+| Resume work with a saved decision | Store “Use copper widgets” through the CLI; ask Hermes to call `memory_search` for `copper` in a later session. | The saved fact from the same local SQLite database. [Memory walkthrough](walkthrough/README.md#3-prove-shared-memory) |
+| Coordinate tasks with dependencies | Ask `swarm_prepare` for `inspect` followed by `summarize`, with `summarize` depending on `inspect`. | A validated campaign file to review before explicitly running workers. [Try the example](docs/demo.md#try-the-same-workflow-in-hermes) |
+| Inspect the factory's ready work | Connect a qualified Hermes Kanban board and call `factory_intake`. | Ready, unclaimed tickets for planning; reading does not reserve or dispatch them. [Connect a board](docs/factory.md) |
 
 ## A connected workshop
 
@@ -64,6 +82,36 @@ bun integration/cli.ts hermes chat
 In Hermes, ask it to call `workshop_status`, then store and retrieve a harmless work decision. The profile's MCP connection exposes `memory_store`, `memory_search`, `swarm_prepare`, and `factory_intake` as well.
 
 Read the [walkthrough](walkthrough/README.md) for model setup, campaign execution, and factory wiring. The installation uses a new profile under `~/.local/share/hermes-zouroboros/hermes`; it does not reuse your existing Hermes login automatically.
+
+### Recognize your first successful run
+
+After setup and initialization, `bun integration/cli.ts doctor` should exit with code 0 and print:
+
+```json
+{
+  "ok": true,
+  "checks": {
+    "bun": true,
+    "hermes": true,
+    "profile": true,
+    "registry": true,
+    "builtMemory": true,
+    "builtSwarm": true,
+    "workspace": true
+  },
+  "note": "Local prerequisites only; provider authentication and live model execution need an operator smoke test."
+}
+```
+
+A `false` check means a local prerequisite needs attention: build with `bash scripts/setup.sh`, install Hermes if `hermes` is false, or check your initialized profile and workspace paths. Doctor verifies the local installation; confirm provider access with `hermes chat` from the commands above.
+
+Prove the local workflow without provider setup:
+
+```bash
+bun examples/offline-demo.ts
+```
+
+Look for `demo.choice = Use copper widgets`, `Saved 2 tasks: inspect -> summarize`, and `Worker execution enabled: false`. The demo uses a disposable profile and removes it afterward. [What the demo checks](docs/demo.md).
 
 ## A first campaign
 
