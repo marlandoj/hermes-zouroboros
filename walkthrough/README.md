@@ -37,7 +37,7 @@ HERMES_ZOUROBOROS_ALLOW_SWARM=1 \
   bun integration/cli.ts swarm /absolute/path/to/campaign.json
 ```
 
-The worker uses concurrency two, no automatic retries, and your configured Hermes provider/model. Failed tasks return nonzero. The bridge caps each Hermes call at 300 seconds by default; `HERMES_TIMEOUT` can change that outer bound, while each task retains its orchestrator timeout. Child agents cannot execute a new campaign through the MCP profile.
+The worker uses concurrency two, no automatic retries, and your configured Hermes provider/model. Failed tasks return nonzero. Each task has an orchestrator timeout of 10–600 seconds; the worker sets the bridge's independent process-tree limit to 600 seconds. When called directly, the bridge defaults to 300 seconds and accepts `HERMES_TIMEOUT`. Child agents cannot execute a new campaign through the MCP profile.
 
 For an explicit model, set `HERMES_MODEL`; a `HERMES_PROVIDER` override requires a model as well. Values pass through unchanged. Keep credentials in the Hermes provider configuration or its supported environment variables.
 

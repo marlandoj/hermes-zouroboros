@@ -23,7 +23,8 @@
     "sdk_mcp_handshake_and_memory_round_trip": "pass",
     "real_orchestrator_fake_hermes_success_and_failure": "pass",
     "credential_pattern_scan": "no matches",
-    "source_manifest_hashes": "362 unchanged imported source files"
+    "source_manifest_hashes": "360 unchanged imports; 2 documented TypeScript configuration adaptations",
+    "github_ci_initial": "Found and corrected absolute typeRoots in two imported configs; rerun pending"
   },
   "not_performed": [
     "live provider/model call",

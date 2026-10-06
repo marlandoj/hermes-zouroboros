@@ -1451,5 +1451,17 @@
       "path": "packages/memory/hooks/opencode-observer.ts",
       "sha256": "cdba7eb9c34a1a9bec12c1ea9b7785216344d817af0f9fc3c195b336bfa32925"
     }
+  ],
+  "adaptations": [
+    {
+      "path": "packages/capability-runtime/tsconfig.json",
+      "reason": "Remove VPS absolute typeRoots; resolve installed workspace types normally.",
+      "distributed_sha256": "9c61f5cc234ed122833dc4f3a28c578efcbf33db174ff394dfb18e1f315aa8ad"
+    },
+    {
+      "path": "packages/control-plane/tsconfig.json",
+      "reason": "Remove VPS absolute typeRoots; resolve installed workspace types normally.",
+      "distributed_sha256": "7e26fc466ba7f1236f0159b769a681786252898700c0397748addc8293deea7e"
+    }
   ]
 }
