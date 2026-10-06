@@ -1,5 +1,7 @@
 # README artwork
 
+The terminal demo is rendered from verified local CLI/MCP output, with condensed formatting and paced playback. See [demo documentation](../demo.md) for capture and rendering instructions. Its GIF and [text transcript](terminal-demo.txt) are consumed by the README. Local SVG badges state the runtime requirements and release maturity; the CI badge links to GitHub Actions. These assets are code-rendered, not generated artwork.
+
 Generated with the built-in imagegen tool. All three PNGs are consumed by the root README. The existing capability table and Mermaid diagram provide text equivalents; the imagery is conceptual, not a product screenshot. Claims were checked against the release README.
 
 Palette: graphite, warm white, teal, gold. Visual theme: Hermes and the ouroboros, a persistent workshop.
@@ -77,4 +79,3 @@ Footer small but clearly legible:
 "Provider setup required for live model execution."
 No statistics, invented benchmarks, auto-claiming, automatic deployments, security guarantees, or additional capability claims. No watermark. All text rendered accurately and unclipped.
 ```
-

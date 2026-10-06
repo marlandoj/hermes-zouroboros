@@ -1,6 +1,6 @@
 # Release 0.1.0
 
-Status: COMPLETE
+Status: IN PROGRESS
 
 Objective: independent Hermes/Zouroboros VPS distribution extracted from the workspace; no fork of Muse and no changes to running VPS services.
 
@@ -43,3 +43,22 @@ Verified: all three PNG signatures and dimensions, all README image references, 
 Artifacts: `docs/assets/hermes-zouroboros-{hero,architecture,capabilities}.png`. Exact generation prompts: `docs/assets/README.md`. Consumer: root `README.md`.
 
 Published for review: https://github.com/marlandoj/hermes-zouroboros/pull/1 on `docs/readme-marketing-visuals`. Artwork implementation and local checks are complete; merge remains pending review.
+
+## README experience examples
+
+Objective: add a reproducible terminal demo, three practical use cases, first-run success output, and a compact CI/runtime/maturity strip. PR #1 is now merged.
+
+- [x] Verify current CLI/MCP behavior and runtime requirements.
+- [x] Score scoped plan: SUGGEST (0.30); proceed directly with bounded documentation work.
+- [x] Capture an isolated, credential-free demo and accessible transcript.
+- [x] Integrate use cases, first-run output, and badges.
+- [x] Verify examples, TypeScript, links, and rendered assets.
+- [ ] Commit, push, open PR, and verify CI.
+
+Preflight: graph IPC rejected sandbox ownership; operation-window admission failed before a decision because `/home/.z` is read-only. Use targeted reads and temporary validation only. No provider calls or service changes.
+
+Branch: `docs/readme-first-run`. Verified: demo CLI/MCP round trip and saved dependency plan, full `pnpm run typecheck`, 18 Bun tests, relative links, four rendered GIF frames, and `git diff --check`. Validation checkout: `/tmp/zo-task-hermes-clean-wa7tmuwm`.
+
+Consumers: root README links the animation, transcript, badges, and demo guide; readers run `examples/offline-demo.ts`; CI also runs it and the root TypeScript check includes it. `scripts/render-readme-demo.py` recreates the animation from captured text using optional Pillow tooling.
+
+Next action: publish the documentation PR and verify fresh-runner CI.
