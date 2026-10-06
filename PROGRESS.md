@@ -1,6 +1,6 @@
 # Release 0.1.0
 
-Status: VALIDATED — PUBLICATION IN PROGRESS
+Status: COMPLETE
 
 Objective: independent Hermes/Zouroboros VPS distribution extracted from the workspace; no fork of Muse and no changes to running VPS services.
 
@@ -11,7 +11,8 @@ Objective: independent Hermes/Zouroboros VPS distribution extracted from the wor
 - [x] Build imported packages; validate portable state relocation.
 - [x] Verify MCP memory round trip and fake executor integration.
 - [x] Complete final typecheck, acceptance suite and clean-checkout proof (18 Bun tests, 10 Python tests, portable relocation).
-- [ ] Publish independent private repository and verify remote revision.
+- [x] Publish independent private repository and verify remote revision.
+- [x] Pass GitHub fresh-runner CI: build, TypeScript, 18 Bun tests, 10 Python tests, portable relocation.
 
 Source workspace preflight: graph IPC and operation-window ledger are inaccessible in this sandbox. Targeted source reads were used. Specialist routing ran in shadow mode; bounded read-only/code reviews used the operator-authorized agents. No real specialist provider calls or paid model execution.
 
@@ -19,4 +20,8 @@ Known scope limits: production Factory dispatch and deployment are not installed
 
 GitHub repository created and verified PRIVATE, `isFork=false`: https://github.com/marlandoj/hermes-zouroboros.
 
-Next action: push verified source, confirm remote revision and record publication receipt.
+Verified implementation revision: `2103e0123990b4da69f4efc90773eb98fefee281`.
+
+CI receipt: https://github.com/marlandoj/hermes-zouroboros/actions/runs/37407318443 — SUCCESS.
+
+Next operator step: follow walkthrough/README.md to configure the isolated Hermes provider profile and perform an authorized live-model smoke test. Repository creation and distribution validation are complete; the existing production VPS was not redeployed.

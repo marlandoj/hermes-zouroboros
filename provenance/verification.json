@@ -24,7 +24,20 @@
     "real_orchestrator_fake_hermes_success_and_failure": "pass",
     "credential_pattern_scan": "no matches",
     "source_manifest_hashes": "360 unchanged imports; 2 documented TypeScript configuration adaptations",
-    "github_ci_initial": "Found and corrected absolute typeRoots in two imported configs; rerun pending"
+    "github_ci_initial": "Detected absolute source-host typeRoots; corrected in documented adaptations.",
+    "github_ci": {
+      "status": "success",
+      "implementation_revision": "2103e0123990b4da69f4efc90773eb98fefee281",
+      "url": "https://github.com/marlandoj/hermes-zouroboros/actions/runs/37407318443",
+      "includes": [
+        "fresh Ubuntu runner install",
+        "workspace build",
+        "TypeScript noEmit",
+        "18 Bun acceptance tests",
+        "10 Python tests",
+        "portable state relocation"
+      ]
+    }
   },
   "not_performed": [
     "live provider/model call",
