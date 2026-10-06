@@ -1,0 +1,13 @@
+{
+  "name": "@zouroboros/capability-runtime",
+  "version": "0.1.0",
+  "description": "Capability broker, authority mediation, effect policy, and reconciliation contracts for the capability-secured tool runtime",
+  "type": "module",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "bun test test/",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,37 @@
+{
+  "release": "0.1.0",
+  "source_revision": "63b351c79ddfdecbb72b5d957b9eba8d771063b8",
+  "environment": {
+    "platform": "Linux",
+    "bun": "1.4.0",
+    "pnpm": "8.15.9"
+  },
+  "checks": {
+    "independent_clean_directory_install": "pass (frozen lockfile, lifecycle scripts disabled)",
+    "workspace_build": "pass",
+    "typescript_no_emit": "pass",
+    "bun_acceptance_tests": {
+      "passed": 18,
+      "failed": 0,
+      "assertions": 110
+    },
+    "python_factory_tests": {
+      "passed": 10,
+      "failed": 0
+    },
+    "portable_state_relocation": "pass",
+    "sdk_mcp_handshake_and_memory_round_trip": "pass",
+    "real_orchestrator_fake_hermes_success_and_failure": "pass",
+    "credential_pattern_scan": "no matches",
+    "source_manifest_hashes": "362 unchanged imported source files"
+  },
+  "not_performed": [
+    "live provider/model call",
+    "production service installation",
+    "production Factory dispatch"
+  ],
+  "review": {
+    "persona_consult": "shadow; no provider invocations",
+    "bounded_agent_reviews": "portable source and Hermes integration"
+  }
+}

@@ -1,0 +1,8 @@
+[
+  {
+    "id": "inspect-workspace",
+    "task": "Inspect this workspace and summarize its top-level structure. Do not modify files, install software, contact external services, or delegate additional work.",
+    "priority": "medium",
+    "timeoutSeconds": 120
+  }
+]

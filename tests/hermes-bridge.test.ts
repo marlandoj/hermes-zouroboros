@@ -1,0 +1,86 @@
+import { afterEach, describe, expect, test } from 'bun:test';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { createHermesRegistry } from '../integration/hermes-executor';
+
+const bridge = resolve(import.meta.dir, '../integration/hermes-bridge.sh');
+const dirs: string[] = [];
+afterEach(() => { for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true }); });
+
+function fixture() {
+  const root = mkdtempSync(join(tmpdir(), 'hermes-bridge-test-'));
+  dirs.push(root);
+  const workdir = join(root, 'work space');
+  const scratch = join(root, 'scratch');
+  mkdirSync(workdir); mkdirSync(scratch);
+  const binary = join(root, 'fake hermes');
+  writeFileSync(binary, `#!/usr/bin/env bash
+printf '%s\\n' "$PWD" > "$FAKE_CAPTURE.cwd"
+printf '%s\\n' "$@" > "$FAKE_CAPTURE.args"
+printf '%s\\n' "$HOME" "$HERMES_HOME" > "$FAKE_CAPTURE.home"
+printf '%s\\n' "$HERMES_ZOUROBOROS_ALLOW_SWARM" > "$FAKE_CAPTURE.swarm"
+case "$FAKE_MODE" in
+ failure) printf 'credential-value-must-not-leak' >&2; exit 7 ;;
+ empty) printf '  \\n\\t'; exit 0 ;;
+ timeout) sleep 10 ;;
+ *) printf 'Final response\\n' ;;
+esac
+`);
+  chmodSync(binary, 0o700);
+  const capture = join(root, 'capture');
+  const env = { PATH: process.env.PATH!, HOME: root, HERMES_HOME: join(root, 'profile'), HERMES_BIN: binary, FAKE_CAPTURE: capture, TMPDIR: scratch };
+  return { root, workdir, scratch, capture, env };
+}
+
+describe('portable Hermes bridge', () => {
+  test('passes prompt literally, uses requested cwd and preserves profiles/model identifiers', async () => {
+    const f = fixture();
+    const prompt = 'two lines\n$(touch should-not-exist) `literal` "quoted"';
+    const p = Bun.spawn(['bash', bridge, prompt, f.workdir], { cwd: f.root, env: { ...f.env, HERMES_MODEL: 'vendor/model-x', HERMES_PROVIDER: 'custom-provider' }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await p.exited).toBe(0);
+    expect(await new Response(p.stdout).text()).toBe('Final response\n');
+    expect(readFileSync(f.capture + '.cwd', 'utf8')).toBe(f.workdir + '\n');
+    expect(readFileSync(f.capture + '.args', 'utf8')).toBe('--provider\ncustom-provider\n--model\nvendor/model-x\n-z\n' + prompt + '\n');
+    expect(readFileSync(f.capture + '.home', 'utf8')).toBe(f.root + '\n' + f.env.HERMES_HOME + '\n');
+    expect(readFileSync(f.capture + '.swarm', 'utf8')).toBe('0\n');
+    expect(existsSync(join(f.workdir, 'should-not-exist'))).toBe(false);
+    expect(readdirSync(f.scratch)).toEqual([]);
+  });
+
+  test('defaults to caller cwd and configured Hermes model', async () => {
+    const f = fixture();
+    const p = Bun.spawn(['bash', bridge, 'hello'], { cwd: f.workdir, env: f.env, stdout: 'pipe', stderr: 'pipe' });
+    expect(await p.exited).toBe(0);
+    expect(readFileSync(f.capture + '.cwd', 'utf8')).toBe(f.workdir + '\n');
+    expect(readFileSync(f.capture + '.args', 'utf8')).toBe('-z\nhello\n');
+  });
+
+  test.each([['failure', 7], ['empty', 1], ['timeout', 124]] as const)('fails closed for %s and removes scratch', async (mode, code) => {
+    const f = fixture();
+    const p = Bun.spawn(['bash', bridge, 'hello'], { cwd: f.workdir, env: { ...f.env, FAKE_MODE: mode, HERMES_TIMEOUT: '1' }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await p.exited).toBe(code);
+    expect(await new Response(p.stdout).text()).toBe('');
+    const error = await new Response(p.stderr).text();
+    expect(error).toContain('hermes-zouroboros:');
+    expect(error).not.toContain('credential-value-must-not-leak');
+    expect(readdirSync(f.scratch)).toEqual([]);
+  });
+
+  test('rejects provider-only overrides before invoking the agent', async () => {
+    const f = fixture();
+    const p = Bun.spawn(['bash', bridge, 'hello'], { env: { ...f.env, HERMES_PROVIDER: 'custom' }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await p.exited).toBe(2);
+    expect(existsSync(f.capture + '.args')).toBe(false);
+  });
+
+  test('generates a registry with an absolute bridge and no provider/model policy', () => {
+    const registry = createHermesRegistry('/srv/hermes-zouroboros');
+    expect(registry.$schema).toBe('executor-registry/v1');
+    expect(registry.executors[0]!.bridge).toBe('/srv/hermes-zouroboros/integration/hermes-bridge.sh');
+    expect(registry.executors[0]!.id).toBe('hermes-vps');
+    expect(registry.executors[0]!).not.toHaveProperty('modelRouter');
+    expect(registry.executors[0]!.config).toEqual({ defaultTimeout: 300 });
+    expect(() => createHermesRegistry('relative')).toThrow('absolute');
+  });
+});

@@ -1,0 +1,16 @@
+{
+  "name": "@zouroboros/control-plane",
+  "version": "0.1.0",
+  "description": "Standalone control-plane runtime: durable task queue, daemon lifecycle, vendor-neutral dispatch, authenticated operator API, append-only audit",
+  "type": "module",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "bun test test/",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@zouroboros/capability-runtime": "workspace:*"
+  },
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,28 @@
+[Unit]
+Description=Hermes Zouroboros optional local memory gate
+After=network.target
+
+[Service]
+Type=simple
+User=hermes-zouroboros
+Group=hermes-zouroboros
+WorkingDirectory=/srv/hermes-zouroboros
+EnvironmentFile=/etc/hermes-zouroboros/memory.env
+Environment=ZO_GATE_HOST=127.0.0.1
+Environment=PORT=7820
+Environment=ZOUROBOROS_MEMORY_DB=/var/lib/hermes-zouroboros/memory.db
+Environment=ZOUROBOROS_DATA_DIR=/var/lib/hermes-zouroboros
+Environment=ZOUROBOROS_CONFIG_DIR=/var/lib/hermes-zouroboros/config
+ExecStart=/usr/local/bin/bun /srv/hermes-zouroboros/packages/memory/dist/gate-server.js
+Restart=on-failure
+RestartSec=5
+StateDirectory=hermes-zouroboros
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/hermes-zouroboros
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,24 @@
+{
+  "upstream": "https://github.com/marlandoj/zouroboros",
+  "revision": "63b351c79ddfdecbb72b5d957b9eba8d771063b8",
+  "files": [
+    {
+      "source": "Projects/zouroboros-software-factory/scripts/kanban-intake.ts",
+      "source_sha256": "53147ea011bc70ea6fb67b1f00411b555b232650be12e96da381a10a6e94294f",
+      "destination": "factory/kanban-intake.ts",
+      "changes": "Require explicit board and manifest paths; remove host defaults."
+    },
+    {
+      "source": "Projects/zouroboros-software-factory/hermes/hermes_work_intake.py",
+      "source_sha256": "51963d1034c6b60f56045f2af02321664864c8fc054f884a72180aa5ab273101",
+      "destination": "factory/hermes_work_intake.py",
+      "changes": "Provenance comment only."
+    },
+    {
+      "source": "Projects/zouroboros-software-factory/hermes/test_hermes_work_intake.py",
+      "source_sha256": "0f3935a42df52545a49cfdc4db7bc8234a5a819058d40d490c869ddda7760169",
+      "destination": "factory/test_hermes_work_intake.py",
+      "changes": "Provenance comment only."
+    }
+  ]
+}
