@@ -1,10 +1,19 @@
 # Hermes × Zouroboros
 
+![Hermes × Zouroboros: a persistent workshop for your Linux VPS, combining shared memory, coordinated work, and factory intake.](docs/assets/hermes-zouroboros-hero.png)
+
 **A persistent workshop for Hermes Agent, running on your Linux VPS.**
 
 Hermes handles the conversation and tools. Zouroboros supplies shared work memory, task orchestration, and a path into the software factory. This repository brings those pieces together with an isolated Hermes profile, a local MCP connection, and source extracted from the Zouroboros VPS workspace.
 
 It is an independent repository with fresh history. Muse Zouroboros informed the product brief; no Muse code or Git history was used.
+
+## A connected workshop
+
+![You connect to Hermes Agent and local stdio MCP. MCP branches into shared SQLite memory, validated task planning, and read-only Hermes Kanban intake. An explicit operator command starts local Hermes workers from the reviewed plan.](docs/assets/hermes-zouroboros-architecture.png)
+
+<details>
+<summary>Explore the architecture as a text diagram</summary>
 
 ```mermaid
 flowchart LR
@@ -19,7 +28,11 @@ flowchart LR
   Intake --> Board[Hermes Kanban board]
 ```
 
+</details>
+
 ## What works in this release
+
+![Remember: store and search shared work facts. Coordinate: validate dependencies, prepare campaigns, and explicitly opt in to workers. Connect: read Hermes Kanban and project ready work offline. Live model execution requires provider setup.](docs/assets/hermes-zouroboros-capabilities.png)
 
 | Capability | Included behavior |
 | --- | --- |
