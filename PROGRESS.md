@@ -25,3 +25,21 @@ Verified implementation revision: `2103e0123990b4da69f4efc90773eb98fefee281`.
 CI receipt: https://github.com/marlandoj/hermes-zouroboros/actions/runs/37407318443 — SUCCESS.
 
 Next operator step: follow walkthrough/README.md to configure the isolated Hermes provider profile and perform an authorized live-model smoke test. Repository creation and distribution validation are complete; the existing production VPS was not redeployed.
+
+## README marketing visuals
+
+Objective: create and integrate a coordinated hero banner, architecture diagram, and capability infographic for the Hermes × Zouroboros README.
+
+- [x] Review existing README claims and repository state.
+- [x] Scope documentation-only work; decision gate SUGGEST (0.31), proceed directly.
+- [x] Generate and inspect three images; preserve prompts in docs/assets.
+- [x] Embed assets with descriptive alt text and verify local references.
+- [x] Commit, push, and open a documentation pull request.
+
+Preflight limitations: graph CLI rejects sandbox IPC ownership; escalation unavailable. Operation-window command failed before a decision because `/home/.z` is read-only. Work stays in the existing VPS checkout; no detached workers or service changes.
+
+Verified: all three PNG signatures and dimensions, all README image references, descriptive alt text, retained Mermaid/table text equivalents, and `git diff --check`. No TypeScript or application code changed.
+
+Artifacts: `docs/assets/hermes-zouroboros-{hero,architecture,capabilities}.png`. Exact generation prompts: `docs/assets/README.md`. Consumer: root `README.md`.
+
+Published for review: https://github.com/marlandoj/hermes-zouroboros/pull/1 on `docs/readme-marketing-visuals`. Artwork implementation and local checks are complete; merge remains pending review.
