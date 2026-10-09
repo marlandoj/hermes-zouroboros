@@ -1,0 +1,137 @@
+{
+  "name": "wayfinder-routing",
+  "description": "Runtime gate ordering for the wayfinder lane, ordered by real dependency rather than by cost. harness_gate feeds skills_gate because catalog roots are harness-specific (engine/catalog.py NATIVE_ROOTS). skills_gate does not depend on model_route_gate or swarm_decision_gate: model tier shapes the answer, not the search, and orchestration strategy is orthogonal to which skills are relevant. Those two are therefore siblings of harness_gate, not predecessors of skills_gate.",
+  "entrypoints": [
+    "prompt_intake"
+  ],
+  "nodes": [
+    {
+      "id": "prompt_intake",
+      "kind": "step",
+      "lane": "routing",
+      "deps": [],
+      "summary": "A prompt arrives from a harness.",
+      "evidence": "suggestions.jsonl row"
+    },
+    {
+      "id": "harness_gate",
+      "kind": "gate",
+      "lane": "routing",
+      "deps": [
+        "prompt_intake"
+      ],
+      "summary": "Determine which harness and adapter shape this prompt belongs to.",
+      "spec": "adapters.normalize in engine/adapters.py",
+      "pass_condition": "Prompt normalizes to a known harness",
+      "fail_action": "Continue without a suggestion",
+      "why": "Load-bearing for skills_gate: roots_for() returns different catalog roots per harness, so ranking before harness resolution would search the wrong catalog."
+    },
+    {
+      "id": "model_route_gate",
+      "kind": "gate",
+      "lane": "routing",
+      "deps": [
+        "prompt_intake"
+      ],
+      "summary": "Route the task to a tier-appropriate model for the response.",
+      "spec": "bun skills/zouroboros/tier-resolver/scripts/persona-tier-resolve.ts --json --no-feedback --persona <slug> \"<prompt>\"",
+      "verdicts": [
+        "pass",
+        "fail"
+      ],
+      "pass_condition": "A tier is resolved (exit 0); an empty model id means the Hermes profile's configured model",
+      "fail_action": "Treat as default tier; do not block the prompt",
+      "why": "Sibling of harness_gate, not a predecessor of skills_gate. Tier selection changes how the model answers; it does not change which skills are applicable."
+    },
+    {
+      "id": "swarm_decision_gate",
+      "kind": "gate",
+      "lane": "routing",
+      "deps": [
+        "prompt_intake"
+      ],
+      "summary": "Decide whether this task warrants formal swarm orchestration.",
+      "spec": "bun packages/swarm/src/routing/swarm-decision-gate.ts --json \"<prompt>\"",
+      "verdicts": [
+        "direct",
+        "suggest",
+        "swarm"
+      ],
+      "pass_condition": "Not applicable; this gate is four-way by nature",
+      "fail_action": "Not applicable; DIRECT (exit 2) routes inline",
+      "why": "Sibling of harness_gate. Orchestration strategy is orthogonal to skill relevance, and when a swarm is engaged the skill assessment runs per workstream inside the swarm rather than being replaced by this verdict."
+    },
+    {
+      "id": "skills_gate",
+      "kind": "gate",
+      "lane": "routing",
+      "deps": [
+        "harness_gate"
+      ],
+      "summary": "Assess whether the catalog holds skills applicable to this task.",
+      "spec": "python3 engine/run.py suggest \"<task>\"",
+      "pass_condition": "A pick clears the local rank threshold",
+      "fail_action": "Continue without a suggestion",
+      "why": "Depends on harness_gate only. Placing it after model_route_gate or swarm_decision_gate would assert a dependency the code does not have and serialize work that is genuinely independent."
+    },
+    {
+      "id": "emit_or_skip",
+      "lane": "routing",
+      "deps": [
+        "skills_gate",
+        "model_route_gate",
+        "swarm_decision_gate"
+      ],
+      "summary": "Emit the advisory note, or continue without one. All three verdicts are in hand; the response is composed once.",
+      "fail_action": "none; this is the terminal state",
+      "roles": [
+        "join",
+        "sink"
+      ]
+    }
+  ],
+  "transitions": {
+    "prompt_intake": {
+      "ok": [
+        "harness_gate",
+        "model_route_gate",
+        "swarm_decision_gate"
+      ]
+    },
+    "harness_gate": {
+      "pass": [
+        "skills_gate"
+      ],
+      "fail": [
+        "emit_or_skip"
+      ]
+    },
+    "model_route_gate": {
+      "pass": [
+        "emit_or_skip"
+      ],
+      "fail": [
+        "emit_or_skip"
+      ]
+    },
+    "swarm_decision_gate": {
+      "direct": [
+        "emit_or_skip"
+      ],
+      "suggest": [
+        "emit_or_skip"
+      ],
+      "swarm": [
+        "emit_or_skip"
+      ]
+    },
+    "skills_gate": {
+      "pass": [
+        "emit_or_skip"
+      ],
+      "fail": [
+        "emit_or_skip"
+      ]
+    }
+  }
+}

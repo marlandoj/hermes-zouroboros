@@ -1,0 +1,10 @@
+{
+  "_comment": "Shipped default MCP server policy for the supply-chain gate. Verdicts: allow | restrict | approve | block. A server not listed in `policies` falls back to `default` (approve = needs an explicit operator decision, surfaced as info). block => critical, restrict => warning, approve => info, allow => no finding. Record your own decisions in $ZOUROBOROS_CONFIG_DIR/skill-security-gate/mcp-policy.json (or pass --policy / SUPPLY_CHAIN_POLICY); `_examples` shows the shape and is not applied.",
+  "default": "approve",
+  "policies": {},
+  "_examples": {
+    "my-local-memory-server": "allow",
+    "some-third-party-search": "restrict",
+    "unreviewed-remote-server": "block"
+  }
+}

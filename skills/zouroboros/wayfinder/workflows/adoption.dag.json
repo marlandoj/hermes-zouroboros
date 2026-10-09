@@ -1,0 +1,292 @@
+{
+  "name": "wayfinder-adoption",
+  "description": "Shadow-to-live adoption workflow for Wayfinder. deps are execution edges; transitions are control edges and may point backwards.",
+  "entrypoints": [
+    "install_shadow"
+  ],
+  "nodes": [
+    {
+      "id": "install_shadow",
+      "kind": "step",
+      "lane": "adoption",
+      "deps": [],
+      "summary": "Install into shadow mode and confirm the hook is wired for all seven harnesses.",
+      "evidence": "install.sh --dry-run reports each harness; suggestions.jsonl begins receiving rows",
+      "fail_action": "none; nothing is live yet"
+    },
+    {
+      "id": "g1_conformance",
+      "kind": "gate",
+      "lane": "adoption",
+      "deps": [
+        "install_shadow"
+      ],
+      "summary": "Catalog loads from SKILL.md and every prompt reaching a harness is byte-identical to the pre-install prompt.",
+      "pass_condition": "Catalog loads; prompt digests match pre-install digests across all harnesses",
+      "fail_action": "Rollback to shadow; do not iterate further"
+    },
+    {
+      "id": "g2_correctness",
+      "kind": "gate",
+      "lane": "adoption",
+      "deps": [
+        "install_shadow"
+      ],
+      "summary": "The live note text equals the shadow suggestion for the same prompt, case for case.",
+      "pass_condition": "Byte-equal live note and shadow suggestion over the same prompt set",
+      "fail_action": "Rollback; fix in shadow before any live enablement"
+    },
+    {
+      "id": "g3_latency",
+      "kind": "gate",
+      "lane": "adoption",
+      "deps": [
+        "install_shadow"
+      ],
+      "summary": "p95 prompt-time overhead stays under the adapter's remaining budget.",
+      "pass_condition": "p95 overhead under budget, measured over >=100 prompts",
+      "fail_action": "Rollback; ranking must move off the prompt path"
+    },
+    {
+      "id": "join_shadow_gates",
+      "kind": "join",
+      "lane": "adoption",
+      "deps": [
+        "g1_conformance",
+        "g2_correctness",
+        "g3_latency"
+      ],
+      "summary": "All three shadow gates pass. Admission to live is gated on all three, not any one.",
+      "fail_action": "Admit nothing; the first failing gate has already routed to rollback"
+    },
+    {
+      "id": "review_suggestions",
+      "kind": "step",
+      "lane": "adoption",
+      "deps": [
+        "join_shadow_gates"
+      ],
+      "summary": "Review real shadow suggestions over N days of genuine prompts.",
+      "evidence": "suggestions.jsonl pick distribution; outcomes.jsonl use rate"
+    },
+    {
+      "id": "improve_descriptions",
+      "kind": "step",
+      "lane": "adoption",
+      "deps": [
+        "review_suggestions"
+      ],
+      "summary": "Fix the SKILL.md descriptions the review exposed.",
+      "evidence": "outcomes.jsonl suggested_but_never_used"
+    },
+    {
+      "id": "enable_live_one_harness",
+      "kind": "step",
+      "lane": "adoption",
+      "deps": [
+        "review_suggestions",
+        "improve_descriptions"
+      ],
+      "summary": "Enable live for exactly one harness.",
+      "fail_action": "none; a single harness only"
+    },
+    {
+      "id": "g4_reach",
+      "kind": "gate",
+      "lane": "adoption",
+      "deps": [
+        "enable_live_one_harness"
+      ],
+      "summary": "The note is present in the agent's received context and was read.",
+      "pass_condition": "Note observed in received context on one harness",
+      "fail_action": "Return that harness to shadow; do not expand"
+    },
+    {
+      "id": "verify_claude",
+      "kind": "step",
+      "lane": "fleet",
+      "deps": [
+        "g4_reach"
+      ],
+      "summary": "Verify live reach on Claude Code."
+    },
+    {
+      "id": "verify_codex",
+      "kind": "step",
+      "lane": "fleet",
+      "deps": [
+        "g4_reach"
+      ],
+      "summary": "Verify live reach on Codex CLI."
+    },
+    {
+      "id": "verify_kimi",
+      "kind": "step",
+      "lane": "fleet",
+      "deps": [
+        "g4_reach"
+      ],
+      "summary": "Verify live reach on Kimi Code."
+    },
+    {
+      "id": "verify_remaining",
+      "kind": "step",
+      "lane": "fleet",
+      "deps": [
+        "g4_reach"
+      ],
+      "summary": "Verify live reach on Gemini CLI, OpenCode, Pi, and Hermes."
+    },
+    {
+      "id": "join_fleet_verified",
+      "kind": "join",
+      "lane": "fleet",
+      "deps": [
+        "verify_claude",
+        "verify_codex",
+        "verify_kimi",
+        "verify_remaining"
+      ],
+      "summary": "Every harness verified independently. The join is what admits the fleet-wide live state."
+    },
+    {
+      "id": "monitor",
+      "kind": "step",
+      "lane": "fleet",
+      "deps": [
+        "join_fleet_verified"
+      ],
+      "summary": "Monitor pick rate, accuracy, and p95 across the fleet."
+    },
+    {
+      "id": "rollback_to_shadow",
+      "kind": "step",
+      "lane": "recovery",
+      "deps": [],
+      "summary": "Return every affected harness to shadow. Reachable only through control edges.",
+      "evidence": "mode files read shadow; hook emits {}"
+    },
+    {
+      "id": "stay_live",
+      "kind": "sink",
+      "lane": "fleet",
+      "deps": [
+        "monitor"
+      ],
+      "summary": "Fleet-wide live state, sustained."
+    }
+  ],
+  "transitions": {
+    "install_shadow": {
+      "ok": [
+        "g1_conformance"
+      ]
+    },
+    "g1_conformance": {
+      "pass": [
+        "join_shadow_gates"
+      ],
+      "fail": [
+        "rollback_to_shadow"
+      ]
+    },
+    "g2_correctness": {
+      "pass": [
+        "join_shadow_gates"
+      ],
+      "fail": [
+        "rollback_to_shadow"
+      ]
+    },
+    "g3_latency": {
+      "pass": [
+        "join_shadow_gates"
+      ],
+      "fail": [
+        "rollback_to_shadow"
+      ]
+    },
+    "join_shadow_gates": {
+      "ok": [
+        "review_suggestions"
+      ]
+    },
+    "review_suggestions": {
+      "ok": [
+        "improve_descriptions",
+        "enable_live_one_harness"
+      ]
+    },
+    "improve_descriptions": {
+      "ok": [
+        "g2_correctness"
+      ]
+    },
+    "enable_live_one_harness": {
+      "ok": [
+        "g4_reach"
+      ]
+    },
+    "g4_reach": {
+      "pass": [
+        "verify_claude",
+        "verify_codex",
+        "verify_kimi",
+        "verify_remaining"
+      ],
+      "fail": [
+        "rollback_to_shadow"
+      ]
+    },
+    "join_fleet_verified": {
+      "ok": [
+        "monitor"
+      ]
+    },
+    "monitor": {
+      "healthy": [
+        "stay_live"
+      ],
+      "degraded": [
+        "rollback_to_shadow"
+      ]
+    },
+    "rollback_to_shadow": {
+      "ok": [
+        "install_shadow"
+      ]
+    },
+    "verify_claude": {
+      "ok": [
+        "join_fleet_verified"
+      ],
+      "failed": [
+        "rollback_to_shadow"
+      ]
+    },
+    "verify_codex": {
+      "ok": [
+        "join_fleet_verified"
+      ],
+      "failed": [
+        "rollback_to_shadow"
+      ]
+    },
+    "verify_kimi": {
+      "ok": [
+        "join_fleet_verified"
+      ],
+      "failed": [
+        "rollback_to_shadow"
+      ]
+    },
+    "verify_remaining": {
+      "ok": [
+        "join_fleet_verified"
+      ],
+      "failed": [
+        "rollback_to_shadow"
+      ]
+    }
+  }
+}
