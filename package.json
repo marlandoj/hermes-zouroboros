@@ -12,7 +12,8 @@
   "scripts": {
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r exec tsc --noEmit && tsc --noEmit",
-    "test": "bun test tests",
+    "test": "bun test tests && python3 -m unittest discover -s tests -p test_installer.py",
+    "install:workshop": "bash scripts/install.sh",
     "setup": "bun integration/cli.ts init",
     "doctor": "bun integration/cli.ts doctor",
     "mcp": "bun integration/mcp.ts",
