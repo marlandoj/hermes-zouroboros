@@ -224,10 +224,9 @@
       "nameSha256": "c2d7ad4096694e1ce9f93b1df6b9279d8d62dc78acac1f00d4d232b104c6d94c",
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code.",
-      "followUp": "Exclude data/ run output (valve shadow records)."
+      "disposition": "dropped",
+      "reason": "Retired at the source (SKILL.md lifecycle: retired, 2026-10-02; replacement: persona-based Diversity of Thought); no live caller, model review off in the Factory path. Reviewed for the record: data/valve-shadow.jsonl, data/calibration/ (reconcile candidates, holdout, last-run), evaluations/ (arbiter pilot runs), effective-lineups.json, LINEUPS.generated.md, assets/byok-registry.json and data/prompt-versions/rubric-ab-report.v1-to-v2.md are live run output or host catalog and must never ship; data/experiments/fixtures/offline-paired (4 synthetic toy cases), data/experiments/README.md and data/prompt-versions/rubric.v1.md/rubric.v2.proposed.md are synthetic fixtures or generic prompts and could ship with reviewed exceptions if a port is ever approved.",
+      "followUp": "Operator may reverse: a Hermes port would replace the synthetic.new/OpenRouter/Kimi/x.ai/zo-proxy panel with the hermes-vps executor; persona-consult (pending) carries the Diversity of Thought replacement."
     },
     {
       "name": "deep-research",
@@ -699,9 +698,13 @@
       "nameSha256": "149418b0acab29085321a5d32d609db0d3a5e4e043e25ec442ca21065b6f3089",
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+      "disposition": "adapted",
+      "reason": "Umbrella rewritten for Hermes: skills/zouroboros/zouroboros is the index, read-only doctor (integration/cli.ts doctor + governance verify-docs + skill tree) and exact-phrase operator shortcuts resolved by zouroboros-core resolveOperatorShortcut against distribution commands; install.ts replaced by scripts/setup.sh + integration/cli.ts init. Nested sub-skills: workflow/unstuck-lateral shipped as skills/zouroboros/unstuck-lateral (MIT, Q00/ouroboros); assets/template.program.md shipped as autoloop/templates/program.md (units fixed); workflow/autoloop and three-stage-eval are covered by the autoloop and three-stage-eval entries; skills/memory (41 host scripts) and skills/swarm (host bridges, persona registry, benchmarks, MCP servers) are covered by zo-memory-system, zo-swarm-orchestrator and zo-swarm-executors; skills/selfheal SKILL-introspect/prescribe/evolve duplicate the zouroboros-introspect/-prescribe/-evolve entries (t5); spec-first-interview has its own entry. Not shipped: skill-tracker.ts (writes the host shared memory DB), scripts/package.json, swarm references/images and persona registry.",
+      "distributedAs": [
+        "skills/zouroboros/zouroboros",
+        "skills/zouroboros/unstuck-lateral"
+      ],
+      "followUp": "/status should switch to the self-heal scorecard once zouroboros-introspect ships (t5)."
     },
     {
       "name": "zouroboros-evolution-10",
@@ -725,9 +728,12 @@
       "nameSha256": "5056fdc8bce7f16a34974d8ffc01076c2210a9eb481c5f411d7cea372df1ed4b",
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+      "disposition": "adapted",
+      "reason": "Wired to distribution paths: canonical ZOUROBOROS.md and CONSTITUTION.md ship in references/ (verbatim copies of the workspace-root documents) and verify-docs checks them by default (ZOUROBOROS_GOVERNANCE_DOCS_DIR / optional mirror). Preflight gate (Articles I-X) unchanged; promotion phase fails closed (IX-PROMOTION-AUTHORITY-UNAVAILABLE) because the persona-attestation/operator-approval/provider-native issuer/authorization-ledger stack is host authority, not distributed. Hash-chained anchored audit log and approval registry under ZOUROBOROS_STATE_DIR/ZOUROBOROS_CONFIG_DIR; BLOCKED_TOOLS uses Hermes tool names; offline operator authorization guards the agent host; capability-ethics scans the distribution skills tree. Not shipped: promotion issuer/attestation/approval/ledger scripts, autonomy classifier and pre-tool adapter, managed Codex guard installer and wrapper, destructive-command policy and quarantine, delegation receipts, dissent digest (Zo email, retired consensus gate), restore drill, ZOU-488 worker, config/ (host runtime adapters, Codex requirements).",
+      "distributedAs": [
+        "skills/zouroboros/zouroboros-governance"
+      ],
+      "followUp": "Destructive-command policy + quarantine could become a Hermes pre-tool hook; promotion authority would need an operator-provisioned issuer."
     },
     {
       "name": "zouroboros-introspect",
