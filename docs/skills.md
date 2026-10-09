@@ -195,10 +195,22 @@ Not shipped in t6:
 
 Not shipped in t7:
 
-- `ux-laws` is `held-license`. Its source text is based on CC BY-NC-ND 4.0 material, which conflicts
-  with this repository's MIT licence.
+- `ux-laws` was `held-license` (its source text was based on CC BY-NC-ND 4.0 material). It ships
+  since g1 as a rewrite from primary research; see below.
 - `threejs-game-production` is dropped. It has no SKILL.md and ingests a private, paid course.
 - `graphrag-relational`, `notebooklm-skill` and `reporeel` waited for operator decisions (see f2).
+
+### UX laws (g1)
+
+`ux-laws` (`skills/software-development/ux-laws`) was rewritten from the primary research after the
+operator, who wrote the source skill, approved it on 2026-10-09. The source named the Laws of UX site
+(CC BY-NC-ND 4.0) as its reference, so the distributed text is new. Each of the twenty principles is
+re-derived from its original publication and carries an evidence class: empirical, observational or
+heuristic. The design of the operator's skill is unchanged: measurable rules, a review checklist, a
+tensions table and an installer that writes a marker-fenced block into a project's instruction file
+(`AGENTS.md`, `.hermes.md`, `CLAUDE.md` and others). An 8-word shingle check against the source text
+found 0.16 % overlap, all of it law names and one citation title. `tests/skills-uxlaws.test.ts` runs the
+skill's own suite.
 
 ### GraphRAG and the remaining dispositions (f2)
 
