@@ -10,6 +10,7 @@ import { execSync } from 'child_process';
 import { Database } from 'bun:sqlite';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { fileURLToPath } from 'url';
 import { getMemoryDbPath, getWorkspaceRoot } from 'zouroboros-core';
 import type { MetricResult, MetricStatus } from '../types.js';
 import { scanWiring } from './wiring.js';
@@ -34,15 +35,22 @@ function memoryDb(): string {
   return getMemoryDbPath();
 }
 
-const EVAL_SCRIPT_CANDIDATES = [
-  join(WORKSPACE, 'Skills/zo-memory-system/scripts/eval-continuation.ts'),
-  join(WORKSPACE, 'zouroboros/packages/memory/scripts/self-enhance/eval-continuation.ts'),
-];
+// The memory-recall eval ships with the distribution (synthetic fixtures, throwaway database); it
+// never depends on a workspace skill. ZOUROBOROS_MEMORY_RECALL_EVAL overrides it. Resolved at
+// call time so a run honours its own environment.
+function evalScriptCandidates(): string[] {
+  return [
+    process.env.ZOUROBOROS_MEMORY_RECALL_EVAL,
+    fileURLToPath(new URL('./memory-recall-eval.ts', import.meta.url)),
+    fileURLToPath(new URL('./memory-recall-eval.js', import.meta.url)),
+  ].filter((p): p is string => Boolean(p));
+}
 
-const GRAPH_SCRIPT_CANDIDATES = [
-  join(WORKSPACE, 'Skills/zo-memory-system/scripts/graph.ts'),
-  join(WORKSPACE, '.zo/memory/scripts/graph.ts'),
-];
+// Optional external graph report (`<script> knowledge-gaps`); without one, Graph Connectivity is
+// measured directly from the memory database.
+function graphScriptCandidates(): string[] {
+  return process.env.ZOUROBOROS_MEMORY_GRAPH_SCRIPT ? [process.env.ZOUROBOROS_MEMORY_GRAPH_SCRIPT] : [];
+}
 
 function findScript(candidates: string[]): string | null {
   for (const p of candidates) {
@@ -178,12 +186,13 @@ function legacyDbMetric(name: string, weight: number, target: number, critical: 
 }
 
 export async function measureMemoryRecall(): Promise<MetricResult> {
-  const evalScript = findScript(EVAL_SCRIPT_CANDIDATES);
+  const evalScript = findScript(evalScriptCandidates());
   if (!evalScript) {
-    return buildMetric('Memory Recall', 0.22, 0.90, 0.70, 0.25,
-      'eval-continuation.ts not found in Skills/ or packages/',
-      'Install zo-memory-system skill',
-      false
+    return buildMetric('Memory Recall', 0, 0.90, 0.70, 0.25,
+      'memory-recall eval not found (ZOUROBOROS_MEMORY_RECALL_EVAL or the bundled introspect/memory-recall-eval)',
+      'Reinstall the distribution or point ZOUROBOROS_MEMORY_RECALL_EVAL at a recall eval',
+      false,
+      'INSUFFICIENT_EVIDENCE'
     );
   }
 
@@ -201,14 +210,14 @@ export async function measureMemoryRecall(): Promise<MetricResult> {
       return buildMetric('Memory Recall', rate, 0.90, 0.70, 0.25,
         `${passed}/${cases} fixtures passed (${(rate * 100).toFixed(1)}%)`,
         rate < 0.90
-          ? 'Add continuation fixtures for missed cases; tune graph-boost weights'
+          ? 'Add recall fixtures for missed cases; tune graph-boost weights'
           : 'Recall is healthy',
         false
       );
     }
     return buildMetric('Memory Recall', 0.25, 0.90, 0.70, 0.25,
       `Could not parse eval output: ${result.stdout.slice(0, 200)}`,
-      'Check eval-continuation.ts output format',
+      'Check the memory-recall eval output format (Cases/Passed/Rate)',
       false
     );
   }
@@ -216,14 +225,14 @@ export async function measureMemoryRecall(): Promise<MetricResult> {
   return buildMetric('Memory Recall', passRate, 0.90, 0.70, 0.25,
     `${(passRate * 100).toFixed(1)}% fixture pass rate`,
     passRate < 0.90
-      ? 'Add continuation fixtures for missed cases; tune graph-boost weights'
+      ? 'Add recall fixtures for missed cases; tune graph-boost weights'
       : 'Recall is healthy',
     false
   );
 }
 
 export async function measureGraphConnectivity(): Promise<MetricResult> {
-  const graphScript = findScript(GRAPH_SCRIPT_CANDIDATES);
+  const graphScript = findScript(graphScriptCandidates());
 
   if (graphScript) {
     // Legacy graph.ts reads ZO_MEMORY_DB only; use the same resolved database as
@@ -266,7 +275,7 @@ export async function measureGraphConnectivity(): Promise<MetricResult> {
 
   return buildMetric('Graph Connectivity', 0.14, 0.80, 0.60, 0.15,
     'No graph data available',
-    'Install zo-memory-system skill',
+    'Store facts and links in the profile memory (memory_store, wikilink capture)',
     false
   );
 }

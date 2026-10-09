@@ -2007,8 +2007,8 @@
       "sourcePath": "Skills/agent-model-healer/assets/fallback-chain.example.json",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "54b2c14b126f98c3e37161094a28b8a08c5eddc241ad6b9975f55f523f0300df",
-      "distributedSha256": "cfbdf2718cdddddc9da097e481a9fb9cf8908182be20ca3faf339da404d76925",
-      "adaptation": "Generic example chain (placeholder model ids, empty exclusions, healingEnabled=false, hysteresis 2/3, whole-second timeout); host model ids, operator exclusions and the host qualification note removed."
+      "distributedSha256": "3f46dbcf1a4986e20c121a4405c9e8760beb97263c31db722a6f452e356c1239",
+      "adaptation": "Generic example chain (placeholder model ids, empty exclusions, healingEnabled=false, hysteresis 2/3, whole-second timeout); host model ids, operator exclusions and the host qualification note removed. g2: healthyResponseMs 20000."
     },
     {
       "path": "skills/zouroboros/agent-model-healer/scripts/healer.test.ts",
@@ -2016,8 +2016,8 @@
       "sourcePath": "Skills/agent-model-healer/scripts/healer.test.ts",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "c6beb6fd661d4c6135c9ead911e0ec7f3a2ca34c7e285da5d1c6064a5f71f7ca",
-      "distributedSha256": "0fa8100f676a1c1cd997474053b4d2495e0f924b99e1bc670bd655b30eb929ae",
-      "adaptation": "Ported: chain policy (Zo-native terminal replaced by open-weight), probe timing, exclusions and hysteresis kept; host bridge-mapping tests replaced by probe-classification tests with an injected ask; host-style model ids replaced by generic ones."
+      "distributedSha256": "366001d9f1330bb6ea4b7fb072146f86760da15b3004b774ca42bbdf232b49a4",
+      "adaptation": "Ported: chain policy (Zo-native terminal replaced by open-weight), probe timing, exclusions and hysteresis kept; host bridge-mapping tests replaced by probe-classification tests with an injected ask; host-style model ids replaced by generic ones. g2: tests for the 20 s default, env override and unfunded probes."
     },
     {
       "path": "skills/zouroboros/agent-model-healer/scripts/healer.ts",
@@ -2025,8 +2025,8 @@
       "sourcePath": "Skills/agent-model-healer/scripts/healer.ts",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "efab6caad38c0ef5c8a2d426da11deb2633318bcb7c25f21f2e283d383d5aafc",
-      "distributedSha256": "caaefd830b9a5cd58d184438e3443aeaba90f81bc0a3ed266bbe24056958cfca",
-      "adaptation": "Rewritten over integration/ask.ts and Hermes cron: probe timing semantics, failure categories, exclusions, chain validation (terminal open-weight; zo-native rung removed), hysteresis and healingEnabled gate kept; aborts when the probe path is unavailable; state/log under ZOUROBOROS_STATE_DIR/LOG_DIR; config under ZOUROBOROS_CONFIG_DIR."
+      "distributedSha256": "8a1bfbbdfeca951f3d453eaf7db97281c45f74236faf996067a03af5155cd8ad",
+      "adaptation": "Rewritten over integration/ask.ts and Hermes cron: probe timing semantics, failure categories, exclusions, chain validation (terminal open-weight; zo-native rung removed), hysteresis and healingEnabled gate kept; aborts when the probe path is unavailable; state/log under ZOUROBOROS_STATE_DIR/LOG_DIR; config under ZOUROBOROS_CONFIG_DIR. g2: unfunded providers (HTTP 402) are an informational \"unfunded (skipped)\" status, never retried, never a fallback target; healthy-response default 20 s (hermes -z startup) with AGENT_MODEL_HEALER_HEALTHY_RESPONSE_MS override."
     },
     {
       "path": "skills/zouroboros/agent-model-healer/SKILL.md",
@@ -2034,8 +2034,8 @@
       "sourcePath": "Skills/agent-model-healer/SKILL.md",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "8feb10998314f08cc9fa5f6275af2fddeca667b48ef0052aba93ad64a848b7a1",
-      "distributedSha256": "1a08d2ca35d466383203197da397ea84296f1b3aa189a918f01ad41310a8725d",
-      "adaptation": "Rewritten for Hermes: probes through the profile's executor registry, patients are pinned-model cron jobs, heal/restore via hermes cron edit; Zo MCP/email, host bridges/OpenRouter path, host model exclusions and host state/log paths removed."
+      "distributedSha256": "43b102d8bd7c076e9ff0d61f5666c9232e444b98fc9679c0e1aa506fcee94955",
+      "adaptation": "Rewritten for Hermes: probes through the profile's executor registry, patients are pinned-model cron jobs, heal/restore via hermes cron edit; Zo MCP/email, host bridges/OpenRouter path, host model exclusions and host state/log paths removed. g2: documents the 20 s healthy threshold and unfunded (skipped) status."
     },
     {
       "path": "skills/zouroboros/ask-governor/scripts/client.ts",
@@ -2052,8 +2052,8 @@
       "sourcePath": "Skills/zo-ask-governor/scripts/governor.test.ts",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "739cba2b001ad68a3cc31d41b6311e53878f0dc3a76801f22b696ae234f930d4",
-      "distributedSha256": "5f41b377a78eb23b275dcb3577d150d2bc079741bb0505e9f1b11043d7128f5d",
-      "adaptation": "Ported to the provider-agnostic governor with injected upstream outcomes (no network, no credentials); 402/HTTP-200-error cases mapped to permanent and empty-output failure classes; client tests cover in-process and fail-closed service modes."
+      "distributedSha256": "490516e10dbd9596f109b1ae2bbe49a4ff307922621b378a00a53a662b4aaa59",
+      "adaptation": "Ported to the provider-agnostic governor with injected upstream outcomes (no network, no credentials); 402/HTTP-200-error cases mapped to permanent and empty-output failure classes; client tests cover in-process and fail-closed service modes. g2: unfunded test."
     },
     {
       "path": "skills/zouroboros/ask-governor/scripts/governor.ts",
@@ -2061,8 +2061,8 @@
       "sourcePath": "Skills/zo-ask-governor/scripts/governor.ts",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "4de882586954f33b5a51ffd9da4768b4901d2639117bc39a11166e75b9a04810",
-      "distributedSha256": "a76c7905abb58199aa2435546c81e3c0303fe2429682e0a3439a0ed8fff3438d",
-      "adaptation": "Provider-agnostic: injectable invoke (default integration/ask.ts) replaces fetch to the Zo endpoint; failure classes from the ask layer drive retry/circuit; concurrency, queue, budgets, dedupe, circuit, redacted telemetry unchanged; persistence under the profile state dir (was a hardcoded host path); no authorization token."
+      "distributedSha256": "3c95387f2c81d173ccee104608069964a7de6320ad8f6cce3cb63e34328bd74e",
+      "adaptation": "Provider-agnostic: injectable invoke (default integration/ask.ts) replaces fetch to the Zo endpoint; failure classes from the ask layer drive retry/circuit; concurrency, queue, budgets, dedupe, circuit, redacted telemetry unchanged; persistence under the profile state dir (was a hardcoded host path); no authorization token. g2: unfunded (402) failures are non-retryable and never count toward the circuit breaker."
     },
     {
       "path": "skills/zouroboros/ask-governor/SKILL.md",
@@ -2079,8 +2079,8 @@
       "sourcePath": "Skills/zo-ask-retry/scripts/zo-ask-retry.ts",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "744625703bb95979b54366d378ce2fcc3069e108aa6c06c3ddc30d6410a5cd7b",
-      "distributedSha256": "a2da5fe6dad630cbf2f3f0b9a0ce7808323b4838078329517dd4b8f72c34b79f",
-      "adaptation": "Rewritten for Hermes: retry/backoff/jitter and model-chain rotation over integration/ask.ts; keeps the 0/1/2/3 exit contract, --json envelope, --dry-run and --output-format-file (schema appended to the prompt). Zo /zo/ask SSE client, stall watchdog and conversation resume removed."
+      "distributedSha256": "c8e32b66f4a55fea09ea76c11c811cf5d115eba4ebfb3e6c1f1f094b3102fb9e",
+      "adaptation": "Rewritten for Hermes: retry/backoff/jitter and model-chain rotation over integration/ask.ts; keeps the 0/1/2/3 exit contract, --json envelope, --dry-run and --output-format-file (schema appended to the prompt). Zo /zo/ask SSE client, stall watchdog and conversation resume removed. g2: unfunded models are skipped quietly to the next chain model (no retry, backoff or warning; debug log only); outcome \"unfunded\", exit 1."
     },
     {
       "path": "skills/zouroboros/ask-retry/SKILL.md",

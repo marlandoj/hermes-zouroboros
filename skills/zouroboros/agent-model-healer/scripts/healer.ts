@@ -18,6 +18,13 @@
  *   - healingEnabled=false by default: auto is a dry run until the operator enables it
  *   - alert-on-exhaustion, never cascade
  *
+ * hermes-zouroboros additions:
+ *   - unfunded providers (HTTP 402, insufficient balance) are an informational "unfunded (skipped)"
+ *     status: not healthy, not an alarm, never retried, never an automatic fallback target, and
+ *     jobs pinned to them are listed, not moved
+ *   - healthy-response default of 20 s, because every `hermes -z` probe pays ~8 s of CLI startup
+ *     (override: probeConfig.healthyResponseMs or AGENT_MODEL_HEALER_HEALTHY_RESPONSE_MS)
+ *
  * Commands: probe | diagnose | status | validate | auto
  */
 import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
@@ -26,11 +33,19 @@ import { ask, type AskOutcome, type AskRequest } from "../../../../integration/a
 import { paths } from "../../../../integration/profile.ts";
 import { hermesCron, isActive, loadJobs, type HermesJob } from "../../agent-doctor/scripts/hermes-cron.ts";
 
-const DEFAULT_HEALTHY_RESPONSE_MS = 10_000;
+/**
+ * Default healthy-response threshold. A `hermes -z` probe pays roughly 8 s of CLI startup before
+ * the provider sees the request, and live healthy probes took 9.9–11 s end to end, so the source's
+ * 10 s marked healthy models degraded. 20 s keeps about 2x headroom over an observed healthy probe
+ * while staying well below the example 30 s timeout, so the degraded band (20–30 s) still means
+ * "slow but completed".
+ */
+export const DEFAULT_HEALTHY_RESPONSE_MS = 20_000;
+export const HEALTHY_RESPONSE_ENV = "AGENT_MODEL_HEALER_HEALTHY_RESPONSE_MS";
 
-type ProbeHealth = "healthy" | "degraded" | "unhealthy";
+type ProbeHealth = "healthy" | "degraded" | "unhealthy" | "unfunded";
 
-export type ProbeFailureCategory = "timeout" | "provider_error" | "empty_response";
+export type ProbeFailureCategory = "timeout" | "provider_error" | "empty_response" | "unfunded";
 
 export type RungType = "proprietary" | "open-weight" | "unknown";
 
@@ -54,8 +69,9 @@ export interface FallbackConfig {
     expectedSubstring: string;
     timeoutMs: number;
     retries: number;
-    /** Healthy-response threshold in ms (default 10000). A completed response at or above it is
-     * degraded, not unhealthy. Must be strictly below timeoutMs. */
+    /** Healthy-response threshold in ms (default 20000; AGENT_MODEL_HEALER_HEALTHY_RESPONSE_MS
+     * overrides). A completed response at or above it is degraded, not unhealthy. Must be strictly
+     * below timeoutMs. */
     healthyResponseMs?: number;
     /** @deprecated legacy thresholds; healthyResponseMs wins when both exist */
     latencyThresholds?: { degradedMs: number; slowMs: number };
@@ -227,7 +243,13 @@ export function streakMet(streak: ModelStreak | undefined, healthy: boolean, thr
 
 // ── Probe semantics ─────────────────────────────────────────────────
 
-export function healthyResponseThresholdMs(config: Pick<FallbackConfig, "probeConfig">): number {
+/** Env override (positive integer ms) > probeConfig.healthyResponseMs > legacy degradedMs > 20 s default. */
+export function healthyResponseThresholdMs(config: Pick<FallbackConfig, "probeConfig">, env: NodeJS.ProcessEnv = process.env): number {
+  const override = env[HEALTHY_RESPONSE_ENV];
+  if (override !== undefined && override !== "") {
+    if (!/^[1-9]\d*$/.test(override)) throw new Error(`${HEALTHY_RESPONSE_ENV} must be a positive integer number of milliseconds`);
+    return Number(override);
+  }
   return config.probeConfig.healthyResponseMs ?? config.probeConfig.latencyThresholds?.degradedMs ?? DEFAULT_HEALTHY_RESPONSE_MS;
 }
 
@@ -292,6 +314,10 @@ export function classifyProbe(model: string, outcome: AskOutcome, config: Fallba
   if (outcome.failure === "usage" || outcome.failure === "unavailable" || outcome.failure === "interrupted") {
     throw new ProbeInfrastructureError(`probe path unavailable (${outcome.failure}${outcome.detail ? `: ${outcome.detail}` : ""})`);
   }
+  if (outcome.failure === "unfunded") {
+    // Informational, not an alarm: the account has no balance by operator choice.
+    return { model, healthy: false, health: "unfunded", latencyMs: null, failureCategory: "unfunded", warning: "unfunded (skipped)", checkedAt: now };
+  }
   if (outcome.failure === "timeout") {
     return { model, healthy: false, health: "unhealthy", latencyMs: null, failureCategory: "timeout", error: `No completion within ${probeTimeoutMs(config)}ms`, checkedAt: now };
   }
@@ -314,7 +340,8 @@ export async function probeModel(model: string, config: FallbackConfig, askImpl:
       timeoutSec: Math.ceil(probeTimeoutMs(config) / 1000), executor: config.probeExecutor,
     });
     result = classifyProbe(model, outcome, config);
-    if (result.healthy) return result;
+    // Unfunded is deterministic: retrying would only repeat the 402.
+    if (result.healthy || result.health === "unfunded") return result;
   }
   return result!;
 }
@@ -411,6 +438,12 @@ export async function runAuto(deps: AutoDeps = {}) {
     for (const model of models) {
       const result = await probeModel(model, config, askImpl);
       state.lastProbe[model] = result;
+      if (result.health === "unfunded") {
+        // Not a health sample: clear the streak so an unfunded model never accrues heal or restore credit.
+        delete state.streaks[model];
+        log(`  ℹ️ ${getModelLabel(model, config)} — unfunded (skipped)`);
+        continue;
+      }
       state.streaks[model] = advanceStreak(state.streaks[model], result.healthy, result.checkedAt);
       log(`  ${result.health === "healthy" ? "✅" : result.health === "degraded" ? "⚠️" : "❌"} ${getModelLabel(model, config)} (${result.latencyMs === null ? "no completion" : `${result.latencyMs}ms`})${result.error || result.warning ? ` — ${result.error || result.warning}` : ""}`);
     }
@@ -423,7 +456,10 @@ export async function runAuto(deps: AutoDeps = {}) {
   }
   state.lastRunAt = new Date().toISOString();
 
-  const unhealthy = new Set(Object.entries(state.lastProbe).filter(([, p]) => !p.healthy).map(([m]) => m));
+  // Unfunded models are neither healthy (never a fallback target) nor unhealthy (no alarm, no heal).
+  const unfunded = new Set(Object.entries(state.lastProbe).filter(([, p]) => p.health === "unfunded").map(([m]) => m));
+  const unhealthy = new Set(Object.entries(state.lastProbe).filter(([m, p]) => !p.healthy && !unfunded.has(m)).map(([m]) => m));
+  const unfundedJobs = agents.filter((a) => a.active && a.model && !a.self && unfunded.has(a.model)).map((a) => ({ agentId: a.id, agentTitle: a.title, model: a.model, status: "unfunded (skipped)" as const }));
   const healActions: { agentId: string; agentTitle: string; from: string; to: string; reason: string; applied: boolean }[] = [];
   const restoreActions: { agentId: string; agentTitle: string; from: string; to: string; applied: boolean }[] = [];
   const exhaustedAlerts: { agentId: string; agentTitle: string; model: string; chain: string[]; reason: string }[] = [];
@@ -486,9 +522,9 @@ export async function runAuto(deps: AutoDeps = {}) {
   state.switches = remaining;
   saveState(state);
 
-  const summary = `${healActions.length} switch(es), ${restoreActions.length} restore(s), ${exhaustedAlerts.length} exhausted, ${unhealthy.size} unhealthy model(s). ${remaining.length} job(s) on fallback.${healingEnabled ? "" : " Dry run."}`;
+  const summary = `${healActions.length} switch(es), ${restoreActions.length} restore(s), ${exhaustedAlerts.length} exhausted, ${unhealthy.size} unhealthy model(s), ${unfunded.size} unfunded (skipped). ${remaining.length} job(s) on fallback.${healingEnabled ? "" : " Dry run."}`;
   log(`Run complete: ${summary}`);
-  return { phase: "complete", dryRun: !healingEnabled, healActions, restoreActions, exhaustedAlerts, unhealthy: [...unhealthy], summary };
+  return { phase: "complete", dryRun: !healingEnabled, healActions, restoreActions, exhaustedAlerts, unhealthy: [...unhealthy], unfunded: [...unfunded], unfundedJobs, summary };
 }
 
 async function main() {

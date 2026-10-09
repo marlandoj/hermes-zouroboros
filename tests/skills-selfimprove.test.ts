@@ -66,6 +66,55 @@ test('self-heal loop: introspect → prescribe → evolve use the profile memory
   expect(files(join(root, 'work'))).toEqual([]);
 }, 300_000);
 
+test('self-heal G7: a fresh profile measures Memory Recall with the shipped synthetic eval, never a workspace file', () => {
+  const selfheal = join(repo, 'packages/selfheal/src');
+  const scorecard = JSON.parse(bun(skill('zouroboros-introspect/scripts/introspect.ts'), ['--json']).stdout);
+  const recall = scorecard.metrics.find((metric: { name: string }) => metric.name === 'Memory Recall');
+  expect(recall).toBeDefined();
+  expect(recall.status).not.toBe('CRITICAL');
+  expect(recall.value).toBe(1);
+  expect(recall.detail).toBe('100.0% fixture pass rate');
+  expect(JSON.stringify(scorecard)).not.toMatch(/not found in Skills|Install zo-memory-system/);
+  // The fresh workspace is empty: nothing came from it.
+  expect(files(join(root, 'work'))).toEqual([]);
+
+  // The eval is synthetic and hermetic, and it can fail: a fixture expecting an absent phrase misses.
+  const fixtures = JSON.parse(readFileSync(join(selfheal, 'introspect/memory-recall-fixtures.json'), 'utf8'));
+  expect(fixtures._provenance).toContain('Synthetic');
+  fixtures.cases.push({ id: 'absent', query: 'what colour is the orchard robot?', expectAny: ['ultramarine'] });
+  writeFileSync(join(root, 'fixtures.json'), JSON.stringify(fixtures));
+  const missed = bun(join(selfheal, 'introspect/memory-recall-eval.ts'), [], { ZOUROBOROS_MEMORY_RECALL_FIXTURES: join(root, 'fixtures.json') });
+  expect(missed.stdout).toContain('Cases: 11');
+  expect(missed.stdout).toContain('Passed: 10');
+  expect(missed.stdout).toContain('Failed: absent');
+  expect(readdirSync(join(root, 'scratch'))).toEqual([]);
+
+  // A missing eval is insufficient evidence, not a CRITICAL score.
+  const absent = JSON.parse(bun(skill('zouroboros-introspect/scripts/introspect.ts'), ['--json'], { ZOUROBOROS_MEMORY_RECALL_EVAL: join(root, 'missing.ts') }).stdout);
+  expect(absent.metrics.find((metric: { name: string }) => metric.name === 'Memory Recall')).toBeDefined();
+}, 300_000);
+
+test('self-heal G7: evolve recipes point at existing distribution files, never Skills/ or the workspace', async () => {
+  const { getPlaybook } = await import('../packages/selfheal/src/prescribe/playbook.ts');
+  const names = ['Memory Recall', 'Graph Connectivity', 'Routing Accuracy', 'Eval Calibration'];
+  for (const name of names) for (const status of ['CRITICAL', 'WARNING']) {
+    const playbook = getPlaybook({ name, status, value: 0.5, target: 0.9, critical: 0.7, weight: 0.2, score: 0.5, detail: '', recommendation: '', trend: 'stable' } as never);
+    const text = JSON.stringify(playbook);
+    expect(text).not.toMatch(/Skills\/|zo-memory-system|eval-continuation|shared-facts\.db/);
+    for (const file of [playbook.targetFile, ...(playbook.readOnlyFiles ?? [])].filter(Boolean) as string[]) {
+      expect(file.startsWith(repo + '/')).toBe(true);
+      expect(existsSync(file)).toBe(true);
+    }
+  }
+  const recall = getPlaybook({ name: 'Memory Recall', status: 'WARNING' } as never);
+  const metric = run('bash', ['-c', recall.metricCommand]);
+  expect(metric.stdout.trim()).toBe('100.0');
+  // Graph connectivity metric reads the profile memory database (introspect creates it).
+  expect(bun(skill('zouroboros-introspect/scripts/introspect.ts'), ['--json']).code).toBe(0);
+  const graph = run('bash', ['-c', getPlaybook({ name: 'Graph Connectivity', status: 'WARNING' } as never).metricCommand], { ZOUROBOROS_MEMORY_DB: join(root, 'data/memory.db') });
+  expect(graph.stdout.trim()).toMatch(/^\d+(\.\d+)?$/);
+}, 300_000);
+
 test('instinct-harvester: own selftests pass and the store lives under the profile state dir', () => {
   for (const t of ['selftest', 'lifecycle-selftest', 'supersede-selftest', 'use-flush-selftest', 'remove-verify-selftest']) {
     const result = bun(skill(`instinct-harvester/scripts/${t}.ts`));

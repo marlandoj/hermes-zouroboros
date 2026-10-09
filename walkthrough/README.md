@@ -14,7 +14,7 @@ bun integration/cli.ts hermes setup
 bun integration/cli.ts doctor
 ```
 
-`init` refuses to overwrite an existing profile. `hermes setup` configures the new profile; check its `config.yaml` still contains the generated `mcp_servers.zouroboros` entry afterward. The wrapper sets `HERMES_HOME` only for its child process, preserving the user's actual `HOME`.
+`init` refuses to overwrite an existing profile. To skip the interactive `hermes setup`, pass `--model <model-id>` (and optionally `--provider <hermes-provider>`) to `init`. `hermes setup` configures the new profile; check its `config.yaml` still contains the generated `mcp_servers.zouroboros` entry afterward. The wrapper sets `HERMES_HOME` only for its child process, preserving the user's actual `HOME`.
 
 To choose another data location, export `HERMES_ZOUROBOROS_HOME=/absolute/private/directory` consistently before these and subsequent commands. Defaults follow `XDG_DATA_HOME` or `~/.local/share`. Do not commit that directory.
 

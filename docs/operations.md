@@ -6,6 +6,12 @@ Run the checkout and Hermes as an unprivileged service account. The stdio MCP se
 
 Configuration lives under `HERMES_ZOUROBOROS_HOME` (default `~/.local/share/hermes-zouroboros`). The profile, memory DB, generated executor registry, prepared campaigns, and worker DB belong to that installation. Upstream optional APIs can also use workspace-local state; keep the workspace private and back it up. Provider credentials are managed by the isolated Hermes profile.
 
+Profiles that `init` generates set `HERMES_ZOUROBOROS_ALLOW_SWARM` to a literal `0` for the MCP server, which only prepares campaigns. Execution stays opt-in on the operator command (`HERMES_ZOUROBOROS_ALLOW_SWARM=1 bun integration/cli.ts swarm …`), which reads its own environment. Profiles initialised before this change carry a `${env:HERMES_ZOUROBOROS_ALLOW_SWARM}` reference, which makes Hermes warn on every command while the variable is unset; replace it with `'0'` in `hermes/config.yaml` to silence the warning.
+
+### Restricted email domains
+
+`ZOUROBOROS_RESTRICTED_EMAIL_DOMAINS` lists the mail domains (comma-separated, subdomains included) whose addresses mark text as sensitive, for example an employer's or client's domain. The public candidate-corpus guard (`packages/rag/src/candidate-policy.ts`) blocks text that contains such addresses; private keys and token shapes are blocked regardless. No domain ships as a default. While the variable is unset, `init` and `doctor` print a one-line notice, because the guard cannot block employer-domain addresses until it is set. Export it in the service account's environment, for example `ZOUROBOROS_RESTRICTED_EMAIL_DOMAINS=corp.example,client.example`.
+
 Do not start the MCP script as a systemd daemon: its consumer is Hermes's stdio MCP client. Moving this checkout requires updating absolute MCP/bridge paths in `hermes/config.yaml` and `executors.json`. Moving only a data directory likewise requires reviewing generated absolute paths.
 
 ## Optional HTTP memory gate and hooks

@@ -2,11 +2,28 @@
  * Playbook registry for self-prescription
  */
 
-import { getWorkspaceRoot } from 'zouroboros-core';
+import { existsSync } from 'fs';
+import { join, resolve } from 'path';
+import { fileURLToPath } from 'url';
 import type { Playbook, MetricResult } from '../types.js';
 
-const WORKSPACE = getWorkspaceRoot();
-const MEMORY_SCRIPTS = `${WORKSPACE}/Skills/zo-memory-system/scripts`;
+/**
+ * Recipes point at distribution files (absolute paths in this checkout), never at a workspace
+ * skill. The same depth holds for src/prescribe and dist/prescribe.
+ */
+const DIST_ROOT = resolve(fileURLToPath(new URL('../../../..', import.meta.url)));
+const dist = (path: string) => join(DIST_ROOT, path);
+/** A selfheal script, as .ts from source or .js from a build. */
+function selfhealScript(relative: string): string {
+  const ts = fileURLToPath(new URL(`../${relative}.ts`, import.meta.url));
+  return existsSync(ts) ? ts : fileURLToPath(new URL(`../${relative}.js`, import.meta.url));
+}
+const RECALL_EVAL = selfhealScript('introspect/memory-recall-eval');
+const RECALL_FIXTURES = fileURLToPath(new URL('../introspect/memory-recall-fixtures.json', import.meta.url));
+const GRAPH_METRIC = selfhealScript('introspect/graph-connectivity');
+const INTROSPECT_CLI = selfhealScript('cli/introspect');
+const RECALL_METRIC = `bun "${RECALL_EVAL}" 2>&1 | grep -oP 'Rate: \\K[\\d.]+'`;
+const GRAPH_LINKED_METRIC = `bun "${GRAPH_METRIC}" 2>&1 | grep -oP 'Linked facts: \\d+ \\(\\K[\\d.]+'`;
 
 export function getPlaybook(metric: MetricResult): Playbook {
   const isCritical = metric.status === 'CRITICAL';
@@ -18,37 +35,34 @@ export function getPlaybook(metric: MetricResult): Playbook {
         ? {
             id: 'B-graph-boost-weights',
             name: 'Graph-Boost Weight Tuning',
-            description: 'Adjust RRF fusion weights in graph-boost.ts to improve recall',
-            targetFile: 'Skills/zo-memory-system/scripts/graph-boost.ts',
-            metricCommand: `bun ${MEMORY_SCRIPTS}/eval-continuation.ts 2>&1 | grep -oP 'Rate: \\K[\\d.]+'`,
+            description: 'Adjust the graph-boost RRF defaults (graphWeight, graphDepth) in searchFactsGraphBoosted to improve recall',
+            targetFile: dist('packages/memory/src/graph.ts'),
+            metricCommand: RECALL_METRIC,
             metricDirection: 'higher_is_better',
             constraints: [
-              'Weights must sum to 1.0',
-              'No single weight > 0.70 or < 0.05',
+              'Only change the graphWeight and graphDepth defaults of searchFactsGraphBoosted',
+              'graphWeight stays between 0.05 and 0.70 (the base weight is 1 - graphWeight)',
               'Only modify weight constants, not algorithm logic',
             ],
             maxFiles: 1,
             requiresApproval: false,
-            readOnlyFiles: [
-              'Skills/zo-memory-system/scripts/eval-continuation.ts',
-              'Skills/zo-memory-system/assets/continuation-eval-fixture-set.json',
-            ],
+            readOnlyFiles: [RECALL_EVAL, RECALL_FIXTURES],
           }
         : {
             id: 'A-fixture-expansion',
-            name: 'Continuation Fixture Expansion',
-            description: 'Add new eval fixtures targeting recall gaps',
-            targetFile: 'Skills/zo-memory-system/assets/continuation-eval-fixture-set.json',
-            metricCommand: `bun ${MEMORY_SCRIPTS}/eval-continuation.ts 2>&1 | grep -oP 'Rate: \\K[\\d.]+'`,
+            name: 'Recall Fixture Expansion',
+            description: 'Add new synthetic recall fixtures targeting recall gaps',
+            targetFile: RECALL_FIXTURES,
+            metricCommand: RECALL_METRIC,
             metricDirection: 'higher_is_better',
             constraints: [
               'Only add fixtures, never remove existing ones',
               'Max 10 new fixtures per cycle',
-              'Fixtures must test real continuation scenarios',
+              'Fixtures must be synthetic: never copy facts from a live memory database',
             ],
             maxFiles: 1,
             requiresApproval: false,
-            readOnlyFiles: ['Skills/zo-memory-system/scripts/eval-continuation.ts'],
+            readOnlyFiles: [RECALL_EVAL],
           };
 
     case 'Graph Connectivity':
@@ -58,7 +72,7 @@ export function getPlaybook(metric: MetricResult): Playbook {
             name: 'Entity Consolidation & Hub Linking',
             description: 'Merge duplicate entities and create hub nodes',
             targetFile: null,
-            metricCommand: `bun ${MEMORY_SCRIPTS}/graph.ts knowledge-gaps 2>&1 | grep -oP 'Linked facts: \\d+ \\(\\K[\\d.]+'`,
+            metricCommand: GRAPH_LINKED_METRIC,
             metricDirection: 'higher_is_better',
             constraints: [
               'Only create links with weight >= 0.5',
@@ -68,7 +82,7 @@ export function getPlaybook(metric: MetricResult): Playbook {
             maxFiles: 1,
             requiresApproval: false,
             setupCommands: [
-              `bun ${MEMORY_SCRIPTS}/graph.ts knowledge-gaps > /tmp/z-gaps.txt 2>&1`,
+              `bun "${GRAPH_METRIC}" knowledge-gaps > /tmp/z-gaps.txt 2>&1`,
             ],
             runCommand: 'bun /tmp/z-graph-linker.ts 2>&1',
           }
@@ -76,8 +90,8 @@ export function getPlaybook(metric: MetricResult): Playbook {
             id: 'C-batch-wikilink',
             name: 'Batch Wikilink Extraction',
             description: 'Scan orphan facts for entity co-occurrence and auto-generate links',
-            targetFile: 'Skills/zo-memory-system/scripts/graph.ts',
-            metricCommand: `bun ${MEMORY_SCRIPTS}/graph.ts knowledge-gaps 2>&1 | grep -oP 'Linked facts: \\d+ \\(\\K[\\d.]+'`,
+            targetFile: dist('packages/memory/src/graph.ts'),
+            metricCommand: GRAPH_LINKED_METRIC,
             metricDirection: 'higher_is_better',
             constraints: [
               'Only process facts without existing links',
@@ -86,7 +100,7 @@ export function getPlaybook(metric: MetricResult): Playbook {
             ],
             maxFiles: 1,
             requiresApproval: false,
-            readOnlyFiles: ['Skills/zo-memory-system/scripts/wikilink-utils.ts'],
+            readOnlyFiles: [dist('packages/memory/src/graph-traversal.ts')],
           };
 
     case 'Routing Accuracy':
@@ -94,7 +108,7 @@ export function getPlaybook(metric: MetricResult): Playbook {
         id: 'E-routing-weights',
         name: 'Routing Weight Calibration',
         description: 'Tune 6-signal routing weights based on episode outcomes',
-        targetFile: 'packages/swarm/src/routing/engine.ts',
+        targetFile: dist('packages/swarm/src/routing/engine.ts'),
         metricCommand: 'echo 0.85',
         metricDirection: 'higher_is_better',
         constraints: [
@@ -112,8 +126,9 @@ export function getPlaybook(metric: MetricResult): Playbook {
         id: 'F-eval-thresholds',
         name: 'Evaluation Threshold Tuning',
         description: 'Adjust Stage 2→3 trigger thresholds',
-        targetFile: 'packages/selfheal/src/introspect/collector.ts',
-        metricCommand: `ZO_WORKSPACE=${WORKSPACE} ZOUROBOROS_WORKSPACE=${WORKSPACE} ZOUROBOROS_MEMORY_DB=${WORKSPACE}/.zo/memory/shared-facts.db bun ${WORKSPACE}/packages/selfheal/dist/cli/introspect.js --json 2>/dev/null | jq -r 'first(.metrics[] | select(.name == "Eval Calibration")) | .value // 0'`,
+        targetFile: dist('packages/selfheal/src/introspect/collector.ts'),
+        // Inherits the run's ZOUROBOROS_MEMORY_DB (the profile database under the Hermes integration).
+        metricCommand: `bun "${INTROSPECT_CLI}" --json 2>/dev/null | jq -r 'first(.metrics[] | select(.name == "Eval Calibration")) | .value // 0'`,
         metricDirection: 'lower_is_better',
         constraints: [
           'Only modify threshold constants',

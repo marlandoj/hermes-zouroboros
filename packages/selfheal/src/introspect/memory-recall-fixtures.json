@@ -1,0 +1,31 @@
+{
+  "name": "memory-recall-synthetic-v1",
+  "threshold": 0.9,
+  "_provenance": "Synthetic, hand-written for hermes-zouroboros (g2-polish, 2026-10-09). Not derived from any live memory database. Fictional projects (orchard, lantern, quarry, mosaic, ferry) only; disjoint from the hidden holdout bank (holdout-fixtures.json). This is the visible memory-recall set that introspect's Memory Recall metric and the A-fixture-expansion playbook use.",
+  "facts": [
+    { "entity": "project.orchard", "key": "status", "value": "Orchard sorting robot passed bench calibration; next step is the conveyor speed trial." },
+    { "entity": "project.orchard", "key": "owner", "value": "The orchard sorting robot is owned by the robotics guild." },
+    { "entity": "project.lantern", "key": "schedule", "value": "Lantern newsletter ships every second Tuesday at 09:00 UTC." },
+    { "entity": "project.lantern", "key": "template", "value": "Lantern newsletter uses the two-column serif template after the March redesign." },
+    { "entity": "project.quarry", "key": "retention", "value": "Quarry backups keep 14 daily and 8 weekly snapshots." },
+    { "entity": "project.quarry", "key": "restore-drill", "value": "Last quarry restore drill recovered the staging database in 22 minutes." },
+    { "entity": "project.mosaic", "key": "tokens", "value": "Mosaic design system spacing tokens follow a 4 px base grid." },
+    { "entity": "project.mosaic", "key": "decision", "value": "Mosaic buttons dropped the pill shape in favour of 6 px corner radius." },
+    { "entity": "project.ferry", "key": "blocker", "value": "Ferry ticketing release is blocked on the payment sandbox certificate renewal." },
+    { "entity": "decision.tooling", "key": "linter", "value": "Workshop repositories standardise on the strict lint preset with no warnings allowed." }
+  ],
+  "episodes": [],
+  "openLoops": [],
+  "cases": [
+    { "id": "orchard-next-step", "query": "what is the next step for the orchard sorting robot?", "expectAny": ["conveyor speed trial"] },
+    { "id": "orchard-owner", "query": "who owns the orchard robot?", "expectAny": ["robotics guild"] },
+    { "id": "lantern-schedule", "query": "when does the lantern newsletter ship?", "expectAny": ["second tuesday"] },
+    { "id": "lantern-template", "query": "which template does lantern use after the redesign?", "expectAny": ["two-column serif"] },
+    { "id": "quarry-retention", "query": "how many quarry backup snapshots do we keep?", "expectAny": ["14 daily"] },
+    { "id": "quarry-drill", "query": "how long did the quarry restore drill take?", "expectAny": ["22 minutes"] },
+    { "id": "mosaic-grid", "query": "what base grid do mosaic spacing tokens use?", "expectAny": ["4 px base grid"] },
+    { "id": "mosaic-buttons", "query": "what corner radius did mosaic buttons get?", "expectAny": ["6 px corner radius"] },
+    { "id": "ferry-blocker", "query": "what is blocking the ferry ticketing release?", "expectAny": ["certificate renewal"] },
+    { "id": "lint-preset", "query": "which lint preset do workshop repositories use?", "expectAny": ["strict lint preset"] }
+  ]
+}

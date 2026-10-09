@@ -65,6 +65,16 @@ describe("AskGovernor", () => {
     await expect(governor.submit(request({ policy: { caller: "test", maxAttempts: 1 } }))).rejects.toBeInstanceOf(GovernorError);
   });
 
+  test("an unfunded provider (402) is never retried and never opens the circuit", async () => {
+    let calls = 0;
+    const governor = new AskGovernor({ failureThreshold: 1, sleep: async () => {}, invoke: async () => { calls++; return fail("unfunded"); } });
+    for (let i = 0; i < 3; i++) {
+      await expect(governor.submit(request())).rejects.toMatchObject({ upstreamFailure: "unfunded", status: 402, code: "upstream_unfunded" });
+    }
+    expect(calls).toBe(3);
+    expect(governor.health().circuit).toBe("closed");
+  });
+
   test("opens the circuit after repeated transient failures", async () => {
     const governor = new AskGovernor({
       failureThreshold: 2,
