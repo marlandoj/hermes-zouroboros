@@ -90,10 +90,10 @@ export async function generatePersona(
     const skillContent = `---
 name: ${config.slug}-skill
 description: ${config.description}
-compatibility: Created for Zo Computer
+version: 1.0.0
 metadata:
-  author: zo.computer
-  version: 1.0.0
+  hermes:
+    tags: [persona, ${config.domain}]
 ---
 
 # ${config.name} Skill

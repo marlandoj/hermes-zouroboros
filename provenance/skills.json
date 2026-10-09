@@ -175,6 +175,69 @@
       "adaptation": "Rewritten operator-neutral: removed persona/channel names, operator author handle and Zo host claims; host-only Integrations/hyperframes and skill-security-gate paths replaced by upstream heygen-com/hyperframes and the Hermes optional hyperframes skill plus a generic third-party review step; Hermes frontmatter added."
     },
     {
+      "path": "skills/media/broll-injector/assets/plan.schema.json",
+      "skill": "broll-injector",
+      "sourcePath": "Skills/broll-injector/assets/plan.schema.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2ad52a28d5e1537f3ceaad4303d97a037070555c5cb279dbd467c917ee5fe0ec",
+      "distributedSha256": "2ad52a28d5e1537f3ceaad4303d97a037070555c5cb279dbd467c917ee5fe0ec",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/broll-injector/references/pipeline.md",
+      "skill": "broll-injector",
+      "sourcePath": "Skills/broll-injector/references/pipeline.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4cbc60f62dce493ecf4f15342bd7e070ac58a9fe6bf9b8fe8d4c4feef7a15fb8",
+      "distributedSha256": "12e93b1e185efbe60114099fe7814fc102773146b20fb7a63cb6b30dba2a4d4d",
+      "adaptation": "Zo /zo/ask planning section replaced by the governed Hermes planning call; host project path and named presenter removed from the validation note."
+    },
+    {
+      "path": "skills/media/broll-injector/scripts/compose.py",
+      "skill": "broll-injector",
+      "sourcePath": "Skills/broll-injector/scripts/compose.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f3af425118ca1c2bf92c3fb1524525401a8cb72a784952e254b24016da872344",
+      "distributedSha256": "f3af425118ca1c2bf92c3fb1524525401a8cb72a784952e254b24016da872344",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/broll-injector/scripts/extract-plan.ts",
+      "skill": "broll-injector",
+      "sourcePath": "Skills/broll-injector/scripts/extract-plan.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8af1ede1d638e5ef38a85edd48b551232b51be8cc844f686ffddadebd4978e68",
+      "distributedSha256": "fbc88fc8e256b6e08dc8b36674f88f6d87fa58d18fc63945bc1075407e40a1ef",
+      "adaptation": "Planning call through ask-governor (caller broll-injector, budget broll-injector-plan) with optional --plan-model; Zo endpoint and ZO_* tokens removed."
+    },
+    {
+      "path": "skills/media/broll-injector/scripts/gen-broll.ts",
+      "skill": "broll-injector",
+      "sourcePath": "Skills/broll-injector/scripts/gen-broll.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9cd87d24e210e354c2f31c9621cca90a778c01ba52d4417bd56e501de3063727",
+      "distributedSha256": "c3c986eaa3c3ab487a8ed33879a672b62ba38973201681c00cd4b45c7b191884",
+      "adaptation": "Hardcoded host fal-ai-media path replaced by FAL_MEDIA_SCRIPT or the sibling skill in this tree; fails loud when absent (dry-run unaffected)."
+    },
+    {
+      "path": "skills/media/broll-injector/scripts/inject.ts",
+      "skill": "broll-injector",
+      "sourcePath": "Skills/broll-injector/scripts/inject.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ef2b47c80d265fb49ef6d354864ff28b4df8758c654d6e0aea961a5aaa0a67e1",
+      "distributedSha256": "b8e3b27755dc6ec63278d2f5858ec4f6b50867ee12555cec3d2a5bbfa69d5eea",
+      "adaptation": "Passes --plan-model to extract-plan; stage comment updated (ask-governor instead of /zo/ask)."
+    },
+    {
+      "path": "skills/media/broll-injector/SKILL.md",
+      "skill": "broll-injector",
+      "sourcePath": "Skills/broll-injector/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "930aa359d99ab8e8eef4035e17731ecf45131e4bee624ca3343942d971b14cc2",
+      "distributedSha256": "860a5fe5f2cc75fa68ca094c7998dfb195b5a6c44f36fb9840fd1fb490971115",
+      "adaptation": "Hermes frontmatter; planning via ask-governor (--plan-model); fal-ai-media located via FAL_MEDIA_SCRIPT or the sibling skill; host paths, persona/channel names (presenter identities) and Zo references removed."
+    },
+    {
       "path": "skills/media/heygen-avatar/LICENSE",
       "skill": "heygen-skills",
       "sourcePath": "Skills/heygen-skills/LICENSE",
@@ -391,6 +454,33 @@
       "adaptation": "Distribution-authored index for the skills tree; no source counterpart."
     },
     {
+      "path": "skills/research/deep-research/scripts/research.ts",
+      "skill": "deep-research",
+      "sourcePath": "Skills/deep-research/scripts/research.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f568ec270f15ec64e6dd85edf856c55aa52d92debd8ad4324efde6049871b3da",
+      "distributedSha256": "d7f6ab9fa5db6393b462cdc506a9019280550d41fdfab75e4f2709785fa775e5",
+      "adaptation": "Rewritten conductor keeping the plan/gather/fuse/synthesize/claim-check/report/persist DAG, artifacts, idempotency and fail-loud behaviour; model calls via ask-governor (budgets kept); no fetch, Zo self-dispatch, file sentinels, OpenAI key self-heal, Qdrant, shared-facts.db or audio; run dir under the profile workspace; persist via zmem.ts."
+    },
+    {
+      "path": "skills/research/deep-research/scripts/wiring.test.ts",
+      "skill": "deep-research",
+      "sourcePath": "Skills/deep-research/scripts/zo-ask-governor-wiring.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4200d2b121ffa9799f322d41c7b4158efa1b5afa0a580ecb627859a023fe4db8",
+      "distributedSha256": "6c724dbd643358ffdbcf8a122264af9ea8e2bb02dad9a09f9ebeaa4dd3b4e605",
+      "adaptation": "Renamed from zo-ask-governor-wiring.test.ts; asserts routing through ask-governor and that no provider/platform endpoint or Zo/OpenAI credential is referenced."
+    },
+    {
+      "path": "skills/research/deep-research/SKILL.md",
+      "skill": "deep-research",
+      "sourcePath": "Skills/deep-research/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7c250d4cbe5cdb44f9f49d09e84a3884adc1351565a2c9468877580c2da17e71",
+      "distributedSha256": "2eda573cd88b7688bac0bf92cb92a85bb10430ab7bf65b08f3cb6739a0367832",
+      "adaptation": "Rewritten for Hermes: all model calls via ask-governor; gather uses the profile's own web/literature tools with JSON final responses; internal channel is profile memory via zo-memory-system; host Qdrant/RAPTOR/GraphRAG/compounding corpus, OpenAI-direct calls, audio overview and host paths removed."
+    },
+    {
       "path": "skills/research/tradingview-mcp-server/LICENSE",
       "skill": "tradingview-mcp-server",
       "sourcePath": "Skills/tradingview-mcp-server/LICENSE",
@@ -463,6 +553,24 @@
       "adaptation": "Hermes frontmatter (metadata.hermes, upstream ponytail 4.7.0 MIT attribution kept, python3 prerequisite) replaces Zo compatibility/author fields; script paths use ${HERMES_SKILL_DIR} instead of the source repo path."
     },
     {
+      "path": "skills/software-development/ponytail-review/scripts/ponytail-review.ts",
+      "skill": "ponytail-review",
+      "sourcePath": "Skills/ponytail-review/scripts/ponytail-review.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d8d7c1deca4a512ad6d88ec9a8fc49c16713858b55db116bc738b25631e2fc08",
+      "distributedSha256": "91c95a13bfa8beb43a4cf45f811985d252647213b38a69fa400972beaba50207",
+      "adaptation": "Provider chain (synthetic.new key, Zo /zo/ask token) replaced by one governed call via ask-governor; model = profile default unless --model/PONYTAIL_REVIEW_MODEL; host model id removed; still advisory (errors reported as empty review with note)."
+    },
+    {
+      "path": "skills/software-development/ponytail-review/SKILL.md",
+      "skill": "ponytail-review",
+      "sourcePath": "Skills/ponytail-review/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "1744d7d5cc8144c92c577789647260de8ab68e3ad0891f80e1171e3af5154cf3",
+      "distributedSha256": "8c7ff5ca7298f08a6e6e93744c14d28bf3f3038f89e1cf36f82255c6d008bf47",
+      "adaptation": "Hermes frontmatter (MIT, upstream DietrichGebert/ponytail 4.7.0 kept); mechanized section rewritten: one governed call through the Hermes profile; host plan-closeout/consensus wiring and Zo provider chain removed."
+    },
+    {
       "path": "skills/software-development/three-stage-eval/references/evaluator.md",
       "skill": "three-stage-eval",
       "sourcePath": "Skills/three-stage-eval/references/evaluator.md",
@@ -488,6 +596,150 @@
       "sourceSha256": "e4af2dcaaccbfbd88109be0a0ae3aca232a691acc852bb9164faea2afdd0c96d",
       "distributedSha256": "637b6aec3a34d98d5964a54fe4c6373c58461435be822aa6de062d56cf127af3",
       "adaptation": "Hermes frontmatter (Q00/ouroboros MIT origin kept) replaces Zo fields; Quick Start for the never-tracked scripts/evaluate.ts replaced by an agent-run procedure; zo.space checks generalised to web routes; /zo/ask consensus replaced by Hermes delegate_task or separate model invocations; references to unshipped ontologist.md/unstuck-lateral replaced by inline guidance."
+    },
+    {
+      "path": "skills/zouroboros/agent-doctor/assets/model-tiers.example.json",
+      "skill": "agent-doctor",
+      "sourcePath": "Skills/agent-doctor/assets/model-tiers.example.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8e8620fd11ab5b50c748b1f966d66e13858c1525af9b24171497b21c5fbc248a",
+      "distributedSha256": "7d2eda924cbde53a68047cc6020841f62345408c7b5d30e9b8d0598a0da1cf1c",
+      "adaptation": "Generic placeholder model ids (no host BYOK ids or Zo models); empty downgrade targets disable automatic model changes until the operator fills them; adds safetyExcludeIds."
+    },
+    {
+      "path": "skills/zouroboros/agent-doctor/scripts/doctor.test.ts",
+      "skill": "agent-doctor",
+      "sourcePath": "Skills/agent-doctor/scripts/doctor.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "49015b8b5603e311cbb75b45e970be1fd50e21fc5c5917dad5f099918cc80536",
+      "distributedSha256": "c1995a0318948cb129e69fdfacfc91940efdba8a3b1e6ccbb95e4d6f91d6e295",
+      "adaptation": "Ported to the Hermes AgentInfo shape; source tests kept; added schedule estimation, job mapping and safe-fix planning tests."
+    },
+    {
+      "path": "skills/zouroboros/agent-doctor/scripts/doctor.ts",
+      "skill": "agent-doctor",
+      "sourcePath": "Skills/agent-doctor/scripts/doctor.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "525810030a21a7029846a5ded2573fbad6c4edb87e2f0312c5b2c8a3beb9a07f",
+      "distributedSha256": "9e06b345a5fbcc2a76b3b0e66bdd63c2313c69ca0f0ad041b52850e69905715c",
+      "adaptation": "Rewritten over Hermes cron jobs: same check families (cost fitness, banned, frequency, zombies, duplicates with fleet-boilerplate filter, errors, hygiene, collisions, delivery, length, output delta); persona-fitness dropped (Zo personas); apply plans pause/edit via the Hermes CLI with self/excluded-job protection; instructionSimilarity/checkDuplicates/checkCostFitness logic kept."
+    },
+    {
+      "path": "skills/zouroboros/agent-doctor/scripts/hermes-cron.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "976eb21ce995e1ea8b9d81413c542490ba3a6183e61b24735a6a65bbb5e2e45f",
+      "adaptation": "Read-only access to the profile's Hermes cron jobs (jobs.json, outputs, default model) plus the hermes cron CLI write path; shared by agent-doctor and agent-model-healer."
+    },
+    {
+      "path": "skills/zouroboros/agent-doctor/scripts/preflight-paths.ts",
+      "skill": "agent-doctor",
+      "sourcePath": "Skills/agent-doctor/scripts/preflight-paths.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f23071fe9fd999df093ed03d5af53d830becc58ef8d66deb97e1c3872a838e55",
+      "distributedSha256": "f23071fe9fd999df093ed03d5af53d830becc58ef8d66deb97e1c3872a838e55",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/agent-doctor/SKILL.md",
+      "skill": "agent-doctor",
+      "sourcePath": "Skills/agent-doctor/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "32749e3794f3bf8059f878ef47de13b6cc83934b627a5687bf0b4f5e84ac3a07",
+      "distributedSha256": "8c84ccb10008e5f4f7e20e5573589b77a72cc5c3019f8c46b9a4166d6d9d7604",
+      "adaptation": "Rewritten for Hermes: audits the profile's cron jobs (jobs.json) and applies safe fixes only via hermes cron pause|edit; Zo automation/MCP endpoint, hardcoded agent ids, Loki and the Zo MCP path-audit script removed."
+    },
+    {
+      "path": "skills/zouroboros/agent-model-healer/assets/fallback-chain.example.json",
+      "skill": "agent-model-healer",
+      "sourcePath": "Skills/agent-model-healer/assets/fallback-chain.example.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "54b2c14b126f98c3e37161094a28b8a08c5eddc241ad6b9975f55f523f0300df",
+      "distributedSha256": "cfbdf2718cdddddc9da097e481a9fb9cf8908182be20ca3faf339da404d76925",
+      "adaptation": "Generic example chain (placeholder model ids, empty exclusions, healingEnabled=false, hysteresis 2/3, whole-second timeout); host model ids, operator exclusions and the host qualification note removed."
+    },
+    {
+      "path": "skills/zouroboros/agent-model-healer/scripts/healer.test.ts",
+      "skill": "agent-model-healer",
+      "sourcePath": "Skills/agent-model-healer/scripts/healer.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c6beb6fd661d4c6135c9ead911e0ec7f3a2ca34c7e285da5d1c6064a5f71f7ca",
+      "distributedSha256": "0fa8100f676a1c1cd997474053b4d2495e0f924b99e1bc670bd655b30eb929ae",
+      "adaptation": "Ported: chain policy (Zo-native terminal replaced by open-weight), probe timing, exclusions and hysteresis kept; host bridge-mapping tests replaced by probe-classification tests with an injected ask; host-style model ids replaced by generic ones."
+    },
+    {
+      "path": "skills/zouroboros/agent-model-healer/scripts/healer.ts",
+      "skill": "agent-model-healer",
+      "sourcePath": "Skills/agent-model-healer/scripts/healer.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "efab6caad38c0ef5c8a2d426da11deb2633318bcb7c25f21f2e283d383d5aafc",
+      "distributedSha256": "caaefd830b9a5cd58d184438e3443aeaba90f81bc0a3ed266bbe24056958cfca",
+      "adaptation": "Rewritten over integration/ask.ts and Hermes cron: probe timing semantics, failure categories, exclusions, chain validation (terminal open-weight; zo-native rung removed), hysteresis and healingEnabled gate kept; aborts when the probe path is unavailable; state/log under ZOUROBOROS_STATE_DIR/LOG_DIR; config under ZOUROBOROS_CONFIG_DIR."
+    },
+    {
+      "path": "skills/zouroboros/agent-model-healer/SKILL.md",
+      "skill": "agent-model-healer",
+      "sourcePath": "Skills/agent-model-healer/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8feb10998314f08cc9fa5f6275af2fddeca667b48ef0052aba93ad64a848b7a1",
+      "distributedSha256": "1a08d2ca35d466383203197da397ea84296f1b3aa189a918f01ad41310a8725d",
+      "adaptation": "Rewritten for Hermes: probes through the profile's executor registry, patients are pinned-model cron jobs, heal/restore via hermes cron edit; Zo MCP/email, host bridges/OpenRouter path, host model exclusions and host state/log paths removed."
+    },
+    {
+      "path": "skills/zouroboros/ask-governor/scripts/client.ts",
+      "skill": "zo-ask-governor",
+      "sourcePath": "Skills/zo-ask-governor/scripts/client.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2516babfa8917480b1c6e495017f899b5d81d5b441641ecd84878ac6ce61a568",
+      "distributedSha256": "5820786bcf6cc8bde7a3373e90d8abcfe4947f6056f1ea04597192d3c7b41546",
+      "adaptation": "governedAsk: optional governor service (ZOUROBOROS_ASK_GOVERNOR_URL, fail closed) else an in-process persistent governor; the ungoverned direct Zo path is removed."
+    },
+    {
+      "path": "skills/zouroboros/ask-governor/scripts/governor.test.ts",
+      "skill": "zo-ask-governor",
+      "sourcePath": "Skills/zo-ask-governor/scripts/governor.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "739cba2b001ad68a3cc31d41b6311e53878f0dc3a76801f22b696ae234f930d4",
+      "distributedSha256": "5f41b377a78eb23b275dcb3577d150d2bc079741bb0505e9f1b11043d7128f5d",
+      "adaptation": "Ported to the provider-agnostic governor with injected upstream outcomes (no network, no credentials); 402/HTTP-200-error cases mapped to permanent and empty-output failure classes; client tests cover in-process and fail-closed service modes."
+    },
+    {
+      "path": "skills/zouroboros/ask-governor/scripts/governor.ts",
+      "skill": "zo-ask-governor",
+      "sourcePath": "Skills/zo-ask-governor/scripts/governor.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4de882586954f33b5a51ffd9da4768b4901d2639117bc39a11166e75b9a04810",
+      "distributedSha256": "a76c7905abb58199aa2435546c81e3c0303fe2429682e0a3439a0ed8fff3438d",
+      "adaptation": "Provider-agnostic: injectable invoke (default integration/ask.ts) replaces fetch to the Zo endpoint; failure classes from the ask layer drive retry/circuit; concurrency, queue, budgets, dedupe, circuit, redacted telemetry unchanged; persistence under the profile state dir (was a hardcoded host path); no authorization token."
+    },
+    {
+      "path": "skills/zouroboros/ask-governor/SKILL.md",
+      "skill": "zo-ask-governor",
+      "sourcePath": "Skills/zo-ask-governor/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2d00b51ca0eca29de86704ed9302d75851db9dbd03f9eb99d11217a9d842451d",
+      "distributedSha256": "1a3ed476ea9ef4efa83d7971ee926d3ff9c3f30a97d22dbd9f530230d1ed668a",
+      "adaptation": "Renamed zo-ask-governor -> ask-governor and rewritten for Hermes: provider-agnostic governor over integration/ask.ts; in-process default or optional 127.0.0.1 service; state under ZOUROBOROS_STATE_DIR; Zo memory_mode/402/HTTP semantics and host .runtime path removed."
+    },
+    {
+      "path": "skills/zouroboros/ask-retry/scripts/ask-retry.ts",
+      "skill": "zo-ask-retry",
+      "sourcePath": "Skills/zo-ask-retry/scripts/zo-ask-retry.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "744625703bb95979b54366d378ce2fcc3069e108aa6c06c3ddc30d6410a5cd7b",
+      "distributedSha256": "a2da5fe6dad630cbf2f3f0b9a0ce7808323b4838078329517dd4b8f72c34b79f",
+      "adaptation": "Rewritten for Hermes: retry/backoff/jitter and model-chain rotation over integration/ask.ts; keeps the 0/1/2/3 exit contract, --json envelope, --dry-run and --output-format-file (schema appended to the prompt). Zo /zo/ask SSE client, stall watchdog and conversation resume removed."
+    },
+    {
+      "path": "skills/zouroboros/ask-retry/SKILL.md",
+      "skill": "zo-ask-retry",
+      "sourcePath": "Skills/zo-ask-retry/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "787c450de59c54342cc8247e0dfbbf2fe68a798e02f30afb26bfe1aacffb5afe",
+      "distributedSha256": "96e6af82424a1a37504c1cd911b692458ea65998d456cf9c5422c03f9b5a5b37",
+      "adaptation": "Renamed zo-ask-retry -> ask-retry and rewritten for Hermes: one-shot calls through integration/ask.ts (profile executor registry, default hermes-vps); exit-code failure classes replace HTTP/SSE classes; no partial-stream resume (bridge returns final response only); Zo token/endpoint and operator author removed."
     },
     {
       "path": "skills/zouroboros/autoloop/scripts/autoloop.ts",
@@ -569,6 +821,42 @@
       "sourceSha256": "7c56f1754e7b3d65c55c8b04d2a5b8cfaad81fb242a5118f11b8470c186ebf00",
       "distributedSha256": "b89fff253bda145406f2fc19d9b1d1cb84a1bc0093c7bfdb9c3b4fd92f6f04b8",
       "adaptation": "Hermes frontmatter (removed operator handle, Linear/AIEWF ids, consensus-gate dependency); commands use ${HERMES_SKILL_DIR}; ledger and snapshots moved from assets/ to $ZOUROBOROS_STATE_DIR/classifier-fallback with env overrides; documented env-configured fallback models."
+    },
+    {
+      "path": "skills/zouroboros/persona-creator/scripts/persona.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "b12b85cd4d7372b593b2521dcb7c0639d891dcd91157f53ea4dd580b08dfd013",
+      "adaptation": "Create/validate/install/list over packages/personas; install writes agent.personalities.<slug> into the profile config.yaml (comment-preserving), never selects it, refuses built-in names without --force. Replaces the host setup/interactive/validate scripts."
+    },
+    {
+      "path": "skills/zouroboros/persona-creator/SKILL.md",
+      "skill": "zo-persona-creator",
+      "sourcePath": "Skills/zo-persona-creator/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "3635b8ff4bae97bdae598ab4aaa4ef96b5a21c0a30630f32f8d4509a28b7f8dd",
+      "distributedSha256": "6cc3f06433432fca6325214f8953b2b48fe7ea58337b0d72919cbb83815a6da8",
+      "adaptation": "Renamed zo-persona-creator -> persona-creator and rewritten for Hermes: personas generated by packages/personas into the state dir and installed as agent.personalities overlays; Zo personas/rules/vault and host paths removed."
+    },
+    {
+      "path": "skills/zouroboros/persona-creator/templates/persona-prompt-template.md",
+      "skill": "zo-persona-creator",
+      "sourcePath": "Skills/zo-persona-creator/assets/persona-prompt-template.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f56a433e0b7b8115785352ff1ebd2cbe07a626ab5b35e7ec29014624ecc69810",
+      "distributedSha256": "010d9daff05636b35848c5213a11bdab30ec3547faebae57a2aae1e41533b3c9",
+      "adaptation": "Moved from assets/; 'Zo Tools' heading made platform-neutral."
+    },
+    {
+      "path": "skills/zouroboros/persona-creator/templates/safety-rules-template.md",
+      "skill": "zo-persona-creator",
+      "sourcePath": "Skills/zo-persona-creator/assets/safety-rules-template.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c09e12d2b76f97cfbb3f29019dc1ee08516000ef03b64ff746600fa488e5d3c8",
+      "distributedSha256": "a426ddba7e6d30182d0d0c2695984d9f577ee2ecfba54e777fdcb4335102caa4",
+      "adaptation": "Moved from assets/; Zo create_rule reference replaced with a platform-neutral comment."
     },
     {
       "path": "skills/zouroboros/tier-resolver/assets/models.default.json",

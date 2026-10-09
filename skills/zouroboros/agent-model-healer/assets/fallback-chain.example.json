@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "description": "Example fallback chains for agent-model-healer. Copy to $ZOUROBOROS_CONFIG_DIR/agent-model-healer/fallback-chain.json, replace the example model ids with models your Hermes profile can reach (add \"provider\" where the model needs a Hermes provider override), then run `healer.ts validate`. Automatic healing stays off (healingEnabled=false) until you have reviewed a dry run.",
+
+  "_policy": {
+    "terminalRung": "open-weight",
+    "cascadeOnExhaustion": false,
+    "alertOnExhaustion": true,
+    "probeTiming": "healthyResponseMs=10000 (completed responses at/above are degraded); timeoutMs=30000 strictly above it and in whole seconds, so slow-but-complete responses are distinguishable from timeouts. Timeouts record latencyMs=null.",
+    "watchmen": "Schedule the healer as a no_agent Hermes cron job whose script runs `healer.ts auto`, so it has no model dependency of its own. Never add a model the healer depends on to a chain it heals."
+  },
+
+  "probeConfig": {
+    "prompt": "You are a health check responder. List the numbers 1 through 10, each on its own line. After the list, write exactly: HEALTH_CHECK_PASS",
+    "expectedSubstring": "HEALTH_CHECK_PASS",
+    "timeoutMs": 30000,
+    "retries": 1,
+    "healthyResponseMs": 10000
+  },
+
+  "probeExecutor": "hermes-vps",
+  "healingEnabled": false,
+  "hysteresis": {
+    "consecutiveUnhealthyToHeal": 2,
+    "consecutiveHealthyToRestore": 3
+  },
+
+  "excludedFromAutoFallback": [],
+
+  "fallbackChains": {
+    "example/claude-sonnet": {
+      "label": "Example proprietary model (Claude Sonnet class)",
+      "fallbacks": ["example/gpt-oss-120b"]
+    },
+    "example/gemini-pro": {
+      "label": "Example proprietary model (Gemini Pro class)",
+      "fallbacks": ["example/gpt-oss-120b"]
+    },
+    "example/gpt-oss-120b": {
+      "label": "Example open-weight model (GPT-OSS-120B class)",
+      "fallbacks": []
+    }
+  },
+
+  "modelLabels": {
+    "example/claude-sonnet": "Example proprietary model (Claude Sonnet class)",
+    "example/gemini-pro": "Example proprietary model (Gemini Pro class)",
+    "example/gpt-oss-120b": "Example open-weight model (GPT-OSS-120B class)"
+  }
+}

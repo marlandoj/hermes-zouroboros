@@ -68,6 +68,40 @@ The preflight gate enforces Articles I-X. The promotion phase always fails close
 (`IX-PROMOTION-AUTHORITY-UNAVAILABLE`), because no promotion issuer or attestation authority is distributed.
 `tests/skills-core-b.test.ts` covers both skills, `unstuck-lateral` and the autoloop program template offline.
 
+### Model calls and scheduled agents (t4)
+
+Skills that called the Zo `/zo/ask` endpoint now go through `integration/ask.ts`. This is the
+distribution's one-shot model layer. It resolves an executor from the profile's registry
+(default `hermes-vps`) and runs `integration/hermes-bridge.sh`, so the provider, model and
+credentials come from the Hermes profile. `SWARM_RESOLVED_MODEL` and `SWARM_PROVIDER` carry a
+per-call model and provider, and `HERMES_TIMEOUT` carries the per-call timeout. Zo credential
+variables are removed from the child environment. Failures are classified from the bridge exit
+status:
+
+- timeout (124 or 137): transient;
+- any other Hermes failure, or empty output: transient;
+- usage (2), unavailable (126 or 127, or no profile): permanent;
+- interrupted (130 or 143): permanent.
+
+- **`ask-retry`** (renamed from `zo-ask-retry`): retry, backoff and model-chain rotation with
+  a 0/1/2/3 exit contract.
+- **`ask-governor`** (renamed from `zo-ask-governor`): concurrency, named budgets,
+  deduplication, a circuit breaker and redacted telemetry. It runs in-process, or as an optional
+  `127.0.0.1` service that fails closed. Its state lives under `ZOUROBOROS_STATE_DIR`.
+- **Governed callers:** `deep-research`, `broll-injector` and `ponytail-review` make their model
+  calls through `ask-governor`.
+- **`agent-doctor` and `agent-model-healer`** target the profile's own scheduled agents:
+  - they read `$HERMES_HOME/cron/jobs.json` and change jobs only through
+    `hermes cron pause|edit`, which holds Hermes' own jobs lock;
+  - the healer's fallback chain lives under `ZOUROBOROS_CONFIG_DIR/agent-model-healer/`;
+  - healing is a dry run until the operator enables it.
+- **`persona-creator`** (renamed from `zo-persona-creator`):
+  - it generates personas with `packages/personas` into `ZOUROBOROS_STATE_DIR/personas`;
+  - it installs them as Hermes `agent.personalities` entries and never selects one.
+
+`tests/skills-zoapi.test.ts` exercises all eight end to end with a fake `hermes` and no
+credentials. It also runs their own unit tests.
+
 Skills must stay operator-neutral and portable. Do not include host paths, operator names or
 handles, persona identities, memories, run output, model catalogs or credentials. Read state through
 the variables the distribution already sets (`HERMES_ZOUROBOROS_HOME`, `ZOUROBOROS_DATA_DIR`,

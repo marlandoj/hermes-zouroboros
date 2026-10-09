@@ -112,7 +112,9 @@ test('baseline grandfathers existing package occurrences by count but never skil
   expect(() => runGate({ root, gitleaks: false })).toThrow('may not grandfather');
 });
 
+// Scanning the whole tree takes several seconds and grows with every ported skill; bun's 5 s
+// default made this test flaky on a loaded host.
 test('the repository tree passes its own gate', () => {
   const result = runGate({ gitleaks: false });
   expect(result.findings).toEqual([]);
-});
+}, 60_000);

@@ -78,7 +78,7 @@ ${config.safetyRules.map(rule => `- ✅ ${rule}`).join('\n')}
 
 ## Tools Preferred
 
-${config.skills?.map(skill => `- \`${skill.name}\` — ${skill.commands.join(', ')}`).join('\n') || '- Standard Zo tools'}
+${config.skills?.map(skill => `- \`${skill.name}\` — ${skill.commands.join(', ')}`).join('\n') || '- Standard agent tools'}
 
 ---
 
