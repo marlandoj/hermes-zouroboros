@@ -1,0 +1,97 @@
+{
+  "_comment": [
+    "Externalized decision thresholds for the Daily Top 5 advisor.",
+    "This file is the single source of truth for every gate the pipeline applies.",
+    "Previously these were hardcoded inline in per-run build-analysis.py, which meant",
+    "each nightly run silently re-authored its own thresholds.",
+    "Source of truth per prompt contract section 3: the daily-top5-advisor SKILL.md",
+    "Verified: 2026-10-01 constraint diagnostic."
+  ],
+  "confluence": {
+    "min_total_points": 4,
+    "min_hard_indicators": 1,
+    "_min_hard_note": [
+      "Relaxed from 2 to 1 on 2026-10-01. This was only possible after hard",
+      "indicator #2 was re-scoped: the old #2 fired 0 times in 3 years on any",
+      "name other than two M&A-pinned stocks, so requiring two hard indicators",
+      "was unsatisfiable. Re-run the replay in scripts/replay_gate.py before",
+      "tightening this back."
+    ],
+    "hard_1_ema20_vs_extension": {
+      "enabled": true,
+      "tolerance_pct": 1.0
+    },
+    "hard_2_fib_confluence_band": {
+      "enabled": true,
+      "definition": "band_pullback",
+      "_definition_note": [
+        "REPLACED 2026-10-01. The old rule required price within 1.5% of the",
+        "161.8% extension of the 60-day impulse. A 161.8% extension sits 61.8%",
+        "ABOVE the impulse-leg high, so the level was above price in 100% of",
+        "17,675 measured symbol-days (median gap 14.02%). The old rule could",
+        "therefore only fire when price was at a new high -- the exact",
+        "opposite of the pullback entry it was meant to detect.",
+        "New rule: price has pulled back INTO the confluence band formed",
+        "between the impulse-leg high and the 161.8% extension, and is holding",
+        "the daily EMA-20."
+      ],
+      "max_band_depth_pct": 3.0,
+      "_max_band_depth_note": "How far below band_low price may pull back and still count as a retest.",
+      "require_ema20_hold": true,
+      "impulse_lookback_days": 60,
+      "fib_ratio": 1.618
+    }
+  },
+  "soft_indicators": {
+    "range_20_low_reversal": {
+      "enabled": true,
+      "tolerance_pct": 1.0
+    },
+    "avwap_1sigma_reclaim": {
+      "enabled": true,
+      "sigma_tol": 0.5
+    },
+    "s_rev_30s_reversal": {
+      "enabled": false,
+      "data_collected": false
+    },
+    "_s_rev_note": [
+      "DISABLED 2026-10-01. The 30-second climactic reversal needs 30-second",
+      "bars, which the pipeline never fetched. It was hardwired False while",
+      "still being rendered as an evaluated 0-point row, which misrepresented",
+      "an uncollected indicator as a genuine non-hit.",
+      "Re-enable only if collect-evidence.py actually pulls 30s bars."
+    ]
+  },
+  "position_sizing": {
+    "max_single_security_pct": 5.0,
+    "sector_flag_pct": 25.0,
+    "_sector_flag_note": "Standing risk rule: flag (do not silently accept) any sector above this share of the portfolio after the proposed fill.",
+    "_note": "Standing risk rule. Unchanged. Not a defect -- see the capital-to-strategy mismatch in the 2026-10-01 diagnostic.",
+    "allow_fractional": true,
+    "fractional_requires": {
+      "account_fractional_trading": true,
+      "asset_fractionable": true
+    },
+    "fractional_field_map": {
+      "asset": "fractionable",
+      "account": "fractional_trading"
+    },
+    "_fractional_requires_note": [
+      "CORRECTED 2026-10-01. The pipeline previously required an asset-level",
+      "boolean `fractional_eh_enabled`. Alpaca's /v2/assets payload does not",
+      "return that field -- it only appears as a STRING inside the `attributes`",
+      "array. The check read 'absent' for all 25 qualifiers on every run, so",
+      "fractional was permanently and silently disabled. Real capability is",
+      "account-level /v2/account/configurations -> fractional_trading, plus",
+      "per-asset fractionable. Both are now asserted explicitly and a missing",
+      "field raises instead of defaulting to whole shares."
+    ],
+    "fail_loud_on_missing_field": true
+  },
+  "expected_indicator_values": {
+    "_note": "Fields the pipeline MUST obtain. Any missing value is a hard error, never a silent default.",
+    "account_configurations": "fractional_trading",
+    "asset_record": "fractionable"
+  }
+}

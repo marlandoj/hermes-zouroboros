@@ -1,0 +1,21 @@
+# systemd user unit template for the optional n8n service (hermes-zouroboros n8n-setup skill).
+# @DATA@ and @CONF@ are substituted at install time; see SKILL.md.
+[Unit]
+Description=n8n workflow automation (local-only)
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=N8N_USER_FOLDER=@DATA@/n8n/home
+Environment=N8N_LISTEN_ADDRESS=127.0.0.1
+Environment=N8N_PORT=5678
+Environment=N8N_DIAGNOSTICS_ENABLED=false
+Environment=N8N_PERSONALIZATION_ENABLED=false
+EnvironmentFile=@CONF@/n8n.env
+ExecStart=@DATA@/n8n/app/node_modules/.bin/n8n start
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

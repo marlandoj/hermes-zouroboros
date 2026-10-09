@@ -4,6 +4,24 @@
   "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
   "files": [
     {
+      "path": "skills/devops/n8n-setup/references/n8n.service",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "a31998e20b091c3cbe2e7f428d875aa318554ea417d72d01695a04a7cab1a8ed",
+      "adaptation": "Distribution-authored systemd user unit template for the optional local-only n8n service."
+    },
+    {
+      "path": "skills/devops/n8n-setup/SKILL.md",
+      "skill": "n8n-setup",
+      "sourcePath": "Skills/n8n-setup/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8d2fb99e88c61328a930e6faa0da5206376fb57eec4c9e63fc7db09611ffb9f8",
+      "distributedSha256": "0f6791c4aed9312a3b6abd8e32a9c900b6e8741f196c9a74dcc7f0d12971f996",
+      "adaptation": "Re-authored as an optional, local-only systemd user service with data under the Zouroboros data dir; Zo managed-service/public URL/dev-shm log instructions removed."
+    },
+    {
       "path": "skills/email/agent-email-patterns/LICENSE",
       "skill": null,
       "sourcePath": null,
@@ -166,6 +184,204 @@
       "adaptation": "Hermes frontmatter added (version, author, MIT licence, platforms, metadata.hermes tags/related_skills); unshipped sibling agentmail-manage-inboxes reference replaced by agentmail-sdk."
     },
     {
+      "path": "skills/finance/daily-top5-advisor/config/gates.json",
+      "skill": "jhf-daily-top5",
+      "sourcePath": "Skills/jhf-daily-top5/config/gates.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "220efd3cc6e964d77d2ae5aa6019974241e71eb51b4777a5f6410eeaf94bfe38",
+      "distributedSha256": "6b6a9c364e8fbbd4288c8b03e558a8296126e22f1783820309bf74a5c1cbe808",
+      "adaptation": "Brand and host-path wording removed from comments; sector_flag_pct 25 added (standing concentration rule)."
+    },
+    {
+      "path": "skills/finance/daily-top5-advisor/scripts/confidence.py",
+      "skill": "jhf-daily-top5",
+      "sourcePath": "Skills/jhf-daily-top5/scripts/confidence.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b677f5dbef7e4e275a2d4a68aec6cd854c14446a6bc4685bee9bd5ca33d4aba6",
+      "distributedSha256": "8fc5a7c2cc81f65ee905d1b583ec01ebbba86636cdca4d21355c4567cdecf6a3",
+      "adaptation": "Confidence model name/source made brand-neutral; logic unchanged."
+    },
+    {
+      "path": "skills/finance/daily-top5-advisor/scripts/gates.py",
+      "skill": "jhf-daily-top5",
+      "sourcePath": "Skills/jhf-daily-top5/scripts/gates.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5dced0d615dc59d65331f0fe17eed1991d47859709e358e34008235faf413f30",
+      "distributedSha256": "c7f12a5c27a69e64aaf327fc46d817cef27eec41722f98ddeba793f392d540f3",
+      "adaptation": "Docstring brand/path references neutralised; concentration_flags() added for the 5% position cap and 25% sector flag."
+    },
+    {
+      "path": "skills/finance/daily-top5-advisor/scripts/replay_gate.py",
+      "skill": "jhf-daily-top5",
+      "sourcePath": "Skills/jhf-daily-top5/scripts/replay_gate.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8a2d260ab0b47a08218badeba9a02c419b5ae43a48c0f9a20d31c5db80109d90",
+      "distributedSha256": "f3029e2723b80ec673e6491c97e3dc092ea3670ceccc8070d7fb237049bc9c30",
+      "adaptation": "Default cache under the temp dir (tempfile) instead of a branded /tmp path; secrets-file usage line removed."
+    },
+    {
+      "path": "skills/finance/daily-top5-advisor/scripts/shortlist.py",
+      "skill": "jhf-daily-top5",
+      "sourcePath": "Skills/jhf-daily-top5/scripts/shortlist.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ddf1a0d539fb3cee803d0576f448c507944ed999b616ecc568f7fa6510d30b68",
+      "distributedSha256": "8491940d033d11ffb315b247c7a847db2e46a4141f27757406bf3c0dc8ca030e",
+      "adaptation": "Horizon source labels brand-neutral; requests/pymysql imported lazily so --help works without them."
+    },
+    {
+      "path": "skills/finance/daily-top5-advisor/scripts/test_confidence.py",
+      "skill": "jhf-daily-top5",
+      "sourcePath": "Skills/jhf-daily-top5/scripts/test_confidence.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "578944ed403927f2dc63f3c05b2b9a87828e901e165f62acc055717dd3d1d04b",
+      "distributedSha256": "c3fa62be9fdccb5230d44567a66020cdbfedd9513e6bfd111939a5f50fff7822",
+      "adaptation": "Adds its own directory to sys.path and a plain-Python runner (pytest optional)."
+    },
+    {
+      "path": "skills/finance/daily-top5-advisor/scripts/test_gates.py",
+      "skill": "jhf-daily-top5",
+      "sourcePath": "Skills/jhf-daily-top5/scripts/test_gates.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7438fdc4acd52d8a87ff559d7d89bd881b4eb4524a7c73ddbe28ffbc71261470",
+      "distributedSha256": "1a1afa213adf51c69b946ace56b3b7178611a1a3fb96d50058e7047f6407faf0",
+      "adaptation": "pytest optional (local raises() fallback + plain-Python runner); concentration_flags test added."
+    },
+    {
+      "path": "skills/finance/daily-top5-advisor/SKILL.md",
+      "skill": "jhf-daily-top5",
+      "sourcePath": "Skills/jhf-daily-top5/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "dc02815bd08366b25f265f7bad9258f9f519b6f83df27fbcb197f93aa1bf2587",
+      "distributedSha256": "78ffdcf7ffd12363610aac378ad1266fbd49e1a9c734b22a70d77d1c6fcaaf4e",
+      "adaptation": "Renamed from jhf-daily-top5; financial safety rules section; screener/Alpaca configuration; outputs under ZOUROBOROS_STATE_DIR; recipient email address, brand and host project paths removed; delivery as operator-approved drafts."
+    },
+    {
+      "path": "skills/finance/strategy-scout/references/email-template.html",
+      "skill": "jhf-strategy-scout",
+      "sourcePath": "Skills/jhf-strategy-scout/references/email-template.html",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d2832050f0bdbae07eee612525286824f3c0ee07583ccc66e03601d50831bff6",
+      "distributedSha256": "5e62140836801855d7aba6d31c57be272a7f9b4265b1d2a32dbb3cf722c4de12",
+      "adaptation": "Brand, persona name and Zo email footer removed; stop-loss, 5% max position and tax fields added; portfolio line wording fixed."
+    },
+    {
+      "path": "skills/finance/strategy-scout/references/verdict-rubric.md",
+      "skill": "jhf-strategy-scout",
+      "sourcePath": "Skills/jhf-strategy-scout/references/verdict-rubric.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "59ec32bf9e1881d497c9bfd8fea01b3e6850c6e4d16466d70c291986157a54f0",
+      "distributedSha256": "0434d46439852f3d8d8e8eceeaf8ebefefe0edb46dcaec47a5f903a8ed6e9bb5",
+      "adaptation": "Brand references removed; rules unchanged."
+    },
+    {
+      "path": "skills/finance/strategy-scout/scripts/scout-data.ts",
+      "skill": "jhf-strategy-scout",
+      "sourcePath": "Skills/jhf-strategy-scout/scripts/scout-data.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "92b0cbfb2f165a7879fb6c1c96e73b13096d6d07b5eb819520d7c7e2109afefb",
+      "distributedSha256": "144cd9e2b6ba3739de8d95f9b8eb4549e8a92793f7ba89adc8ff7a56167ac45f",
+      "adaptation": "Backtest search directory from STRATEGY_SCOUT_BACKTEST_DIR (absent -> none configured) instead of a host project path; brand/Zo wording removed from the header."
+    },
+    {
+      "path": "skills/finance/strategy-scout/SKILL.md",
+      "skill": "jhf-strategy-scout",
+      "sourcePath": "Skills/jhf-strategy-scout/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "786924d338f6b29fdef260370faf7e9e89b1ebcc57175df11b8d99ad911e8f90",
+      "distributedSha256": "0bacac3fc76c2738bda7fc796d754663178aef0dc110d1e086f63b5f2071e2ed",
+      "adaptation": "Renamed from jhf-strategy-scout; financial safety rules; profile-environment configuration; report delivery via the profile channel (email only as approved drafts); brand, private UI invocation and host paths removed."
+    },
+    {
+      "path": "skills/gaming/all-out-game-development/references/csl-engineer.md",
+      "skill": "all-out-game-development",
+      "sourcePath": "Skills/all-out-game-development/references/csl-engineer.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6d07b6d12bee355c6d19f11fe58915a665e745a42ae8a1db67de86b9fdeee113",
+      "distributedSha256": "6d07b6d12bee355c6d19f11fe58915a665e745a42ae8a1db67de86b9fdeee113",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/gaming/all-out-game-development/references/game-director.md",
+      "skill": "all-out-game-development",
+      "sourcePath": "Skills/all-out-game-development/references/game-director.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "eaa077284491747598c2d79382f07d8305fe011ee12bfd5186b20b822c8bf3af",
+      "distributedSha256": "eaa077284491747598c2d79382f07d8305fe011ee12bfd5186b20b822c8bf3af",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/gaming/all-out-game-development/references/qa-release.md",
+      "skill": "all-out-game-development",
+      "sourcePath": "Skills/all-out-game-development/references/qa-release.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "322cc44f748ad9cd294da963ce50b6a7cbcb83355e0e0c0fff7525b41cce4db1",
+      "distributedSha256": "322cc44f748ad9cd294da963ce50b6a7cbcb83355e0e0c0fff7525b41cce4db1",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/gaming/all-out-game-development/references/technical-art-ux.md",
+      "skill": "all-out-game-development",
+      "sourcePath": "Skills/all-out-game-development/references/technical-art-ux.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "fde2ce2e4305aece9d0d304a1ea2fb972a868a4dce460efa3ed14af111ff1d3e",
+      "distributedSha256": "fde2ce2e4305aece9d0d304a1ea2fb972a868a4dce460efa3ed14af111ff1d3e",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/gaming/all-out-game-development/scripts/check-corpus.ts",
+      "skill": "all-out-game-development",
+      "sourcePath": "Skills/all-out-game-development/scripts/check-corpus.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "37a496fab303e6689d41c6008ad5c9aa0ecea8400fb34337a9a4faf5ab377138",
+      "distributedSha256": "a0890c5175ace3ed1ef27532e3a1423bb3f233a1eb533626613239c7a4220a43",
+      "adaptation": "Trailing 'export {}' gives the script module scope for the root tsc --noEmit (its main() otherwise collides globally); logic verbatim."
+    },
+    {
+      "path": "skills/gaming/all-out-game-development/scripts/query.ts",
+      "skill": "all-out-game-development",
+      "sourcePath": "Skills/all-out-game-development/scripts/query.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4c356f7c10db39b090fd195b0a947e458f83f18a4f484296944cc4ed231f66a1",
+      "distributedSha256": "f8483888cbe0b5fe5447d0d143538ba0c0d87eacb773b1aa2be4d68d3ee1b697",
+      "adaptation": "Imports embeddings/buildSparseVector from integration/qdrant-corpus.ts instead of the host zo-memory-system model client and RAG pipeline; host secrets-file loader removed."
+    },
+    {
+      "path": "skills/gaming/all-out-game-development/scripts/sync-corpus.ts",
+      "skill": "all-out-game-development",
+      "sourcePath": "Skills/all-out-game-development/scripts/sync-corpus.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "33a092fc937169d70a82a3c210d104d3c2d90c90e275db31f445686ab79f8687",
+      "distributedSha256": "b46c64a9f22e25b8324eb4a977e7754f5777e301638cd57399bd6fa632ca4005",
+      "adaptation": "Imports embeddings/buildSparseVector from integration/qdrant-corpus.ts; host secrets-file loader removed; SKILL_ROOT resolved from the script location instead of a host path."
+    },
+    {
+      "path": "skills/gaming/all-out-game-development/SKILL.md",
+      "skill": "all-out-game-development",
+      "sourcePath": "Skills/all-out-game-development/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "bc5ae9ebb8c136174c8f1d6f939fb41ce9dfe7d42a970ce522d4fc10799c3ade",
+      "distributedSha256": "e3557c90ff4d05806b1856f62a77b61cf637541e0d2d0322e9a29b96541c8489",
+      "adaptation": "Hermes frontmatter; ${HERMES_SKILL_DIR} paths; configuration section (QDRANT_URL/QDRANT_API_KEY/OPENAI_API_KEY via integration/qdrant-corpus.ts); MCP contract names generic Qdrant/code-graph/memory servers instead of host server names."
+    },
+    {
+      "path": "skills/gaming/gamedev-engine-corpus/scripts/ingest-engine-corpus.ts",
+      "skill": "gamedev-engine-corpus",
+      "sourcePath": "Skills/gamedev-engine-corpus/scripts/ingest-engine-corpus.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7364b49eecaba332022911ea17d7f7badb0919789cc2b74a82bb3d5e701fd830",
+      "distributedSha256": "79c9a65bab646ba59e3adc27541093c92552bc0c0e320df1dc5b96b7eb7a55d7",
+      "adaptation": "Imports embeddings/buildSparseVector from integration/qdrant-corpus.ts instead of the host zo-memory-system modules; side-effect-free --help added."
+    },
+    {
+      "path": "skills/gaming/gamedev-engine-corpus/SKILL.md",
+      "skill": "gamedev-engine-corpus",
+      "sourcePath": "Skills/gamedev-engine-corpus/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ec7e9020f8ae835a9c27929c8a12998e25aa6e4f6d4756c5e08342267945ef3a",
+      "distributedSha256": "984c34984ad0c2d8169027c729147e2e52a55039b33c990142fa1fa81abc4c8a",
+      "adaptation": "Rewritten for the distribution: generic Qdrant MCP usage, profile-environment credentials, acquisitions under ZOUROBOROS_CACHE_DIR, Unreal licensee-only; host private-course collection, host checkpoint script, secrets sourcing and operator retirement notes removed."
+    },
+    {
       "path": "skills/media/academy-video-pipeline/SKILL.md",
       "skill": "academy-video-pipeline",
       "sourcePath": "Skills/academy-video-pipeline/SKILL.md",
@@ -173,6 +389,15 @@
       "sourceSha256": "6e2709a2a124f103b744b5baa85860fe06af5f3f776e11e16e31b3e2192551ac",
       "distributedSha256": "264a22c8c2856eec533e6ec6ef0e316eed9ef9b7ed64b1998fe4e045ebfd9cab",
       "adaptation": "Rewritten operator-neutral: removed persona/channel names, operator author handle and Zo host claims; host-only Integrations/hyperframes and skill-security-gate paths replaced by upstream heygen-com/hyperframes and the Hermes optional hyperframes skill plus a generic third-party review step; Hermes frontmatter added."
+    },
+    {
+      "path": "skills/media/ai-character-builder/SKILL.md",
+      "skill": "ai-character-builder",
+      "sourcePath": "Skills/ai-character-builder/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f045277a99fb7c960ead73035a06bd6779dd69c81483b8c34e9de545b5a23e83",
+      "distributedSha256": "3f8843e6d4ff227f5a4d7f9b1b2d4ab3bebccd065fd281a470023e9937d7c775",
+      "adaptation": "Re-authored: the source is a pointer to a toolkit outside the repository; now a workflow over fal-ai-media, the profile TTS provider, persona-creator and heygen-*; Hermes frontmatter; consent rules; no host paths or zo.space page."
     },
     {
       "path": "skills/media/broll-injector/assets/plan.schema.json",
@@ -236,6 +461,24 @@
       "sourceSha256": "930aa359d99ab8e8eef4035e17731ecf45131e4bee624ca3343942d971b14cc2",
       "distributedSha256": "860a5fe5f2cc75fa68ca094c7998dfb195b5a6c44f36fb9840fd1fb490971115",
       "adaptation": "Hermes frontmatter; planning via ask-governor (--plan-model); fal-ai-media located via FAL_MEDIA_SCRIPT or the sibling skill; host paths, persona/channel names (presenter identities) and Zo references removed."
+    },
+    {
+      "path": "skills/media/fal-ai-media/scripts/fal-media.ts",
+      "skill": "fal-ai-media",
+      "sourcePath": "Skills/fal-ai-media/scripts/fal-media.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "cd1d8e0a41f84d7bf2cbd3e70695cd47819edf4f4d4e634eae017f970fc0c50d",
+      "distributedSha256": "9b4e38f142f0ff1506668e0420cc4b052d3c0d0a75e5ed6c25543893729ce1a9",
+      "adaptation": "Missing-key message points at the Hermes profile environment instead of Zo settings; trailing 'export {}' gives module scope for the root tsc --noEmit; otherwise verbatim."
+    },
+    {
+      "path": "skills/media/fal-ai-media/SKILL.md",
+      "skill": "fal-ai-media",
+      "sourcePath": "Skills/fal-ai-media/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "dec643f3a5fe36cd5cf5c4f11a2623680498c5b1da60c17566d6f7377bb19090",
+      "distributedSha256": "e45ea28d8a2513ec8faaea080526dfdb4aca9e66b9f2a2788eb49d23b66c8759",
+      "adaptation": "Hermes frontmatter (FAL_KEY prerequisite); ${HERMES_SKILL_DIR} invocation; workspace-relative outputs instead of host paths; Zo credit/secrets wording removed; cost confirmation note."
     },
     {
       "path": "skills/media/heygen-avatar/LICENSE",
@@ -515,6 +758,177 @@
       "sourceSha256": null,
       "distributedSha256": "addac373bdb4ebc77142d24bbe04d0cdc9d9982626655b327456d59b3ff4b791",
       "adaptation": "Hermes skill authored for the upstream MIT tradingview-mcp-server (Fiale Plus): the source entry is a vendored MCP server repo with no SKILL.md; this skill registers the pinned npm package (0.7.1) as a Hermes stdio MCP server and adds research-only and portfolio-safety rules. Server source is not vendored."
+    },
+    {
+      "path": "skills/software-development/compile-build-spec/assets/build-spec-template.prompt.md",
+      "skill": "compile-build-spec",
+      "sourcePath": "Skills/compile-build-spec/assets/build-spec-template.prompt.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c1f3c541e288b3d58d9f020b6acac813b674d2fc3bba59cc520a8dc313f0935b",
+      "distributedSha256": "c1f3c541e288b3d58d9f020b6acac813b674d2fc3bba59cc520a8dc313f0935b",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/compile-build-spec/references/factory-integration.md",
+      "skill": "compile-build-spec",
+      "sourcePath": "Skills/compile-build-spec/references/factory-integration.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "868bb3b196f9cc580f08884ab794b43dfc31c475f01420fa7adc8aeaeeb5aa7e",
+      "distributedSha256": "90e4eb0ff8cd5e6c69b38dac30281b34af56274fd5912b32962d988fb3650671",
+      "adaptation": "Validation step points at the distribution factory/cli.ts and docs/factory.md instead of the host ticket-contract script path; consensus wording made generic."
+    },
+    {
+      "path": "skills/software-development/compile-build-spec/references/specification-schema.md",
+      "skill": "compile-build-spec",
+      "sourcePath": "Skills/compile-build-spec/references/specification-schema.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b73ceb298d5a69cd473a852c171b0dd1edd282e0fe3b6e99066c1aaa4863637f",
+      "distributedSha256": "b73ceb298d5a69cd473a852c171b0dd1edd282e0fe3b6e99066c1aaa4863637f",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/compile-build-spec/scripts/spec-tool.test.ts",
+      "skill": "compile-build-spec",
+      "sourcePath": "Skills/compile-build-spec/scripts/spec-tool.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6427af669eaaa70869d3353356d9cd562cbc4a310bedd1b6cc40b53c1393b61f",
+      "distributedSha256": "4b6c3bcbd14566933fe582bf3321bfbc703e736b59961098242746c769859711",
+      "adaptation": "Host-only cases removed (Projects reference-case byte-for-byte, host ticket-contract parser); fixture ingest made synthetic; panel and review --dry-run tests added; persona name in fixtures replaced by a generic role name."
+    },
+    {
+      "path": "skills/software-development/compile-build-spec/scripts/spec-tool.ts",
+      "skill": "compile-build-spec",
+      "sourcePath": "Skills/compile-build-spec/scripts/spec-tool.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "377820994f9a4eede9f0adcdd6e528311579ce7a1bfd2dea22b6557fc85ce985",
+      "distributedSha256": "26067f68b6952ad6f07a7463f39f4edf0e17a840be7c36e1cbbe0a0c81d9f358",
+      "adaptation": "review: retired consensus-gate import replaced by a governed reviewer panel (ask-governor; COMPILE_BUILD_SPEC_REVIEW_MODELS) with exported parseReviewVerdict/panelStatus; error wording."
+    },
+    {
+      "path": "skills/software-development/compile-build-spec/SKILL.md",
+      "skill": "compile-build-spec",
+      "sourcePath": "Skills/compile-build-spec/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ec4244f36d6540631b5629ba5e75c30e2f62021d4a93652c6b900ebd15a5be00",
+      "distributedSha256": "2e61bb8a4dd01b00fe7ddaa21a06a8e7bde2c01ab5711cf139a9857faf7eaf42",
+      "adaptation": "Hermes frontmatter; ${HERMES_SKILL_DIR} paths; independent review through ask-governor replaces the retired consensus gate; no shipped fixture (the source fixture is a third-party prompt without a licence)."
+    },
+    {
+      "path": "skills/software-development/design-md-drift-guard/config/pii.json",
+      "skill": "design-md-drift-guard",
+      "sourcePath": "Skills/design-md-drift-guard/config/pii.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "976947dc662dcd9f61a956471ce15b6385a8b374aeab48860d1d0637c5e1e591",
+      "distributedSha256": "38a52383585925b12c14e4406cd205c9fee5a34ff65e2b8ff00d3e0bd8a990b2",
+      "adaptation": "Description points operators at the config-dir copy; Zo-specific first-person pattern removed; placeholders unchanged."
+    },
+    {
+      "path": "skills/software-development/design-md-drift-guard/config/projects.example.json",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "95337c9378d148c3d0b383ada3d9b856600f1b4d8604368cd6f72655d80d0f3f",
+      "adaptation": "Distribution-authored example projects config with placeholder paths; replaces the host scripts/projects.json (operator brands, host paths), which is not shipped."
+    },
+    {
+      "path": "skills/software-development/design-md-drift-guard/scripts/auto-heal.ts",
+      "skill": "design-md-drift-guard",
+      "sourcePath": "Skills/design-md-drift-guard/scripts/auto-heal.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "69104ae4fd1bf33fcf31d095fefce6449d10f9dd5fbfdf3db3a83bbb63cb0c5c",
+      "distributedSha256": "48e3e345563c5d7981fc6e04b4c22cf15a0f7018da111e8fc709e05ceceacbe9",
+      "adaptation": "Script and config paths from the script location/paths.ts instead of host paths; retired consensus gating removed; missing-config exit 2; side-effect-free --help."
+    },
+    {
+      "path": "skills/software-development/design-md-drift-guard/scripts/drift-guard.ts",
+      "skill": "design-md-drift-guard",
+      "sourcePath": "Skills/design-md-drift-guard/scripts/drift-guard.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b48ae05e77eaa4335907f442bbc9245487757f7e51a664da44a14dab80ce3a42",
+      "distributedSha256": "3d9f6b7cd718ee69f360ec47f0b18cad304d8b0c974b41af0dd660c0edc0029a",
+      "adaptation": "Projects config and reports from paths.ts (config/state dirs) instead of the skill tree; missing-config exit 2; DESIGN_DRIFT_LINT=off; tmpdir() cwd; side-effect-free --help."
+    },
+    {
+      "path": "skills/software-development/design-md-drift-guard/scripts/orchestrate.ts",
+      "skill": "design-md-drift-guard",
+      "sourcePath": "Skills/design-md-drift-guard/scripts/orchestrate.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "42c395a40995c32a597a3172a062a6b54539b368ef4d18c2eb3b4ac4dea907a1",
+      "distributedSha256": "1d45469eaf2d43fa44a9c9169d39c10826b79da639d24802e6563f29d9ffe79a",
+      "adaptation": "Config/reports from paths.ts; plan-only by default (--open-pr to push and open PRs; DESIGN_DRIFT_GITHUB_WRITES_DISABLED forces plan-only); consensus filtering removed; worktree in tmpdir(); host path wording removed; side-effect-free --help."
+    },
+    {
+      "path": "skills/software-development/design-md-drift-guard/scripts/paths.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "73ff1173f499bf23110335158fb4d957811400e1e30c441c9fefcf6b39b70753",
+      "adaptation": "Distribution-authored: portable config/state/workspace locations for the drift guard (no writes in the skill tree)."
+    },
+    {
+      "path": "skills/software-development/design-md-drift-guard/scripts/pii-leak-scan.ts",
+      "skill": "design-md-drift-guard",
+      "sourcePath": "Skills/design-md-drift-guard/scripts/pii-leak-scan.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "70b4a242c6f8596f6a6b2606d46405dd90b6baf9b0ef46c56814ffdf4e62419f",
+      "distributedSha256": "d10c07a3c8284d14af144bbf9715dea71e33ac94655b29d3fc0f59cb1753f604",
+      "adaptation": "Config and workspace from paths.ts (config dir / ZOUROBOROS_WORKSPACE) instead of host paths."
+    },
+    {
+      "path": "skills/software-development/design-md-drift-guard/SKILL.md",
+      "skill": "design-md-drift-guard",
+      "sourcePath": "Skills/design-md-drift-guard/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "1247c223ada13dc9c56ed0447df7b155f452fd1eb8a79dd21e3c2335716ea964",
+      "distributedSha256": "5a935d73648ef1ee24a7afb6f1152a9d33284cdc68377371b2fbd7a8cffd4769",
+      "adaptation": "Rewritten for portable config/state paths, plan-only default with --open-pr, no consensus gate, offline lint switch, PII config location, hermes cron scheduling; no host projects or email agent."
+    },
+    {
+      "path": "skills/software-development/destructive-op-guard/scripts/post-destructive-sweep-hook.sh",
+      "skill": "destructive-op-guard",
+      "sourcePath": "Skills/destructive-op-guard/scripts/post-destructive-sweep-hook.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "520efd090bd99df5e5ec54efb1db204cc554e9c9d473bbd40675ec34b205320f",
+      "distributedSha256": "c2cfcd8daf8d9142b12f770fe97e234f1b3dfa59d0ec0b17b71aaccb24f6c9ff",
+      "adaptation": "Claude Code PostToolUse hook rewritten to the Hermes shell-hook protocol: post_tool_call records a per-session pending reminder under ZOUROBOROS_STATE_DIR, pre_llm_call injects it once; safe session ids only; cloud CLI patterns added."
+    },
+    {
+      "path": "skills/software-development/destructive-op-guard/scripts/sweep-refs.sh",
+      "skill": "destructive-op-guard",
+      "sourcePath": "Skills/destructive-op-guard/scripts/sweep-refs.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2787585a03550f9cf8868e8afc131c37fe3b11fad6435201119539dd4d8a0854",
+      "distributedSha256": "0d281bc1772394a5b14f44f142c57f2778f2a9f7779172de2f7a7237a181f0ee",
+      "adaptation": "Sweep root from SWEEP_ROOT / ZOUROBOROS_WORKSPACE / cwd instead of a host path; --help and missing-root handling; '--' before the search term."
+    },
+    {
+      "path": "skills/software-development/destructive-op-guard/SKILL.md",
+      "skill": "destructive-op-guard",
+      "sourcePath": "Skills/destructive-op-guard/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "be95a214464c414c37004b3b95743e498b2ea0ecab9061e4e40ef1d7b2d2c5e2",
+      "distributedSha256": "e3425be90688581969f2a2694b163abb73c49991a779fbffdbecb46bf0701ee1",
+      "adaptation": "Rewritten for Hermes shell hooks (post_tool_call + pre_llm_call config), portable sweep root, kill switch and rollback via profile config."
+    },
+    {
+      "path": "skills/software-development/gauntlet-loop/references/mechanics.md",
+      "skill": "gauntlet-loop",
+      "sourcePath": "Skills/gauntlet-loop/references/mechanics.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b7153cabfdf4804fec5b4a05c16c8b3f51715222e4ef32b11ade747e2e19bcaf",
+      "distributedSha256": "b7153cabfdf4804fec5b4a05c16c8b3f51715222e4ef32b11ade747e2e19bcaf",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/gauntlet-loop/SKILL.md",
+      "skill": "gauntlet-loop",
+      "sourcePath": "Skills/gauntlet-loop/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "571ed4992751278caccba94651b2902f82a500103c8489e07d9c493b3899148a",
+      "distributedSha256": "50233742213c63b7b33ae48f84f976aca7429a7b18117fa6490d2ba1a799e17f",
+      "adaptation": "Hermes frontmatter; host Software Factory supervised-runtime section replaced by guidance for a project-supplied supervised runner."
     },
     {
       "path": "skills/software-development/ponytail-audit/SKILL.md",
