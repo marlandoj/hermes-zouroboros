@@ -1696,6 +1696,60 @@
       "adaptation": "Hermes frontmatter (Q00/ouroboros MIT origin kept) replaces Zo fields; Quick Start for the never-tracked scripts/evaluate.ts replaced by an agent-run procedure; zo.space checks generalised to web routes; /zo/ask consensus replaced by Hermes delegate_task or separate model invocations; references to unshipped ontologist.md/unstuck-lateral replaced by inline guidance."
     },
     {
+      "path": "skills/software-development/ux-laws/assets/review-checklist.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "6136177e55d1157b110e3412c06e77c6eac81e2c8e87d49f515fee136e22176d",
+      "adaptation": "Rewritten from primary research: one defect question per rule, new wording. Replaces Skills/ux-laws/assets/review-checklist.md."
+    },
+    {
+      "path": "skills/software-development/ux-laws/assets/ux-principles.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "22022863550fe05e92c906687035002969ac966cf3b5ad080379f04e168a9c42",
+      "adaptation": "Rewritten from primary research: new wording of the operator's paste-ready rules block (same 20 numbered rules and precedence line, same parse format). Replaces Skills/ux-laws/assets/ux-principles.md."
+    },
+    {
+      "path": "skills/software-development/ux-laws/references/ux-laws.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "aefd3eab2cebb46478f8944a3e0f836f65b25ffcad029c14d7ea430327f6145f",
+      "adaptation": "Rewritten from primary research: each principle re-derived from the original publications (Hick 1952, Hyman 1953, Fitts 1954, Miller 1956, Wertheimer 1923, Palmer and Rock 1994, Doherty and Thadani 1982, von Restorff 1933, Ebbinghaus 1885, Murdock 1962, Kahneman et al. 1993, Zeigarnik 1927, Tesler, RFC 760/1122, Parkinson 1955, Pareto/Juran, Hull 1932, Kivetz et al. 2006, Nielsen 2000) with evidence classes; 8-word shingle overlap with Skills/ux-laws text 0.16% (law-name list and a citation title only). Replaces Skills/ux-laws/references/ux-laws.md."
+    },
+    {
+      "path": "skills/software-development/ux-laws/scripts/ux-laws.test.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "ef46d47f88855f4f486a060b1c93690d0bac9eb730172b644b0267f00ffeacbe",
+      "adaptation": "Distribution-authored offline tests: rules parse, checklist alignment, sources and evidence class per principle, idempotent install, dry run, path containment, status."
+    },
+    {
+      "path": "skills/software-development/ux-laws/scripts/ux-laws.ts",
+      "skill": "ux-laws",
+      "sourcePath": "Skills/ux-laws/scripts/ux-laws.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c6a4a13003aeaeca68b07fb3c055a5bb962d625b3ab77f7d09c72f4874a47e46",
+      "distributedSha256": "19465d98155dbd0f956c8e21c6327a5bfb4edca802e1c879665812dde87ff615",
+      "adaptation": "Operator-authored installer kept; adapted for Hermes: .hermes.md and HERMES.md added to the known instruction files, --file must stay inside --target, helpers exported and CLI guarded by import.meta.main for tests; help text updated."
+    },
+    {
+      "path": "skills/software-development/ux-laws/SKILL.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "5b8f13c84d2acf4e980ea887068b4bf1f25d29c946bdd7e4a2c45227f5bbfdb4",
+      "adaptation": "Rewritten from primary research (operator decision 2026-10-09): new text for the operator's design (measurable rules, checklist, tensions, install flow), Hermes frontmatter and ${HERMES_SKILL_DIR} commands; the CC BY-NC-ND source line and third-party summary text removed. Replaces Skills/ux-laws/SKILL.md."
+    },
+    {
       "path": "skills/software-development/verity/scripts/adapter.mjs",
       "skill": "verity",
       "sourcePath": "Skills/verity/scripts/adapter.mjs",

@@ -114,5 +114,5 @@ test('t7 skills carry no operator brand or persona identity and no host paths', 
       }
     }
   }
-  expect(existsSync(skill('software-development/ux-laws'))).toBe(false);
+  // ux-laws was held for licence here; it ships since g1 and tests/skills-uxlaws.test.ts covers it.
 });

@@ -642,9 +642,11 @@
       "nameSha256": "ca4b14485aa0dc838d3c94629eca9e4e6ecd471fc9ba55a62e06473d50b578a8",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "held-license",
-      "reason": "Licence check in f1-t7: the source declares its basis as Laws of UX by Jon Yablonski (lawsofux.com), CC BY-NC-ND 4.0, and its one-line principle statements closely paraphrase that site's summaries. NoDerivatives and NonCommercial conflict with redistribution under this repository's MIT licence, so nothing is shipped.",
-      "followUp": "Operator decision: approve an independent rewrite from the primary research (Hick 1952, Fitts 1954, Miller 1956, ...) with lawsofux.com cited only as further reading, or obtain permission; then port (paths are trivial: skill-relative script and the impeccable reference)."
+      "disposition": "adapted",
+      "reason": "Rewritten from primary research (operator decision 2026-10-09; the operator authored the source skill). The source cited Laws of UX (CC BY-NC-ND 4.0) as its reference, so SKILL.md, the reference and both assets are new text built from the original publications (Hick, Hyman, Fitts, Miller, Gestalt grouping, Doherty and Thadani, von Restorff, serial position, peak-end, Zeigarnik, Tesler, Postel, Parkinson, Pareto/Juran, Hull, Kivetz et al., Nielsen) with an evidence class per entry; the CC source line was removed and the site is mentioned only as related reading. 8-word shingle overlap with the source text: 0.16% (law names and one citation title). The operator's installer script is kept and adapted (.hermes.md, path containment). 8 offline tests.",
+      "distributedAs": [
+        "skills/software-development/ux-laws"
+      ]
     },
     {
       "name": "verity",
