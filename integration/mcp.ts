@@ -3,7 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { DEFAULT_CONFIG } from 'zouroboros-core';
-import { initDatabase, closeDatabase, storeFact, searchFacts, getDbStats } from 'zouroboros-memory';
+import { initDatabase, closeDatabase, storeFact, searchFacts, getFact, getDatabase, getDbStats } from 'zouroboros-memory';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -29,9 +29,21 @@ server.tool('workshop_status', 'Inspect local Zouroboros memory and execution mo
 server.tool('memory_store', 'Store a work fact or decision in the shared SQLite memory. Do not store credentials.', {
   entity: z.string().min(1).max(200), key: z.string().max(200).optional(), value: z.string().min(1).max(20000),
 }, async input => result(await storeFact({ ...input, category: 'fact', source: 'hermes-zouroboros' }, memoryConfig)));
-server.tool('memory_search', 'Find shared work facts by keyword. No remote embedding API is called.', {
+server.tool('memory_search', 'Find shared work facts by keyword, optionally restricted to an exact ID that also matches the query and is unexpired. No remote embedding API is called.', {
   query: z.string().min(1).max(2000), limit: z.number().int().min(1).max(30).default(10),
-}, async ({ query, limit }) => result(searchFacts(query, { limit })));
+  id: z.string().min(1).max(200).optional(),
+}, async ({ query, limit, id }) => {
+  if (id === undefined) return result(searchFacts(query, { limit }));
+  // Filter by ID before the keyword result cap, retaining searchFacts' SQLite
+  // LIKE and expiry semantics. getFact alone intentionally includes expired rows.
+  const pattern = `%${query}%`;
+  const match = getDatabase().query(`SELECT id FROM facts WHERE id = ?
+    AND (text LIKE ? OR entity LIKE ? OR value LIKE ?)
+    AND (expires_at IS NULL OR expires_at > strftime('%s', 'now'))`)
+    .get(id, pattern, pattern, pattern);
+  const fact = match ? getFact(id) : null;
+  return result(fact ? [fact] : []);
+});
 server.tool('swarm_prepare', 'Validate a task DAG and save an operator-reviewable campaign. Does not execute tasks.', {
   tasks: z.array(taskSchema).min(1).max(20),
 }, async ({ tasks }) => {
