@@ -132,6 +132,8 @@ This is a VPS distribution foundation, not a clone of the production host. Facto
 
 The supported entry point is `integration/cli.ts`. The imported packages retain broader upstream APIs; optional legacy CLI skills/TUI and standalone self-healing probes are not bundled. The local worker uses task-schema/DAG validation and post-flight result evaluation. Production-wide seed/gap audits depend on an installation and role inventory this release does not provision. Automatic swarm memory enrichment is off; shared MCP memory is active.
 
+Zouroboros skills are being ported into `skills/`, which the generated profile registers with Hermes. Every file carries provenance and passes a leak gate. [Skills](docs/skills.md) explains the import process, and the [parity manifest](docs/SKILLS-PARITY.md) tracks each source skill.
+
 ## Verification and provenance
 
 ```bash
@@ -140,6 +142,8 @@ pnpm run typecheck
 pnpm test
 python3 -m unittest discover -s factory -p 'test_*.py'
 pnpm run verify:portable
+bun scripts/ci/leak-gate.ts          # needs GITLEAKS_BIN; see docs/skills.md
+bun scripts/ci/skills-parity.ts check
 ```
 
 Tests include a real MCP client handshake, SQLite memory round trip, factory integrity checks, fake-executor campaigns, and relocation of portable state. They do not make paid model calls. See [verification](docs/verification.md), [operations](docs/operations.md), and [source provenance](provenance/workspace.json).

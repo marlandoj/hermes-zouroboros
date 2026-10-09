@@ -4,5 +4,5 @@
     "strict": true, "skipLibCheck": true, "noEmit": true,
     "allowImportingTsExtensions": true, "types": ["bun"]
   },
-  "include": ["integration/**/*.ts", "factory/*.ts", "tests/**/*.ts", "examples/offline-demo.ts"]
+  "include": ["integration/**/*.ts", "factory/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "examples/offline-demo.ts"]
 }

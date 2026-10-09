@@ -1,0 +1,731 @@
+{
+  "schema": "hermes-zouroboros/skills-parity/v1",
+  "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+  "sourceRoot": "Skills",
+  "total": 80,
+  "entries": [
+    {
+      "name": "-help-skill",
+      "nameSha256": "9d2fc24ec7c24568cdf4bc7fdec888d3ffd6f9898b2603fb814b0d0a282026b9",
+      "trackedAtRevision": true,
+      "triage": "drop",
+      "disposition": "dropped",
+      "reason": "Generated stub (\"--help\" parsed as a skill name) from another instance; not a real skill."
+    },
+    {
+      "name": "_candidates",
+      "nameSha256": "d85c4e396a66b909e13bca0c0f36315a350e13691051d5fc0b39c91733a2275c",
+      "trackedAtRevision": true,
+      "triage": "drop",
+      "disposition": "dropped",
+      "reason": "Staging area for generated candidate skills and expired queue items, not a skill."
+    },
+    {
+      "name": "academy-video-pipeline",
+      "nameSha256": "7f51684977abd88d0b18916c8e0e5f96ec95ea59f1d599b22168ca9871d8f782",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "agent-doctor",
+      "nameSha256": "5aa47afbb7a72d67dfb7af764352b5ebf15953f7d196ec4eb283216c1dad4f4e",
+      "trackedAtRevision": true,
+      "triage": "adapt/zo-api",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+    },
+    {
+      "name": "agent-email-patterns",
+      "nameSha256": "8b657e439e3ba9b1981e913e9013340ae478be09279604923b37fd0063f142dd",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "agent-introspect",
+      "nameSha256": "dc58fca4da9ceb7f6c247afd6d0142506903cfe6503abd08a940d64d0c7504e4",
+      "trackedAtRevision": true,
+      "triage": "adapt/self-improvement",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+    },
+    {
+      "name": "agent-model-healer",
+      "nameSha256": "f3bb5d9520e436cf08226f3cf022685c33ff780a3a14a22a4a36e9e945a7ea97",
+      "trackedAtRevision": true,
+      "triage": "adapt/zo-api",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+    },
+    {
+      "name": "agentmail",
+      "nameSha256": "befc92b3a019d04cffb46eaec3c6dca8befcdd8cdaf0410fad67dd7d9c04bb65",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "agentmail-check-email",
+      "nameSha256": "ce05d241d0ac16905f4d756922b17276268e43f509e78e4ea8cfef23d2367602",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "agentmail-mcp",
+      "nameSha256": "05a78c10a55a807bc76baeba20856cce76a565a2e705641415cb117d8bb921fc",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "agentmail-send-email",
+      "nameSha256": "1f8b8050bc95633e8ff05aacb22a221536f82564a246a91d3b0a107fbcf58721",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "ai-assistant-voice",
+      "nameSha256": "1510d252d2158709c72b2fc8b056b880a1df4f74ddc74c244212935c2d041d95",
+      "trackedAtRevision": true,
+      "triage": "host-only",
+      "disposition": "host-only",
+      "reason": "Host voice-assistant persona/voice configuration bound to this operator and host services."
+    },
+    {
+      "name": "ai-character-builder",
+      "nameSha256": "5c1e9ea5c2ad98b524b519e1c3eea4834cc1bb425174109a8b83c3b21cd28e8f",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "ai-engineer-learning",
+      "nameSha256": "114e601c4b5147c1e8019d2e853d3b7d2f5a25bf697bceaa6e04a53891850e65",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "all-out-game-development",
+      "nameSha256": "6fd52910b8a8cfef316c1a479f1e14e0f044c95a7fd33225101549abae73fbee",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "autoloop",
+      "nameSha256": "c39a199b8e8e22ccdb6a2b4636094a0e081bf4406ca23abcb8c909afdf4389d5",
+      "trackedAtRevision": true,
+      "triage": "adapt/core-runtime",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+    },
+    {
+      "name": "automation-resilience",
+      "nameSha256": "60160444b0f57c76970b5e1e9a466a9867680b415dbde3bd83c11f594c861a5b",
+      "trackedAtRevision": true,
+      "triage": "host-only",
+      "disposition": "host-only",
+      "reason": "Zo/VPS turn-budget, checkpoint and restart-recovery controller bound to this host's automation ledger and managed processes.",
+      "followUp": "Concept follow-up: portable turn checkpointing and restart recovery for Hermes runs."
+    },
+    {
+      "name": "bridge-watchdog",
+      "nameSha256": "c7500d9ee9167d2fe4ef7bb22588a5319ac216e1280b20421f2edd2ad9181bec",
+      "trackedAtRevision": true,
+      "triage": "host-only",
+      "disposition": "host-only",
+      "reason": "Watches the VPS's own executor bridges and services."
+    },
+    {
+      "name": "broll-injector",
+      "nameSha256": "8811be9ff9fa0ef653ca093299aa6f6646b0119ce5f6960149fb1c1ef40e9df3",
+      "trackedAtRevision": true,
+      "triage": "adapt/zo-api",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+    },
+    {
+      "name": "build-watchdog",
+      "nameSha256": "7d8bde9b35d65d553eab464d91096b41cb4af07c59530f9ec4f1e69158746d79",
+      "trackedAtRevision": true,
+      "triage": "host-only",
+      "disposition": "host-only",
+      "reason": "Supervises managed builds on the source host.",
+      "followUp": "Concept follow-up: bounded build watchdog for Hermes-launched builds."
+    },
+    {
+      "name": "classifier-fallback",
+      "nameSha256": "469dd7f6f1d76c326105f842dbf02c4e2f52bbbde722bf30c36bb143394961f2",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1).",
+      "followUp": "Exclude assets/card-snapshots/ (captured run output)."
+    },
+    {
+      "name": "compile-build-spec",
+      "nameSha256": "03751b33f3dd0ae0e4e6c4afa8929eb748ffa849ba870464d3d3c3b3ab6d7113",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "consensus-gate",
+      "nameSha256": "c2d7ad4096694e1ce9f93b1df6b9279d8d62dc78acac1f00d4d232b104c6d94c",
+      "trackedAtRevision": true,
+      "triage": "adapt/core-runtime",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code.",
+      "followUp": "Exclude data/ run output (valve shadow records)."
+    },
+    {
+      "name": "deep-research",
+      "nameSha256": "7e51e8f3436ed6769e1a6ec1dc3c939b4d8e97d31a2bc22c420f0ba12c144847",
+      "trackedAtRevision": true,
+      "triage": "adapt/zo-api",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+    },
+    {
+      "name": "design-md-drift-guard",
+      "nameSha256": "7b60555cfef52fd8cc9a71f5029ca77f160bd95ab5f50327ab1656570a87d595",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7).",
+      "followUp": "Exclude reports/."
+    },
+    {
+      "name": "destructive-op-guard",
+      "nameSha256": "6083513c3a0acf21caea5497b2e9ae3448eeedccbf04976636e755c41deaea57",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "elevenlabs-skill",
+      "nameSha256": "40f30ae1d2f32176b1d54b4aef354d19269939fade2341dedab2225fe81258d3",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "extract-patterns",
+      "nameSha256": "d8c866f4f6041b74ecf7342051f527590d578c5a8c82156f56ff6b5a540967bc",
+      "trackedAtRevision": true,
+      "triage": "adapt/self-improvement",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+    },
+    {
+      "name": "fal-ai-media",
+      "nameSha256": "e6903ab3a146bf1c9d0e4a37a05bd94aa7b7dd018d7e15fa8bb03f14afe0b087",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "gamedev-engine-corpus",
+      "nameSha256": "cf0f8a2a291e0729207a81a6d57d75567c4226d51e84cb6788a1dd334e83ad95",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "gauntlet-loop",
+      "nameSha256": "9ab4c8835edce564b1e3d80e7b11c3c4b63a70f25ea5e2c33857b35a0ae0e035",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "graphrag-relational",
+      "nameSha256": "487b93d88688eb9674a347733541121b4624bf20b152df52bcb0736ec6ba7630",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "heygen-skills",
+      "nameSha256": "75dc16c3790f551fc53281118f8b927ea3cdaf64f226ed186eb54dda8d265421",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "host-resilience-probe",
+      "nameSha256": "09261977b21981da2d48ea761a18cf5d12f8a60633ee81ac9cc848efb85ea5be",
+      "trackedAtRevision": true,
+      "triage": "host-only",
+      "disposition": "host-only",
+      "reason": "Observes this host's gateway restarts and stream faults; meaningless off the source host.",
+      "followUp": "Concept follow-up: restart detection hook for long Hermes runs."
+    },
+    {
+      "name": "humanizer-skill",
+      "nameSha256": "deeecbc350d55c176896d6b41fe11d5b8e17818f6ab939a0abbe8649c3aca6ed",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1).",
+      "followUp": "Hermes bundles a 'humanizer' skill: merge into it or ship under a non-colliding name; never two skills named humanizer."
+    },
+    {
+      "name": "impeccable",
+      "nameSha256": "8b3ed8af70bd3b1d283fdbd462a4bc22044c6d1877fac90ed56cf8d7e5c80423",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "instinct-harvester",
+      "nameSha256": "743c3236e18b72952d8b41e6799c095b75cf40c3ad2433e03fe0ef8012d861e1",
+      "trackedAtRevision": true,
+      "triage": "adapt/self-improvement",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+    },
+    {
+      "name": "jhf-daily-top5",
+      "nameSha256": "592736130e559e50c289214decedb270c9ff1638f18dcc6565fc065bd0b844b3",
+      "trackedAtRevision": true,
+      "triage": "adapt/financial",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: financial; carry the financial safety rules into the skill text and remove personal-data references (t6)."
+    },
+    {
+      "name": "jhf-strategy-scout",
+      "nameSha256": "8fd0e70d655b8e7d52b0631986991209a0a69041f58856322a012b3e6b844e7f",
+      "trackedAtRevision": true,
+      "triage": "adapt/financial",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: financial; carry the financial safety rules into the skill text and remove personal-data references (t6)."
+    },
+    {
+      "name": "operator-collaboration-profile",
+      "nameSha256": "c07e99041049384b0f821f156169dd281d85202a041d24d8a4d06c14fb02759d",
+      "redacted": true,
+      "trackedAtRevision": true,
+      "triage": "host-only",
+      "disposition": "host-only",
+      "reason": "Operator personal profile drift watcher over private conversation data; personal data, never exported."
+    },
+    {
+      "name": "n8n-setup",
+      "nameSha256": "24f7126c277e7cd91687165923134a97655d70f285d808acb6147c33a6ca9340",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "notebooklm-skill",
+      "nameSha256": "94920183f3ef66d532705969ced9f8c9cd75fe3013c08beb9685dd4215c92209",
+      "trackedAtRevision": false,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7).",
+      "followUp": "Untracked in the source repository at the pinned revision; the importer only copies tracked blobs, so the source must be committed (or a reviewed import path agreed) before porting."
+    },
+    {
+      "name": "operator-digest",
+      "nameSha256": "2d97978377d4643242db2b6697496ccbf809237aa22cb0f6bad5b3624eb5dde7",
+      "trackedAtRevision": true,
+      "triage": "adapt/self-improvement",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+    },
+    {
+      "name": "operator-worker",
+      "nameSha256": "4d455150a9d952f4cf8b8417a2c993bff749b87471b7bbb3b1ed24e99f77fe78",
+      "trackedAtRevision": false,
+      "triage": "host-only",
+      "disposition": "host-only",
+      "reason": "Operator-specific worker for this host; untracked in the source repository."
+    },
+    {
+      "name": "persona-consult",
+      "nameSha256": "1be0cc76808e1f40b40a1c56abd64b2888847a5ee48c47b4b714fa3355803be2",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "plan-closeout",
+      "nameSha256": "e185a1eb6599bc8bbeba2cd1f46f7a3542769add05da17926c0fd2686f9cbdd9",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "ponytail-audit",
+      "nameSha256": "ea2dd56424c53372d5352c6e7971dfecf471cdb57437eac5b3a2cb8bc9a3937a",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "ponytail-debt",
+      "nameSha256": "306f2591c637633838a4e0f6782dbef23846292c396e1137d7b5bbbaa35c28a5",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "ponytail-review",
+      "nameSha256": "a5918803dd0f658deba9519d688b12fd6f34e02cfb593367692d071a0b8cd5e7",
+      "trackedAtRevision": true,
+      "triage": "adapt/zo-api",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+    },
+    {
+      "name": "production-ready",
+      "nameSha256": "1b360196d74d67963a9cc722a353b918cfcb29f192a9b9fbb6c5148145128dee",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "rag-telemetry",
+      "nameSha256": "4182e5ad69a966374c559c0a388da98034457453ac433fe991cf78812cbaa587",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "repo-drift-autofix",
+      "nameSha256": "b5331346048658ec3f9de757910325acdf914d929ea46f84a9cf59b5fac6a7e2",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "reporeel",
+      "nameSha256": "ba816032691bcb7d7248d5b08469771b02d3dad002da0ec321bd7fd7ef26210b",
+      "trackedAtRevision": false,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1).",
+      "followUp": "Untracked in the source repository at the pinned revision; the importer only copies tracked blobs, so the source must be committed (or a reviewed import path agreed) before porting."
+    },
+    {
+      "name": "skill-security-gate",
+      "nameSha256": "f9810558833aff947dc2e2787ab74ef120d5ad8986a34b6b8e1631bc0dc1716e",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "smart-money",
+      "nameSha256": "8f8efb9736478b1151a73b40b7f138d4e384bba705faca77f1bd4316dd030a87",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1).",
+      "followUp": "Ship .env.template only with empty placeholders, as a reviewed exception."
+    },
+    {
+      "name": "spec-first-interview",
+      "nameSha256": "c2c3c1723af1acf8ef7b6ed5c9565a3bbccf1cd0d19bbb3f1a20ed6629809e4e",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "three-stage-eval",
+      "nameSha256": "195649b14c4b93ab44f03884eb72f8489f72746eed14ea732474c862e8e37f9d",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "threejs-game-production",
+      "nameSha256": "84b2bcf0f4141aa7f7a4dccec4fe9b1c016d22a93d0f4bc8c275ec0e883a4932",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "tier-resolver",
+      "nameSha256": "c1fd44be40619e1c7af1b0565d53b0309b90ed81aa8f3795ceca18f13eaefc1e",
+      "trackedAtRevision": true,
+      "triage": "adapt/core-runtime",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code.",
+      "followUp": "Ship a fresh default model catalog; never data/feedback.jsonl or the host catalog/weights."
+    },
+    {
+      "name": "tradingview-mcp-server",
+      "nameSha256": "87f60780172aa4f4477f0ec68bc4a0668672df1cde6f0a756d896a87d0b2d766",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "ux-laws",
+      "nameSha256": "ca4b14485aa0dc838d3c94629eca9e4e6ecd471fc9ba55a62e06473d50b578a8",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "verity",
+      "nameSha256": "3cd3ea577d506c913ed42a399144c4bbff6189edccb3cd476ca981a457660b45",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "visual-verifier",
+      "nameSha256": "0380f46ab89489e267d7288463a7a288c694ae8dbb7a11e8c24ae8445c79898d",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "wayfinder",
+      "nameSha256": "f287d93b4c82eb2e5e4f7a3cf7faab06a8dfd85c211e10b5a9c4c30d53e47e33",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "workspace-search",
+      "nameSha256": "18095fc87e583ef172f6f887bc03a3aa8804242910e0a28f760f947fd544d33b",
+      "trackedAtRevision": true,
+      "triage": "adapt/paths",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+    },
+    {
+      "name": "zo-ask-governor",
+      "nameSha256": "55952426aa682519689ef6160e85e01a4061564c4e25944b14b71dc78da08b6a",
+      "trackedAtRevision": true,
+      "triage": "adapt/zo-api",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+    },
+    {
+      "name": "zo-ask-retry",
+      "nameSha256": "596c3cf8e92fc0b812eb25826ec68dd7700a49242a33f544a1bd180c502cdc29",
+      "trackedAtRevision": true,
+      "triage": "adapt/zo-api",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+    },
+    {
+      "name": "zo-memory-system",
+      "nameSha256": "ee2039f5dbd6d62507cf21dc2af4b831f5388758b152ebc8eb4acb372544a67f",
+      "trackedAtRevision": true,
+      "triage": "adapt/core-runtime",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code.",
+      "followUp": "Exclude scripts/.mcp-trust/ manifest history."
+    },
+    {
+      "name": "zo-persona-creator",
+      "nameSha256": "8e2482bfcf23791e79fff218afbd2b773e9802fbb700b3437c21e95cc1777a15",
+      "trackedAtRevision": true,
+      "triage": "adapt/zo-api",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+    },
+    {
+      "name": "zo-swarm-executors",
+      "nameSha256": "0b1fff4f025ff9cd3658d1e07b1bc06493fe5b612fb56e192ad695d42b4d6b8c",
+      "trackedAtRevision": true,
+      "triage": "adapt/core-runtime",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+    },
+    {
+      "name": "zo-swarm-orchestrator",
+      "nameSha256": "cd466754a58fa5dfe5fd60f9b5743b11a71ef1ae285885f695b5de86201fc35f",
+      "trackedAtRevision": true,
+      "triage": "adapt/core-runtime",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+    },
+    {
+      "name": "zo-to-zo-consult",
+      "nameSha256": "7350d611ec42bc09dbb6ec513a345f405ca5490689030ee0bf908781adfbf9d2",
+      "trackedAtRevision": true,
+      "triage": "host-only",
+      "disposition": "host-only",
+      "reason": "Calls between Zo Computer instances; requires the Zo platform."
+    },
+    {
+      "name": "zouroboros",
+      "nameSha256": "149418b0acab29085321a5d32d609db0d3a5e4e043e25ec442ca21065b6f3089",
+      "trackedAtRevision": true,
+      "triage": "adapt/core-runtime",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+    },
+    {
+      "name": "zouroboros-evolution-10",
+      "nameSha256": "b832bc341139e2d18ccacabce5906863b48fdd6fa14eed7545684296021fe54b",
+      "trackedAtRevision": true,
+      "triage": "drop",
+      "disposition": "dropped",
+      "reason": "Generated evolution-episode stub with no implementation; not a skill."
+    },
+    {
+      "name": "zouroboros-evolve",
+      "nameSha256": "f1ce284c0e8ff276c1ca607a7b71cd6721cae4e347d7f0882f8fb313df3ab8fe",
+      "trackedAtRevision": true,
+      "triage": "adapt/self-improvement",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+    },
+    {
+      "name": "zouroboros-governance",
+      "nameSha256": "5056fdc8bce7f16a34974d8ffc01076c2210a9eb481c5f411d7cea372df1ed4b",
+      "trackedAtRevision": true,
+      "triage": "adapt/core-runtime",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+    },
+    {
+      "name": "zouroboros-introspect",
+      "nameSha256": "f0a958f0c8ec45be70b08958b10d19c578b97264be5e2d4a5366adb013bcc6ad",
+      "trackedAtRevision": true,
+      "triage": "adapt/self-improvement",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+    },
+    {
+      "name": "zouroboros-memory-evolution",
+      "nameSha256": "4efa326cf7e037871c6916dc5e7348a914e2dc3e54aaca20d904502039b22cc6",
+      "trackedAtRevision": true,
+      "triage": "adapt/self-improvement",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5).",
+      "followUp": "evalsets/memory-baseline.v1.jsonl may ship only as a reviewed synthetic fixture exception."
+    },
+    {
+      "name": "zouroboros-observatory",
+      "nameSha256": "b798a547836879df2a9e58d6aa9e63801be92676684117fe099184bba3665ea6",
+      "trackedAtRevision": true,
+      "triage": "portable",
+      "disposition": "pending",
+      "plannedDisposition": "portable",
+      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+    },
+    {
+      "name": "zouroboros-prescribe",
+      "nameSha256": "c67ddf0d07aec15924df086e4522580c67fef79509a369d18e12a9debe812c54",
+      "trackedAtRevision": true,
+      "triage": "adapt/self-improvement",
+      "disposition": "pending",
+      "plannedDisposition": "adapted",
+      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+    }
+  ]
+}
