@@ -61,17 +61,26 @@ flowchart LR
 | VPS operations | Setup and doctor commands, optional loopback memory-gate systemd template, backup guidance, CI and portable-state verification |
 | Source | Nine Zouroboros packages plus the upstream CLI dependency closure, with per-file source hashes |
 
-The default executor is Hermes. The bundled swarm library supports additional harnesses, but adding one requires reviewing its bridge and registry settings for your host. No existing VPS services or profiles are changed by installation.
+The default executor is Hermes. The bundled swarm library supports additional harnesses, but adding one requires reviewing its bridge and registry settings for your host. Installation adds the Zouroboros MCP connection to the selected existing normal Hermes profile while preserving unrelated settings; it does not change existing VPS services or other profiles.
 
 ## Start here
 
-Prerequisites: a Linux host, Git, Node.js 20+, Bun 1.3.12+, pnpm 8.15, Python 3.10+, GNU coreutils, and an installed Hermes Agent.
+Prerequisites: a Linux host, Git, Node.js 20+, Bun 1.3.12+, Python 3.10+, GNU coreutils, and an installed/configured Hermes Agent. The installer can bootstrap missing pnpm at the exact source pin into workshop-private tools.
+
+For shared memory and Zouroboros tools in your **normal Hermes chats**:
 
 ```bash
 git clone https://github.com/marlandoj/hermes-zouroboros.git
 cd hermes-zouroboros
-bash scripts/setup.sh
+bash scripts/install.sh --workspace "$HOME/work/hermes-projects"
+```
 
+The installer preserves existing workshop data and unrelated profile settings, connects MCP through the supported Hermes CLI, keeps workers and sampling off, and verifies memory persistence across reconnects. Start a new chat or explicitly use `/reload-mcp`, then ask for `workshop_status`. See [operator installation](docs/install.md) for preview/check modes, profile selection, prerequisites, failure recovery, and capability boundaries.
+
+If you deliberately prefer the separate workshop chat instead, the original setup remains available:
+
+```bash
+bash scripts/setup.sh
 mkdir -p "$HOME/work/hermes-projects"
 bun integration/cli.ts init --workspace "$HOME/work/hermes-projects"
 bun integration/cli.ts hermes setup
@@ -79,9 +88,7 @@ bun integration/cli.ts doctor
 bun integration/cli.ts hermes chat
 ```
 
-In Hermes, ask it to call `workshop_status`, then store and retrieve a harmless work decision. The profile's MCP connection exposes `memory_store`, `memory_search`, `swarm_prepare`, and `factory_intake` as well.
-
-Read the [walkthrough](walkthrough/README.md) for model setup, campaign execution, and factory wiring. The installation uses a new profile under `~/.local/share/hermes-zouroboros/hermes`; it does not reuse your existing Hermes login automatically.
+The workshop's isolated worker profile remains under `~/.local/share/hermes-zouroboros/hermes`; its provider login is separate. Connecting shared-memory tools to a normal profile does not copy credentials or merge session histories. Read the [walkthrough](walkthrough/README.md) for the separate model setup, campaign execution, and factory wiring.
 
 ### Recognize your first successful run
 
