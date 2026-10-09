@@ -68,11 +68,6 @@
       "count": 1
     },
     {
-      "file": "packages/selfheal/src/cli/crystallize.ts",
-      "rule": "host-path:hardcoded-dev-shm",
-      "count": 2
-    },
-    {
       "file": "packages/selfheal/src/crystallize/grep-validate.ts",
       "rule": "host-path:host-workspace",
       "count": 1

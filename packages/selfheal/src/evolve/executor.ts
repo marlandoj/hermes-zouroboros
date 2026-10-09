@@ -6,6 +6,7 @@ import { execSync } from 'child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { getWorkspaceRoot } from 'zouroboros-core';
+import { getAutoloopScript, getSelfHealResultsDir } from '../paths.js';
 import type { Prescription, EvolutionResult, ScorecardSnapshot, TrajectoryStep } from '../types.js';
 import {
   classifyRegime,
@@ -60,13 +61,11 @@ function getWorkspace(): string {
 }
 
 function getResultsDir(): string {
-  return join(getWorkspace(), 'Seeds/zouroboros/results');
+  return getSelfHealResultsDir();
 }
 
-const AUTOLOOP_SCRIPT_RELATIVE_PATH = 'Skills/zouroboros/skills/workflow/scripts/autoloop/autoloop.ts';
-
 function buildAutoloopCommand(programPath: string, workspace = getWorkspace()): string {
-  return `bun "${join(workspace, AUTOLOOP_SCRIPT_RELATIVE_PATH)}" --program "${programPath}" 2>&1`;
+  return `bun "${getAutoloopScript(workspace)}" --program "${programPath}" 2>&1`;
 }
 
 function run(cmd: string, timeout = 120000): { stdout: string; ok: boolean; code: number } {

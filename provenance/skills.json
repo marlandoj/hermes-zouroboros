@@ -652,6 +652,60 @@
       "adaptation": "Rewritten for Hermes: audits the profile's cron jobs (jobs.json) and applies safe fixes only via hermes cron pause|edit; Zo automation/MCP endpoint, hardcoded agent ids, Loki and the Zo MCP path-audit script removed."
     },
     {
+      "path": "skills/zouroboros/agent-introspect/scripts/config.json",
+      "skill": "agent-introspect",
+      "sourcePath": "Skills/agent-introspect/scripts/config.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "daab866016f56de0c75d5ea681c0e9750ad485217ebaa1e26d99b6022180340d",
+      "distributedSha256": "c4bee3151dbeaa65d31903b577293ecb8c008e9a882cc6d726f4f85a4dca3188",
+      "adaptation": "skip_health replaced: the host list named Zo scripts; the distribution skips only heygen-video update-check.sh (network-only)."
+    },
+    {
+      "path": "skills/zouroboros/agent-introspect/scripts/introspect.py",
+      "skill": "agent-introspect",
+      "sourcePath": "Skills/agent-introspect/scripts/introspect.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "44a866edfcd8de44bb467972222aba37d380aa2c96339e4fe1d74c5d68f54684",
+      "distributedSha256": "ac5d94393ab6321325598ce0da567940640e74da14a41150fe4ef9a4f0c52aa2",
+      "adaptation": "Host paths replaced by portable roots (skills tree beside the script, state dir reports, env overrides); nested SKILL.md discovery; probes run with stdin closed and bun --no-install; codebase-memory binary/projects from env."
+    },
+    {
+      "path": "skills/zouroboros/agent-introspect/scripts/persona_audit.py",
+      "skill": "agent-introspect",
+      "sourcePath": "Skills/agent-introspect/scripts/persona_audit.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "552c78ae0ad8c487be970da6ad13e96f873b49cab0e693955b1bf83cba8c239d",
+      "distributedSha256": "552c78ae0ad8c487be970da6ad13e96f873b49cab0e693955b1bf83cba8c239d",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/agent-introspect/scripts/test_introspect.py",
+      "skill": "agent-introspect",
+      "sourcePath": "Skills/agent-introspect/scripts/test_introspect.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b71219548861e842e1a44618c92aa7fa5076284b88fa37b2a84647dda6a64cf7",
+      "distributedSha256": "17592379597e256f17be8903fafc648b1cadca555823759cab3dfa964955a70e",
+      "adaptation": "FROZEN_SKIP_HEALTH snapshot updated to the distribution skip list."
+    },
+    {
+      "path": "skills/zouroboros/agent-introspect/scripts/test_persona_audit.py",
+      "skill": "agent-introspect",
+      "sourcePath": "Skills/agent-introspect/scripts/test_persona_audit.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "35f5821c01e6c7e79a9c954f9d26c640334272e438738a1428446b6d5707e01e",
+      "distributedSha256": "35f5821c01e6c7e79a9c954f9d26c640334272e438738a1428446b6d5707e01e",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/agent-introspect/SKILL.md",
+      "skill": "agent-introspect",
+      "sourcePath": "Skills/agent-introspect/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "66754e04d290a22a11a51d8abfa90319b9b2d34c9ccb5a0db84eee1a8f2642ed",
+      "distributedSha256": "9502bd24ec48af4bd1a93179c04cf049565c2805ebb48be0f74ddb60863d589c",
+      "adaptation": "Rewritten for Hermes: audits the distribution skills tree (nested categories); report/status/lock under ZOUROBOROS_STATE_DIR/agent-introspect; Zo automation id, email wiring and host registry/catalog paths removed; arch hotspots opt-in via CODEBASE_MEMORY_BIN."
+    },
+    {
       "path": "skills/zouroboros/agent-model-healer/assets/fallback-chain.example.json",
       "skill": "agent-model-healer",
       "sourcePath": "Skills/agent-model-healer/assets/fallback-chain.example.json",
@@ -821,6 +875,204 @@
       "sourceSha256": "7c56f1754e7b3d65c55c8b04d2a5b8cfaad81fb242a5118f11b8470c186ebf00",
       "distributedSha256": "b89fff253bda145406f2fc19d9b1d1cb84a1bc0093c7bfdb9c3b4fd92f6f04b8",
       "adaptation": "Hermes frontmatter (removed operator handle, Linear/AIEWF ids, consensus-gate dependency); commands use ${HERMES_SKILL_DIR}; ledger and snapshots moved from assets/ to $ZOUROBOROS_STATE_DIR/classifier-fallback with env overrides; documented env-configured fallback models."
+    },
+    {
+      "path": "skills/zouroboros/extract-patterns/scripts/extract-patterns-hook.sh",
+      "skill": "extract-patterns",
+      "sourcePath": "Skills/extract-patterns/scripts/extract-patterns-hook.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e4673373adecec77ea5ecbfcc68f28634db006e67fed049f6ea960f23143745e",
+      "distributedSha256": "03c07e62e377efc7e7d08d90cb834d3b2c5ffae6e38b32c87fd3be557af51fa7",
+      "adaptation": "Ported from the Claude Code Stop/SessionEnd hook to the Hermes shell-hook protocol: pre_llm_call injects the gate as context once per session (message-count threshold), on_session_finalize back-fills; log under ZOUROBOROS_LOG_DIR, sentinels under ZOUROBOROS_STATE_DIR, kill switch under ZOUROBOROS_CONFIG_DIR (no /dev/shm or host workspace); unsafe session ids ignored."
+    },
+    {
+      "path": "skills/zouroboros/extract-patterns/scripts/selftest.sh",
+      "skill": "extract-patterns",
+      "sourcePath": "Skills/extract-patterns/scripts/selftest.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4049a89a815c3b621b95254d8484486a1e0349c2df857da14263594a39beb5c1",
+      "distributedSha256": "6155aa183b446c53aedb3a5487366ead6a9d2ca1c4404a1945eab129707423db",
+      "adaptation": "Rewritten for the Hermes events against a temporary state root; adds file kill switch, unsafe-id and other-event cases."
+    },
+    {
+      "path": "skills/zouroboros/extract-patterns/SKILL.md",
+      "skill": "extract-patterns",
+      "sourcePath": "Skills/extract-patterns/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "48486c1ad241d380a0cdbd8f20b6ca8ef954b3246bc4041579604fe32c83b769",
+      "distributedSha256": "256f38243c67c5836fa461f497525f576eb671b5c771fec28c91df2a06f9f69c",
+      "adaptation": "Rewritten for Hermes shell hooks (pre_llm_call + on_session_finalize) with portable log/sentinel/kill-switch paths; routes only to instinct-harvester; host settings paths removed."
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/lifecycle-selftest.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/lifecycle-selftest.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2f0f44f63e9180562e4168f174f3dcac015140ac7217f2182fea3ec917fdfdf6",
+      "distributedSha256": "2f0f44f63e9180562e4168f174f3dcac015140ac7217f2182fea3ec917fdfdf6",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/lifecycle.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/lifecycle.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8ed8051a26a8b3005b61bafe28298a9a2ca431dcd6aad956ead9c6715eab8c50",
+      "distributedSha256": "9a252e9bf2e040f569bed89b00b85fbe75fbc835d5e437e0be868caa451d59ac",
+      "adaptation": "js-yaml → ./yaml-compat; store and report defaults under the portable instincts dir (paths.ts) instead of host workspace paths; unused HOME default removed; --help guard added so probes have no side effect."
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/merge.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/merge.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8d65ca3df3216d7c154869112ded3ee928e28cc148a64d3c5f81215a1653faa0",
+      "distributedSha256": "8d65ca3df3216d7c154869112ded3ee928e28cc148a64d3c5f81215a1653faa0",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/observer.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/observer.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "1556ee51127a8b30143ebc8cba4f01d034c1898308380de6af913d8faa254849",
+      "distributedSha256": "b3469a2b34520ea517d8782d9e0b3327a4fa43ae8e8e58ce5ad063c6d6b0917f",
+      "adaptation": "js-yaml → ./yaml-compat; default store from paths.ts (portable state root) instead of a host workspace path."
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/paths.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "07d16adbddcecff0c7d4f056651bd1952b41fdd8cd95efe29ce21ffaa89cd054",
+      "adaptation": "Portable instinct directory: INSTINCT_DIR, else ZOUROBOROS_STATE_DIR/instincts, else the profile state dir."
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/prune.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/prune.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "a425431e280fa32e1dd10a6fb66ef765642193a941d19188bca5b4c288ab3506",
+      "distributedSha256": "a425431e280fa32e1dd10a6fb66ef765642193a941d19188bca5b4c288ab3506",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/remove-verify-selftest.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/remove-verify-selftest.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "582c3063feb3fae12e96fc94c36cf0458e6c829940752f73cf7987b4c7b77333",
+      "distributedSha256": "582c3063feb3fae12e96fc94c36cf0458e6c829940752f73cf7987b4c7b77333",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/selftest.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/selftest.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b77d8a1848925d9d8beb50e5456ae547fd1fe7a4568f95126583075d78db05df",
+      "distributedSha256": "b77d8a1848925d9d8beb50e5456ae547fd1fe7a4568f95126583075d78db05df",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/store-surgery.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/store-surgery.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2ce61b1a9823caddb51b03d5d9e562a8e3f6a2e22fd8c8450b906fc6a45f9d5a",
+      "distributedSha256": "561dd219c471d38c782f20b6a1d45be0bb55c92108e7b87119f39cc922e2ca9e",
+      "adaptation": "js-yaml import replaced by ./yaml-compat (distribution yaml dependency)."
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/supersede-selftest.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/supersede-selftest.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ba8178b15c581b23f5c0c471a9f4927f97ae5b7059f0c3c2f86f9263d6534123",
+      "distributedSha256": "ba8178b15c581b23f5c0c471a9f4927f97ae5b7059f0c3c2f86f9263d6534123",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/supersede.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/supersede.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "95024404c15754307547fdc6c7e3a961c944ec656f539f4b88d7af398049cd32",
+      "distributedSha256": "95024404c15754307547fdc6c7e3a961c944ec656f539f4b88d7af398049cd32",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/use-flush-selftest.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/use-flush-selftest.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "cc009c04b9961e2207cbbbfdc692a8a318a9938f02435f528356002a1b7e54c5",
+      "distributedSha256": "159037780773d5489bc9e43d0a2d09945430e0d55d30f0485a4ff64ed233c59c",
+      "adaptation": "js-yaml import replaced by ./yaml-compat (distribution yaml dependency); persona fixture name made generic."
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/use-flush.ts",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/scripts/use-flush.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9f008f45132fafbae848870a3ebf4493652b8c50c135a9570d8894b3e4a46939",
+      "distributedSha256": "b6fcd266db2dce07911f7f224a534a83515a016b317b9923feca25bd96d272da",
+      "adaptation": "Journal, evidence and store defaults from paths.ts (portable state root) instead of host workspace paths."
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/scripts/yaml-compat.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "71df7a2bdfc893526a6655ff62402bbc3c77b35b4ac22cbca87c22d5ed199842",
+      "adaptation": "js-yaml-compatible load/dump over the distribution's yaml dependency."
+    },
+    {
+      "path": "skills/zouroboros/instinct-harvester/SKILL.md",
+      "skill": "instinct-harvester",
+      "sourcePath": "Skills/instinct-harvester/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "feadd59f10039af0b854cb325ac4b3ddfd9a84acdb59ab903b2d211e9ddcc292",
+      "distributedSha256": "3fb7f1c4511450244f8f3653eb828691dfcc9552a33ec1a20949910c544bc931",
+      "adaptation": "Rewritten operator-neutral for Hermes: store and side files under ZOUROBOROS_STATE_DIR/instincts (INSTINCT_DIR override); session briefing via observer.ts brief instead of the Zo memory-gate hook; Zo scheduled-agent ids and host corpus notes removed."
+    },
+    {
+      "path": "skills/zouroboros/operator-digest/scripts/digest.ts",
+      "skill": "operator-digest",
+      "sourcePath": "Skills/operator-digest/scripts/digest.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4ba49fa57257d0fe104b01fdce63255d88c454d9dd629a05632988f829197720",
+      "distributedSha256": "b8d456360aa02249bc05047fffe3c6a4e0ff49cc8c817f46d9722fe6d2f23128",
+      "adaptation": "Defaults from the profile (ZOUROBOROS_DATA_DIR/STATE_DIR/CONFIG_DIR) instead of host paths; healer state/chain from the agent-model-healer skill locations; output under STATE_DIR/operator-digest; Modal summarizer (host factory runtime) replaced by the deterministic summary; persona name removed from the footer."
+    },
+    {
+      "path": "skills/zouroboros/operator-digest/scripts/governance-evidence.test.ts",
+      "skill": "operator-digest",
+      "sourcePath": "Skills/operator-digest/scripts/governance-evidence.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5168135058b1bb7876290b2bab8c31435606864b74ee298a9c0b1cb3429dfd19",
+      "distributedSha256": "4946fe4ce41ca2cb78960d6fa22a054e3abbd2a1cf05abccac003158a3d11e02",
+      "adaptation": "Fixture resource path made host-neutral."
+    },
+    {
+      "path": "skills/zouroboros/operator-digest/scripts/governance-evidence.ts",
+      "skill": "operator-digest",
+      "sourcePath": "Skills/operator-digest/scripts/governance-evidence.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2564e928dfbc712ca71cb40b9015a8666d1b731bce285fe7889d323aaa971878",
+      "distributedSha256": "0bd77cc91c623879b59df09665e6d4d71b45d4a35f5e24dee387793b6e731616",
+      "adaptation": "Graph query default resolved from a sibling graphrag-relational skill instead of a host path; a missing adapter inventory means no governed runtimes instead of a crash."
+    },
+    {
+      "path": "skills/zouroboros/operator-digest/SKILL.md",
+      "skill": "operator-digest",
+      "sourcePath": "Skills/operator-digest/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2394ffe9f5bf53d1bdd69c690f016e01b3e8c02b0e2ebe748fcd59670cfe8cf4",
+      "distributedSha256": "a42f712edda8b8b3625bd0840c577ed186d28371b6f830fb4067c85ea7160000",
+      "adaptation": "Rewritten for Hermes: portable defaults (profile data/state/config), Hermes cron delivery instead of a Zo email agent, Modal summarizer removed, host paths removed; documents the fail-closed missing-ledger case."
     },
     {
       "path": "skills/zouroboros/persona-creator/scripts/persona.ts",
@@ -1057,6 +1309,24 @@
       "adaptation": "Rewritten for Hermes: decision gate -> bounded task DAG (integration/tasks.ts contract) -> prepare -> operator opt-in run via integration/cli.ts swarm (hermes-vps workers). Removed Zo API executors, persona registry, host campaigns/examples, operator handle."
     },
     {
+      "path": "skills/zouroboros/zouroboros-evolve/scripts/evolve.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "9c29dcc78e1f813e4bc5e2ab5608d55a15923cf76a776d5e221e8d2ac45656a6",
+      "adaptation": "Entry point for integration/selfheal.ts evolve."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-evolve/SKILL.md",
+      "skill": "zouroboros-evolve",
+      "sourcePath": "Skills/zouroboros-evolve/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9f22f25b2704b328d8261d2648b36c7de36e4767b543fc1d63e16416910eb249",
+      "distributedSha256": "6b3789917cdcc2d72eef97421118519a5936a50f094e3f3f4141e3a71a49d31b",
+      "adaptation": "Rewritten for Hermes: thin skill over packages/selfheal evolve(); non-dry-run opt-in via HERMES_ZOUROBOROS_ALLOW_SWARM=1; autoloop mode runs the distribution autoloop skill; results under ZOUROBOROS_STATE_DIR/selfheal/results. Source evolve.ts not shipped."
+    },
+    {
       "path": "skills/zouroboros/zouroboros-governance/GOVERNANCE.md",
       "skill": "zouroboros-governance",
       "sourcePath": "Skills/zouroboros-governance/GOVERNANCE.md",
@@ -1174,6 +1444,24 @@
       "adaptation": "Rewritten for Hermes: ${HERMES_SKILL_DIR} commands; documents shipped in references/; portable state/config paths; preflight gate, audit log, operator-only bypass and capability-ethics; promotion documented as fail-closed (issuer/attestation stack not distributed); Zo email/zo.space surfaces, operator handle and host project paths removed."
     },
     {
+      "path": "skills/zouroboros/zouroboros-introspect/scripts/introspect.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "290914419075c1fe23f32543543405a5725fc28a819ffe004e4af52a6dcd855d",
+      "adaptation": "Entry point for integration/selfheal.ts introspect."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-introspect/SKILL.md",
+      "skill": "zouroboros-introspect",
+      "sourcePath": "Skills/zouroboros-introspect/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "1a2a30b55745b92a6a49a84d8629355d74695b523744ad1abb0421809b764576",
+      "distributedSha256": "625c62e187fc76cce1ebd95f5a71058288dc399d5030c804a29557546fa2c71b",
+      "adaptation": "Rewritten for Hermes: thin skill over packages/selfheal introspect() via integration/selfheal.ts; profile memory DB enforced (inherited ZO_MEMORY_DB/ZOUROBOROS_MEMORY_DB overridden); scorecards under ZOUROBOROS_STATE_DIR/selfheal; Zo schedule/author lines removed. Source introspect.ts/skill-tracker.ts and references/metric-thresholds.md not shipped (Zo shared-facts schema, superseded by the package's 13-metric collector)."
+    },
+    {
       "path": "skills/zouroboros/zouroboros-observatory/assets/install.prompt.md",
       "skill": "zouroboros-observatory",
       "sourcePath": "Skills/zouroboros-observatory/assets/install.prompt.md",
@@ -1190,6 +1478,24 @@
       "sourceSha256": "4c2c68f5146130423fecc1b5c052863c132f53813c3721e22f202c6b82241415",
       "distributedSha256": "b122d537864f6d945add74ff9761848c55ea71e42638bea1019ca2fb6caf1505",
       "adaptation": "Rewritten for Hermes hosts: run the published zouroboros-observatory@0.1.0 via bunx; Zo Site deploy replaced by private remote-access guidance (token, private network, approval); env var list matches packages/observatory/src/config.ts; Hermes frontmatter added; operator author handle removed."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-prescribe/scripts/prescribe.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "e69a38d249f6a814cb50c145352dd5e9b20deaf01498e42c27f6f631d6ea669b",
+      "adaptation": "Entry point for integration/selfheal.ts prescribe."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-prescribe/SKILL.md",
+      "skill": "zouroboros-prescribe",
+      "sourcePath": "Skills/zouroboros-prescribe/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "31a5e398fa92768c06545998707e5b7823e9e84ecd49b28341c027865ce01485",
+      "distributedSha256": "3170faf4ea903df7f211379da5cb02b9aafa964ba98fcd9c2c9f2012f0f1eb74",
+      "adaptation": "Rewritten for Hermes: thin skill over packages/selfheal prescribe(); prescriptions under ZOUROBOROS_STATE_DIR/selfheal/prescriptions; governor rules kept. Source prescribe.ts and references/playbooks.md not shipped (superseded by the package playbooks)."
     },
     {
       "path": "skills/zouroboros/zouroboros/scripts/zouroboros.ts",

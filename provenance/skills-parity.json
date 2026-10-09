@@ -59,9 +59,12 @@
       "nameSha256": "dc58fca4da9ceb7f6c247afd6d0142506903cfe6503abd08a940d64d0c7504e4",
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+      "disposition": "adapted",
+      "reason": "Audits the distribution skills tree (nested categories) instead of the host Skills/; report/status/lock under ZOUROBOROS_STATE_DIR/agent-introspect; probes run with stdin closed and bun --no-install; skip list replaced (host Zo script names \u2192 update-check.sh); codebase-memory hotspots opt-in via env; persona_audit.py and both test suites shipped. Not shipped: references/legacy-inline-instruction.md (host scheduled-agent text).",
+      "distributedAs": [
+        "skills/zouroboros/agent-introspect"
+      ],
+      "followUp": "Its first run flags three distribution scripts that exit 2 on --help (deep-research research.ts, zouroboros.ts, governance constitution-gate.ts)."
     },
     {
       "name": "agent-model-healer",
@@ -281,9 +284,12 @@
       "nameSha256": "d8c866f4f6041b74ecf7342051f527590d578c5a8c82156f56ff6b5a540967bc",
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+      "disposition": "adapted",
+      "reason": "Claude Code Stop/SessionEnd hook ported to the Hermes shell-hook protocol (pre_llm_call injects the gate once per session; on_session_finalize back-fills); decision log under ZOUROBOROS_LOG_DIR, sentinels under ZOUROBOROS_STATE_DIR, kill switch under ZOUROBOROS_CONFIG_DIR (no /dev/shm); routes to instinct-harvester. Selftest rewritten (17 checks).",
+      "distributedAs": [
+        "skills/zouroboros/extract-patterns"
+      ],
+      "followUp": "Optional: have scripts/setup.sh offer to register the hook in the profile config."
     },
     {
       "name": "fal-ai-media",
@@ -366,9 +372,11 @@
       "nameSha256": "743c3236e18b72952d8b41e6799c095b75cf40c3ad2433e03fe0ef8012d861e1",
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+      "disposition": "adapted",
+      "reason": "Store, tombstones, use journal/evidence and lifecycle reports under ZOUROBOROS_STATE_DIR/instincts (INSTINCT_DIR override); js-yaml replaced by a shim over the distribution yaml dependency; briefing via observer.ts brief (no Zo memory-gate). All five selftests ported (226 checks). Not shipped: INSTINCT-LIFECYCLE-SPEC.md and MEASURE-LINK-2026-09-30.md (host design/evidence notes naming the operator, persona and live corpus), the workflow PNG, js-yaml.d.ts.",
+      "distributedAs": [
+        "skills/zouroboros/instinct-harvester"
+      ]
     },
     {
       "name": "jhf-daily-top5",
@@ -421,9 +429,12 @@
       "nameSha256": "2d97978377d4643242db2b6697496ccbf809237aa22cb0f6bad5b3624eb5dde7",
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+      "disposition": "adapted",
+      "reason": "Reads profile data/state/config (healer state and chain from the agent-model-healer skill locations, governance ledger from the zouroboros-governance skill); output under ZOUROBOROS_STATE_DIR/operator-digest; Modal summarizer (host factory runtime) removed in favour of the deterministic summary; graph query from a sibling graphrag-relational skill when present; a missing adapter inventory means no governed runtimes. Governance evidence tests ported. Not shipped: modal-summary.ts/.test.ts, tsconfig.json, the host runtime-adapters inventory.",
+      "distributedAs": [
+        "skills/zouroboros/operator-digest"
+      ],
+      "followUp": "Graph evidence becomes available once graphrag-relational ships (t7)."
     },
     {
       "name": "operator-worker",
@@ -739,9 +750,11 @@
       "nameSha256": "f1ce284c0e8ff276c1ca607a7b71cd6721cae4e347d7f0882f8fb313df3ab8fe",
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+      "disposition": "adapted",
+      "reason": "Thin Hermes skill over packages/selfheal evolve(); anything but --dry-run is opt-in via HERMES_ZOUROBOROS_ALLOW_SWARM=1; autoloop mode runs the distribution autoloop skill (ZOUROBOROS_AUTOLOOP_SCRIPT); results under ZOUROBOROS_STATE_DIR/selfheal/results; crystallize invocation log under ZOUROBOROS_LOG_DIR (no /dev/shm). Not shipped: source evolve.ts.",
+      "distributedAs": [
+        "skills/zouroboros/zouroboros-evolve"
+      ]
     },
     {
       "name": "zouroboros-governance",
@@ -760,19 +773,20 @@
       "nameSha256": "f0a958f0c8ec45be70b08958b10d19c578b97264be5e2d4a5366adb013bcc6ad",
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+      "disposition": "adapted",
+      "reason": "Thin Hermes skill over packages/selfheal introspect() (integration/selfheal.ts): memory read through the distribution memory layer (profile memory.db enforced; inherited ZO_MEMORY_DB/ZOUROBOROS_MEMORY_DB overridden; schema initialised), scorecards under ZOUROBOROS_STATE_DIR/selfheal, logs under ZOUROBOROS_LOG_DIR. packages/selfheal paths made configurable (src/paths.ts) and its --store fact write fixed for the memory schema. Not shipped: source introspect.ts and skill-tracker.ts (Zo shared-facts schema via sqlite3 CLI; superseded by the package collector), references/metric-thresholds.md (describes the superseded 6-metric script).",
+      "distributedAs": [
+        "skills/zouroboros/zouroboros-introspect"
+      ]
     },
     {
       "name": "zouroboros-memory-evolution",
       "nameSha256": "4efa326cf7e037871c6916dc5e7348a914e2dc3e54aaca20d904502039b22cc6",
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5).",
-      "followUp": "evalsets/memory-baseline.v1.jsonl may ship only as a reviewed synthetic fixture exception."
+      "disposition": "host-only",
+      "reason": "Reclassified on re-verification: a Phase-0 baseline experiment over this host's live memory. evalsets/memory-baseline.v1.jsonl is NOT synthetic: apart from the 4+ adversarial probes it is derived from live operator facts (real fact ids, the operator's handle, BYOK model ids, personal preferences and project state) and must never ship. The harness reads the host memory DB, persona files and memory gate, and canary.ts plants rows into the live DB.",
+      "followUp": "Parity concept: a distribution memory-retrieval eval over packages/memory with a newly authored synthetic eval set."
     },
     {
       "name": "zouroboros-observatory",
@@ -791,9 +805,12 @@
       "nameSha256": "c67ddf0d07aec15924df086e4522580c67fef79509a369d18e12a9debe812c54",
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: self-improvement; make shared-memory, log and state paths configurable under the portable state root (t5)."
+      "disposition": "adapted",
+      "reason": "Thin Hermes skill over packages/selfheal prescribe(); prescriptions under ZOUROBOROS_STATE_DIR/selfheal/prescriptions; governor unchanged. Not shipped: source prescribe.ts and references/playbooks.md (superseded by the package playbooks).",
+      "distributedAs": [
+        "skills/zouroboros/zouroboros-prescribe"
+      ],
+      "followUp": "Package playbook targets follow the Zouroboros workspace layout (Skills/zo-memory-system/...); retarget them to distribution skills."
     }
   ]
 }

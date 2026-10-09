@@ -126,11 +126,11 @@
   "reviewedExceptions": [
     {
       "path": "packages/selfheal/src/cli/crystallize.ts",
-      "sha256": "ab06ff42b59289672186c9d7c8ded7a39dd1fd11c032f843874ff5ce741068bc",
+      "sha256": "4ba786a38877c06af7ff07cb45c7ed198e1b55f6b9cbfdbe7e4a5ace8708af97",
       "rules": [
         "secret:credential-assignment"
       ],
-      "reason": "0.1.0 import: dry-run CLI sets a padded non-secret approval placeholder before invoking the approval path; reviewed 2026-10-09."
+      "reason": "0.1.0 import: dry-run CLI sets a padded non-secret approval placeholder before invoking the approval path; reviewed 2026-10-09. Re-reviewed 2026-10-09 (t5): file changed only to take the invocation-log path from paths.ts; the flagged placeholder line is unchanged."
     },
     {
       "path": "skills/email/agentmail-sdk/references/admin.md",

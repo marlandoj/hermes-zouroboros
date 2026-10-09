@@ -18,6 +18,7 @@ import { generateSeed, generateProgram } from './prescribe/seed.js';
 import { runSelfHealPlanGateShadow } from './prescribe/plan-gate.js';
 import { executeEvolution } from './evolve/executor.js';
 import { expectedStateChange } from './evolve/intervention-ledger.js';
+import { getSelfHealDir } from './paths.js';
 import type { Scorecard, Prescription, EvolutionResult } from './types.js';
 
 export const VERSION = '2.0.0';
@@ -37,6 +38,7 @@ export * from './evolve/execution-validator.js';
 export * from './feedback.js';
 export * from './multi-metric.js';
 export * from './templates.js';
+export * from './paths.js';
 export * from './history.js';
 export * from './replay/cassette.js';
 export * from './replay/recorder.js';
@@ -60,7 +62,6 @@ export interface EvolveOptions {
   skipGovernor?: boolean;
 }
 
-const RESULTS_DIR = join(getWorkspaceRoot(), '.zo/selfheal');
 
 async function storeEpisode(input: {
   summary: string;
@@ -124,8 +125,9 @@ export class SelfHeal {
     }
 
     if (options.store) {
-      mkdirSync(RESULTS_DIR, { recursive: true });
-      const path = join(RESULTS_DIR, `scorecard-${Date.now()}.json`);
+      const resultsDir = getSelfHealDir();
+      mkdirSync(resultsDir, { recursive: true });
+      const path = join(resultsDir, `scorecard-${Date.now()}.json`);
       writeFileSync(path, JSON.stringify(scorecard, null, 2));
 
       // Write a searchable fact so future RAG Health evaluations have domain context
@@ -147,9 +149,11 @@ export class SelfHeal {
           const { Database } = await import('bun:sqlite');
           const db = new Database(memDb);
           try {
+            // Values must satisfy the memory schema's category/decay CHECK constraints.
             db.query(
-              `INSERT OR REPLACE INTO facts(id,persona,entity,key,value,category,decay_class) VALUES(?,?,?,?,?,?,?)`
-            ).run(factId, 'introspect', 'zouroboros.introspection', `scorecard-${dateStr}`, value, 'metric', 'stable');
+              `INSERT OR REPLACE INTO facts(id,persona,entity,key,value,text,category,decay_class) VALUES(?,?,?,?,?,?,?,?)`
+            ).run(factId, 'introspect', 'zouroboros.introspection', `scorecard-${dateStr}`, value,
+              `zouroboros.introspection scorecard-${dateStr}: ${value}`, 'fact', 'medium');
           } finally {
             db.close();
           }

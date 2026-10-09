@@ -1482,6 +1482,31 @@
       "path": "packages/personas/src/templates/prompt.ts",
       "reason": "Platform-neutral wording for Hermes: generated prompts say 'Agent Tools'/'standard agent tools' instead of Zo tools, and the optional generated skill stub gets Hermes frontmatter instead of Zo compatibility/author lines (persona-creator skill, t4).",
       "distributed_sha256": "c504c5b6cfdbca6860f89fc970af2a1d878f64e1a71ac3df154b8bacb1e4389b"
+    },
+    {
+      "path": "packages/selfheal/src/paths.ts",
+      "reason": "New (distribution-authored): self-heal state, results, invocation-log and autoloop locations, configurable under the portable roots (t5).",
+      "distributed_sha256": "817f99a5ba27460fb586c3386b99141badee97a721ef8917e3e6f1fe96255854"
+    },
+    {
+      "path": "packages/selfheal/src/index.ts",
+      "reason": "Scorecard store directory from paths.ts (ZOUROBOROS_STATE_DIR/selfheal when set); the scorecard fact write supplies text and uses category/decay values the memory schema accepts (it silently failed before) (t5).",
+      "distributed_sha256": "c17430d8e59c0f8a474250ffbc52a03a25d2ac5d671e9c109e20e151f35844d6"
+    },
+    {
+      "path": "packages/selfheal/src/evolve/executor.ts",
+      "reason": "Results directory and autoloop entrypoint from paths.ts (state root / ZOUROBOROS_AUTOLOOP_SCRIPT) (t5).",
+      "distributed_sha256": "d3c1b3ed7453d2bddcca37e2029d2991bb0f1f6f53e8bc9cf95a77fea4e8c96d"
+    },
+    {
+      "path": "packages/selfheal/src/introspect/rag-health-shadow.ts",
+      "reason": "RAG-health shadow traces under the self-heal state directory from paths.ts (t5).",
+      "distributed_sha256": "63211f7abeb5ab66df1cf3e8156ed70675b1ad3c1911d2bacc697c109c2c8bbf"
+    },
+    {
+      "path": "packages/selfheal/src/cli/crystallize.ts",
+      "reason": "Invocation log under ZOUROBOROS_LOG_DIR (default: temp dir) instead of a hardcoded /dev/shm path (t5).",
+      "distributed_sha256": "4ba786a38877c06af7ff07cb45c7ed198e1b55f6b9cbfdbe7e4a5ace8708af97"
     }
   ]
 }
