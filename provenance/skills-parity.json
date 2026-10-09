@@ -60,7 +60,7 @@
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
       "disposition": "adapted",
-      "reason": "Audits the distribution skills tree (nested categories) instead of the host Skills/; report/status/lock under ZOUROBOROS_STATE_DIR/agent-introspect; probes run with stdin closed and bun --no-install; skip list replaced (host Zo script names \u2192 update-check.sh); codebase-memory hotspots opt-in via env; persona_audit.py and both test suites shipped. Not shipped: references/legacy-inline-instruction.md (host scheduled-agent text).",
+      "reason": "Audits the distribution skills tree (nested categories) instead of the host Skills/; report/status/lock under ZOUROBOROS_STATE_DIR/agent-introspect; probes run with stdin closed and bun --no-install; skip list replaced (host Zo script names → update-check.sh); codebase-memory hotspots opt-in via env; persona_audit.py and both test suites shipped. Not shipped: references/legacy-inline-instruction.md (host scheduled-agent text).",
       "distributedAs": [
         "skills/zouroboros/agent-introspect"
       ],
@@ -340,10 +340,11 @@
       "nameSha256": "487b93d88688eb9674a347733541121b4624bf20b152df52bcb0736ec6ba7630",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Still pending after f1-t7 (operator decision outstanding). Porting it adds third-party native dependencies (falkordblite) that download and compile Redis from source on first use; CI would need network access and a C toolchain. Its default inputs are the host Software Factory database, factory log and retired Linear exports. Its telemetry dependency rag-telemetry now ships.",
-      "followUp": "Operator decision: approve the Redis-from-source dependency, then port with the dependency confined to the skill, board inputs configurable, Linear sources dropped and graph tests skipped when the binary is absent."
+      "disposition": "adapted",
+      "reason": "Ported in f2 after the operator accepted (2026-10-09) the first-use Redis-from-source dependency. falkordblite 0.3.0 (MIT) is confined to the skill (bun install, lifecycle scripts untrusted) and loaded lazily; Redis 8.2.3 is downloaded, SHA-256-verified and compiled on first use into ZOUROBOROS_CACHE_DIR/falkordblite, never at install and never in CI (refused when CI is set). Inputs come only from --factory-dir/GRAPHRAG_FACTORY_DIR or explicit flags (no host default); retired Linear inputs replaced by tracker-neutral ticket exports; graph data under ZOUROBOROS_STATE_DIR. Not shipped: docs/swarm-db-schema.md (host database evidence), eval/graphrag-vs-vector.md (host run results), tsconfig.json. Own suite: 10 offline tests + 4 live tests (GRAPHRAG_LIVE_TESTS=1; verified 14/14 with a real first-use build). operator-digest's graph evidence now resolves.",
+      "distributedAs": [
+        "skills/zouroboros/graphrag-relational"
+      ]
     },
     {
       "name": "heygen-skills",
@@ -443,10 +444,8 @@
       "nameSha256": "94920183f3ef66d532705969ced9f8c9cd75fe3013c08beb9685dd4215c92209",
       "trackedAtRevision": false,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Still pending after f1-t7 (operator decision outstanding): untracked in the source repository at the pinned revision, so the allowlisted importer (tracked blobs only) cannot take it, and the source is read-only for this campaign.",
-      "followUp": "Source change needed: commit a reviewed subset in the source repository at a new pin; port without the memory-ingest scripts, cookies/session files and captured notebooks, with state under ZOUROBOROS_STATE_DIR."
+      "disposition": "host-only",
+      "reason": "operator decision 2026-10-09: kept untracked on the VPS; not distributed"
     },
     {
       "name": "operator-digest",
@@ -457,8 +456,7 @@
       "reason": "Reads profile data/state/config (healer state and chain from the agent-model-healer skill locations, governance ledger from the zouroboros-governance skill); output under ZOUROBOROS_STATE_DIR/operator-digest; Modal summarizer (host factory runtime) removed in favour of the deterministic summary; graph query from a sibling graphrag-relational skill when present; a missing adapter inventory means no governed runtimes. Governance evidence tests ported. Not shipped: modal-summary.ts/.test.ts, tsconfig.json, the host runtime-adapters inventory.",
       "distributedAs": [
         "skills/zouroboros/operator-digest"
-      ],
-      "followUp": "Graph evidence becomes available once graphrag-relational ships (t7)."
+      ]
     },
     {
       "name": "operator-worker",
@@ -561,10 +559,8 @@
       "nameSha256": "ba816032691bcb7d7248d5b08469771b02d3dad002da0ec321bd7fd7ef26210b",
       "trackedAtRevision": false,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Still pending after f1-t7 (operator decision outstanding): untracked in the source repository at the pinned revision (a symlink into an untracked project), so the allowlisted importer cannot copy it.",
-      "followUp": "Source change needed: commit the skill (not a symlink) in the source repository at a new pin, then port and re-run the leak gate."
+      "disposition": "host-only",
+      "reason": "operator decision 2026-10-09: kept untracked on the VPS; not distributed"
     },
     {
       "name": "skill-security-gate",

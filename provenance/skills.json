@@ -2146,6 +2146,123 @@
       "adaptation": "Rewritten for Hermes shell hooks (pre_llm_call + on_session_finalize) with portable log/sentinel/kill-switch paths; routes only to instinct-harvester; host settings paths removed."
     },
     {
+      "path": "skills/zouroboros/graphrag-relational/adr/0001-graph-store.md",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/adr/0001-graph-store.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7f2b8d7c6beed3d7634b72684794795dd995a7b9b2ee27cd33ec85956526fc5d",
+      "distributedSha256": "3bde2251b81ab51c7fbbf14e094f68fbcb5d40fa6de138e5821c90365cfd4ee0",
+      "adaptation": "Host-specific evidence removed (host database path, the empty-catalog swarm.db report, ticket id); host wording neutralised; distribution notes added (LTO-free redis-server build, CI refusal, untrusted lifecycle scripts)."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/bun.lock",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/bun.lock",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c9a871290be6ceb6c29141b591e42c7be85c5acac3e348cbefbd00dfb33cdace",
+      "distributedSha256": "c56dbe77c2175e957aa729950f428b1730999cb188fa47927a9f72582eeabd1d",
+      "adaptation": "Regenerated with bun 1.4 for the adapted package.json (no trustedDependencies, no devDependencies); pins the same falkordblite 0.3.0 and @falkordblite/linux-x64 8.2.3-falkordb.4.16.3 integrity hashes."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/package.json",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/package.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "738cf6d0450c1d4b43e42b2bbe5c1edc673b180295ef608df4993e02e4f9e3e1",
+      "distributedSha256": "c9963e9e137b1f8bfe477e3e676acf19b48681ed8f647650b6a01f2e1a7126fe",
+      "adaptation": "trustedDependencies removed so falkordblite's postinstall never runs at install; devDependencies dropped (root workspace provides types); test runs the offline suite, test:live prepares the runtime first; version 0.2.0 to match SKILL.md."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/scripts/extract.ts",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/scripts/extract.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "023abeb76bf83215d488d96514b86dc3f310ea6340ea5c33f25aa5bdbfcd481d",
+      "distributedSha256": "4b97a03d703dd15a1e5c7c2a757aadf95d1097f95566bf10709c7a0e653645c8",
+      "adaptation": "Host factory directory default removed: inputs from --factory-dir / GRAPHRAG_FACTORY_DIR or explicit flags, error when none; retired Linear inputs (--linear-json, intake ledger default, linear_tickets table, source label) replaced by tracker-neutral --tickets-json; normalizeSources exported for index.ts."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/scripts/index.test.ts",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/scripts/index.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4544f998fb2ec32b5c98825801c65f71b6e0bff6c6771a555c06fd8a9acade23",
+      "distributedSha256": "2fed42d5438e49a1f46a6f777a08c8b180eb2c5250cdf0c2ca9dc53e567550b0",
+      "adaptation": "Ticket field renames; graph-backed tests run only with GRAPHRAG_LIVE_TESTS=1 (marked); neutral TASK- identifiers."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/scripts/index.ts",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/scripts/index.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f10edbf6cf0a46a3f266eaa4255ad84b9b308ebde5fd1b90b9d8d17db8742da1",
+      "distributedSha256": "8dd9cf8c3f4e2c1124de094fc58755d0603e5badb8f7702de3cef9123cbdb5c6",
+      "adaptation": "Graph data and index state under ZOUROBOROS_STATE_DIR/graphrag-relational (GRAPHRAG_DB_DIR overrides) instead of the host factory state dir; --factory-dir and --tickets-json; source check only when --graph is absent; cacheDir passed to the runtime; Graph type from runtime.ts."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/scripts/live.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "3871b90b666fa16d53ad0c994a4b18b68357a2d070e9da9d231966f0d791294a",
+      "adaptation": "Single switch and marker for graph-backed tests (GRAPHRAG_LIVE_TESTS=1) so CI never downloads or compiles Redis."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/scripts/offline.test.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "b27548a9884601eba617c973b308c2174f55b22ce10eb473fc067f20ea4b88ac",
+      "adaptation": "Offline coverage: portable paths, no-source refusal, extraction from a SQLite + JSONL + ticket-export fixture, CI/disabled build refusal without network, binary override check."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/scripts/paths.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "e69d30da8dd98adb27d25e300f77c0adebe8f2bd89853df32fd8983a89955cde",
+      "adaptation": "Portable locations: source inputs only from flags or GRAPHRAG_FACTORY_DIR; graph data and Redis cache under the profile state and cache roots."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/scripts/query.test.ts",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/scripts/query.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "a202ffcf8a36dcfaa6e6804c2c7fd20a8fabc78d7d77e3865e90f3bb4a53a360",
+      "distributedSha256": "414f9b84a13fe91afa14b78ca1f0bc02fc7b95330740a62fa13b455ac020ad2e",
+      "adaptation": "Ticket field renames; graph-backed tests run only with GRAPHRAG_LIVE_TESTS=1 (marked); neutral TASK- identifiers."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/scripts/query.ts",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/scripts/query.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "cbeea5b4c9058b99b552aa50cc5c8484f67d3c7cdd50487abf32942c0c607f6b",
+      "distributedSha256": "6590072b27da0d5b299019956e1f5f80c60277023ba39b6d664f41426b068a93",
+      "adaptation": "Default graph path from paths.ts (profile state root) instead of the host factory dir; cacheDir option; Graph type from runtime.ts."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/scripts/runtime.ts",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/scripts/runtime.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7a087f93f9f5c296aa82aa2afb2fd2a28a5a12636e83d2a693aa96eecc870742",
+      "distributedSha256": "7549fd4dea41410a81c6f171453f39a6a73e5d334296be7cd898b71a32e34123",
+      "adaptation": "falkordblite loaded lazily with local API types (offline suite and root tsc need no install); Redis cache under GRAPHRAG_CACHE_DIR / ZOUROBOROS_CACHE_DIR instead of ~/.cache; first-use build refused in CI or with GRAPHRAG_NO_BUILD=1; builds only redis-server with OPTIMIZATION=-O2 (GCC 15 LTO crash); stale build locks cleared after 30 min; 'prepare' CLI. Pinned source and module SHA-256 unchanged."
+    },
+    {
+      "path": "skills/zouroboros/graphrag-relational/SKILL.md",
+      "skill": "graphrag-relational",
+      "sourcePath": "Skills/graphrag-relational/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6cfe1664710b1bd0759968fc350d2719f5a7036292c537650042f6e26f5271ff",
+      "distributedSha256": "85b666a6a09116c3ab0e67ae44f1aa4c9593f0a6989fc95e1965a09cef30d84f",
+      "adaptation": "Rewritten for Hermes: frontmatter (license, platforms, metadata.hermes), source author/compatibility removed; install step confined to the skill dir; documents the operator-approved (2026-10-09) first-use Redis 8.2.3 source build (pinned SHA-256, cache under ZOUROBOROS_CACHE_DIR, refused in CI); portable locations table; Linear inputs replaced by tracker-neutral ticket exports."
+    },
+    {
       "path": "skills/zouroboros/instinct-harvester/scripts/lifecycle-selftest.ts",
       "skill": "instinct-harvester",
       "sourcePath": "Skills/instinct-harvester/scripts/lifecycle-selftest.ts",
