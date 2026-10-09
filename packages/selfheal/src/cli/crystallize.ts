@@ -15,7 +15,7 @@
  *     resolve before running. A missing module fails fast, not silently.
  *
  * Invocation log:
- *   Every subcommand writes one JSON line to /dev/shm/crystallize.log:
+ *   Every subcommand writes one JSON line to $ZOUROBOROS_LOG_DIR/crystallize.log (default: the temp dir):
  *     { ts, cmd, id, token_prefix_8, outcome, duration_ms, detail? }
  *   Token prefixes only — never the full hex value.
  *
@@ -33,6 +33,7 @@ import { parseArgs } from 'node:util';
 import { appendFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { getWorkspaceRoot } from 'zouroboros-core';
+import { getSelfHealLogPath } from '../paths.js';
 
 import {
   approveCandidate,
@@ -60,7 +61,7 @@ import {
   runReplayRegressionCase,
 } from '../replay/regression.js';
 
-const INVOCATION_LOG = '/dev/shm/crystallize.log';
+const INVOCATION_LOG = getSelfHealLogPath('crystallize');
 
 interface CliEnv {
   memoryDb: string;
@@ -81,7 +82,7 @@ function logInvocation(entry: Record<string, unknown>): void {
       JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n',
     );
   } catch {
-    // /dev/shm may be unavailable in some sandboxes — skip silently rather
+    // The log directory may be unavailable in some sandboxes — skip silently rather
     // than fail the user-visible command on logging.
   }
 }

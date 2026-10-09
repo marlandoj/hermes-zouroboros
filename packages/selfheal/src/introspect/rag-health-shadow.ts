@@ -5,6 +5,7 @@ import { join } from 'path';
 import { getMemoryDbPath, getWorkspaceRoot } from 'zouroboros-core';
 import type { MemoryConfig } from 'zouroboros-core';
 import type { MetricResult, MetricStatus } from '../types.js';
+import { getSelfHealDir } from '../paths.js';
 
 export const RAG_SHADOW_MIN_COHORT = 20;
 export const RAG_SHADOW_MAX_AGE_DAYS = 30;
@@ -444,7 +445,7 @@ function createLiveDependencies(): RagShadowDependencies {
       };
     },
     persistTrace: (trace) => {
-      const dir = join(workspace, '.zo/selfheal/rag-health-shadow');
+      const dir = join(getSelfHealDir(), 'rag-health-shadow');
       mkdirSync(dir, { recursive: true });
       const finalPath = join(dir, `trace-${Date.now()}-${randomUUID().slice(0, 8)}.json`);
       const tempPath = `${finalPath}.tmp`;

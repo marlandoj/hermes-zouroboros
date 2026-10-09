@@ -102,6 +102,45 @@ status:
 `tests/skills-zoapi.test.ts` exercises all eight end to end with a fake `hermes` and no
 credentials. It also runs their own unit tests.
 
+### Self-improvement (t5)
+
+These skills keep every runtime file under the portable roots. They never use a shared tmpfs or
+a host workspace path:
+
+| Root | Holds |
+|---|---|
+| `ZOUROBOROS_STATE_DIR` | self-heal scorecards, prescriptions and results; the instinct store; hook sentinels; audit and digest reports |
+| `ZOUROBOROS_LOG_DIR` | decision and invocation logs |
+| `ZOUROBOROS_CONFIG_DIR` | kill switches and operator inventories |
+
+Each root falls back to the profile data directory.
+
+- **`zouroboros-introspect`, `zouroboros-prescribe` and `zouroboros-evolve`:** thin skills over
+  `packages/selfheal`, run through `integration/selfheal.ts`.
+  - Memory is read through the distribution's memory layer. The profile `memory.db` is always
+    used, and inherited `ZO_MEMORY_DB`/`ZOUROBOROS_MEMORY_DB` are overridden.
+  - `packages/selfheal/src/paths.ts` makes the package's state, results and log locations
+    configurable. Without the portable variables, the old workspace-relative defaults are kept.
+  - Any evolve run other than `--dry-run` needs `HERMES_ZOUROBOROS_ALLOW_SWARM=1`. Autoloop mode
+    runs the distribution's `autoloop` skill.
+- **`instinct-harvester`:** the trigger→action instinct store, under
+  `ZOUROBOROS_STATE_DIR/instincts`. js-yaml is replaced by a shim over the distribution's `yaml`
+  dependency.
+- **`extract-patterns`:** the four-criteria session gate, run as a Hermes shell hook. It injects
+  the gate on `pre_llm_call` once per session and back-fills on `on_session_finalize`. Register it
+  under `hooks:` in the profile's `config.yaml`.
+- **`agent-introspect`:** audits this skills tree (frontmatter, script `--help` health) and the
+  workspace identity files.
+- **`operator-digest`:** a weekly read-only briefing built from the self-heal, healer and
+  governance state. The summary is deterministic.
+
+`tests/skills-selfimprove.test.ts` runs all seven offline in a disposable profile. A decoy host
+memory database must stay untouched. The test also runs the skills' own suites: 226 instinct
+checks, the hook selftest, two Python suites and the governance-evidence tests.
+
+`zouroboros-memory-evolution` is not shipped. Its eval set is derived from live operator memory,
+not synthetic data, and its harness targets the host memory database.
+
 Skills must stay operator-neutral and portable. Do not include host paths, operator names or
 handles, persona identities, memories, run output, model catalogs or credentials. Read state through
 the variables the distribution already sets (`HERMES_ZOUROBOROS_HOME`, `ZOUROBOROS_DATA_DIR`,

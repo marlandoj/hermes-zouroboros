@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "probe_timeout_s": 10,
+  "retries": 1,
+  "audit_budget_s": 600,
+  "max_timeouts": 5,
+  "skip_health": [
+    "update-check.sh"
+  ]
+}
