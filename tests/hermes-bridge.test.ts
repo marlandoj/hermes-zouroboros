@@ -20,7 +20,14 @@ printf '%s\\n' "$PWD" > "$FAKE_CAPTURE.cwd"
 printf '%s\\n' "$@" > "$FAKE_CAPTURE.args"
 printf '%s\\n' "$HOME" "$HERMES_HOME" > "$FAKE_CAPTURE.home"
 printf '%s\\n' "$HERMES_ZOUROBOROS_ALLOW_SWARM" > "$FAKE_CAPTURE.swarm"
+usage=''
+while [[ $# -gt 0 ]]; do [[ "$1" == --usage-file ]] && usage="$2"; shift; done
+failed=false
+case "$FAKE_MODE" in provider-error|failed-empty) failed=true ;; esac
+[[ -z "$usage" ]] || printf '{"failed": %s}\\n' "$failed" > "$usage"
 case "$FAKE_MODE" in
+ provider-error) printf 'API error 402: insufficient balance\\n' ;;
+ failed-empty) exit 2 ;;
  failure) printf 'credential-value-must-not-leak' >&2; exit 7 ;;
  empty) printf '  \\n\\t'; exit 0 ;;
  timeout) sleep 10 ;;
@@ -33,6 +40,15 @@ esac
   return { root, workdir, scratch, capture, env };
 }
 
+/** Captured argv without the bridge-private --usage-file pair (its path is random). */
+function capturedArgs(capture: string): string {
+  const lines = readFileSync(capture + '.args', 'utf8').split('\n');
+  const at = lines.indexOf('--usage-file');
+  expect(at).toBeGreaterThanOrEqual(0);
+  lines.splice(at, 2);
+  return lines.join('\n');
+}
+
 describe('portable Hermes bridge', () => {
   test('passes prompt literally, uses requested cwd and preserves profiles/model identifiers', async () => {
     const f = fixture();
@@ -41,7 +57,7 @@ describe('portable Hermes bridge', () => {
     expect(await p.exited).toBe(0);
     expect(await new Response(p.stdout).text()).toBe('Final response\n');
     expect(readFileSync(f.capture + '.cwd', 'utf8')).toBe(f.workdir + '\n');
-    expect(readFileSync(f.capture + '.args', 'utf8')).toBe('--provider\ncustom-provider\n--model\nvendor/model-x\n-z\n' + prompt + '\n');
+    expect(capturedArgs(f.capture)).toBe('--provider\ncustom-provider\n--model\nvendor/model-x\n-z\n' + prompt + '\n');
     expect(readFileSync(f.capture + '.home', 'utf8')).toBe(f.root + '\n' + f.env.HERMES_HOME + '\n');
     expect(readFileSync(f.capture + '.swarm', 'utf8')).toBe('0\n');
     expect(existsSync(join(f.workdir, 'should-not-exist'))).toBe(false);
@@ -53,10 +69,10 @@ describe('portable Hermes bridge', () => {
     const p = Bun.spawn(['bash', bridge, 'hello'], { cwd: f.workdir, env: f.env, stdout: 'pipe', stderr: 'pipe' });
     expect(await p.exited).toBe(0);
     expect(readFileSync(f.capture + '.cwd', 'utf8')).toBe(f.workdir + '\n');
-    expect(readFileSync(f.capture + '.args', 'utf8')).toBe('-z\nhello\n');
+    expect(capturedArgs(f.capture)).toBe('-z\nhello\n');
   });
 
-  test.each([['failure', 7], ['empty', 1], ['timeout', 124]] as const)('fails closed for %s and removes scratch', async (mode, code) => {
+  test.each([['failure', 7], ['empty', 1], ['timeout', 124], ['provider-error', 1], ['failed-empty', 1]] as const)('fails closed for %s and removes scratch', async (mode, code) => {
     const f = fixture();
     const p = Bun.spawn(['bash', bridge, 'hello'], { cwd: f.workdir, env: { ...f.env, FAKE_MODE: mode, HERMES_TIMEOUT: '1' }, stdout: 'pipe', stderr: 'pipe' });
     expect(await p.exited).toBe(code);
@@ -65,6 +81,13 @@ describe('portable Hermes bridge', () => {
     expect(error).toContain('hermes-zouroboros:');
     expect(error).not.toContain('credential-value-must-not-leak');
     expect(readdirSync(f.scratch)).toEqual([]);
+  });
+
+  test('omits the usage report when HERMES_USAGE_REPORT=0', async () => {
+    const f = fixture();
+    const p = Bun.spawn(['bash', bridge, 'hello'], { cwd: f.workdir, env: { ...f.env, HERMES_USAGE_REPORT: '0' }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await p.exited).toBe(0);
+    expect(readFileSync(f.capture + '.args', 'utf8')).toBe('-z\nhello\n');
   });
 
   test('rejects provider-only overrides before invoking the agent', async () => {

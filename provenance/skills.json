@@ -720,8 +720,8 @@
       "sourcePath": "Skills/deep-research/scripts/research.ts",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "f568ec270f15ec64e6dd85edf856c55aa52d92debd8ad4324efde6049871b3da",
-      "distributedSha256": "d7f6ab9fa5db6393b462cdc506a9019280550d41fdfab75e4f2709785fa775e5",
-      "adaptation": "Rewritten conductor keeping the plan/gather/fuse/synthesize/claim-check/report/persist DAG, artifacts, idempotency and fail-loud behaviour; model calls via ask-governor (budgets kept); no fetch, Zo self-dispatch, file sentinels, OpenAI key self-heal, Qdrant, shared-facts.db or audio; run dir under the profile workspace; persist via zmem.ts."
+      "distributedSha256": "e1395424895c76d5381dfc9675fef3d410552bba92ae46dc59ca83145601b4fc",
+      "adaptation": "Rewritten conductor keeping the plan/gather/fuse/synthesize/claim-check/report/persist DAG, artifacts, idempotency and fail-loud behaviour; model calls via ask-governor (budgets kept); no fetch, Zo self-dispatch, file sentinels, OpenAI key self-heal, Qdrant, shared-facts.db or audio; run dir under the profile workspace; persist via zmem.ts. Internal memory search also uses the question's own keywords (f3 live smoke test: verbose planner sub-questions crowded out the subject)."
     },
     {
       "path": "skills/research/deep-research/scripts/wiring.test.ts",

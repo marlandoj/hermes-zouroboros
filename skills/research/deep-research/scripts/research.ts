@@ -156,7 +156,8 @@ async function gatherWeb(subQ: string): Promise<Source[]> {
 
 // Internal knowledge: the profile's memory database (facts), via the zo-memory-system skill. Memory search
 // is a substring match, so each sub-question is reduced to its distinctive keywords and facts are ranked
-// by how many keywords they match.
+// by how many keywords they match. The question's own keywords are always searched too: planner
+// sub-questions are verbose, and their longest words can crowd out the subject itself.
 const STOPWORDS = new Set(["about", "after", "against", "among", "between", "could", "does", "from", "have", "into", "should", "their", "there", "these", "they", "this", "what", "when", "where", "which", "while", "with", "would", "your"]);
 export function keywords(text: string, max = 4): string[] {
   const words = text.toLowerCase().match(/[a-z0-9][a-z0-9-]{3,}/g) ?? [];
@@ -169,7 +170,7 @@ function gatherInternal(plan: Plan): Source[] {
   const sources: Source[] = [];
   for (const subQ of plan.subQuestions) {
     const hits = new Map<string, { fact: { id: string; entity: string; key?: string; value: string }; count: number }>();
-    for (const word of keywords(subQ)) {
+    for (const word of new Set([...keywords(plan.query), ...keywords(subQ)])) {
       const res = spawnSync(process.execPath, [ZMEM, "search", word, "--limit", String(MAX_INTERNAL * 2)], { encoding: "utf8", timeout: 60_000 });
       if (res.status !== 0) { log(`internal: memory search failed (soft) for "${word}"`); continue; }
       let facts: { id: string; entity: string; key?: string; value: string }[] = [];

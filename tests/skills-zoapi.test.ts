@@ -44,7 +44,11 @@ test('ask layer: model and provider reach Hermes, Zo credentials do not, failure
   const zo = { ZO_CLIENT_IDENTITY_TOKEN: 'dummy-zo-token', ZO_API_KEY: 'dummy-zo-key' };
   const ok = JSON.parse(run(probe, [JSON.stringify({ prompt: 'ping', model: 'm-1', provider: 'p-1' })], zo).stdout);
   expect(ok).toMatchObject({ ok: true, output: `clean:${join(root, 'data', 'hermes')}`, model: 'm-1' });
-  expect(calls().at(-1)).toBe('--provider p-1 --model m-1 -z ping');
+  expect(calls().at(-1)).toMatch(/^--provider p-1 --model m-1 --usage-file \S+ -z ping$/);
+
+  // A provider error Hermes prints as its final response (exit 0) is a failed run, not an answer.
+  fakeHermes(`while [[ $# -gt 0 ]]; do [[ "$1" == --usage-file ]] && echo '{"failed": true}' > "$2"; shift; done; echo 'API error 402: insufficient balance'`);
+  expect(JSON.parse(run(probe, [JSON.stringify({ prompt: 'ping' })]).stdout)).toMatchObject({ ok: false, failure: 'failed', exitCode: 1, output: '' });
 
   fakeHermes('sleep 5');
   expect(JSON.parse(run(probe, [JSON.stringify({ prompt: 'ping', timeoutSec: 1 })]).stdout)).toMatchObject({ ok: false, failure: 'timeout', exitCode: 124 });
@@ -130,6 +134,24 @@ esac`);
   expect(calls().length).toBe(before);
 }, 120_000);
 
+test('deep-research: internal memory is searched by the query keywords, not only the sub-questions', () => {
+  const zmem = skill('zouroboros/zo-memory-system/scripts/zmem.ts');
+  expect(run(zmem, ['store', '--entity', 'demo', '--key', 'choice', '--value', 'Use copper widgets']).code).toBe(0);
+  // Verbose sub-questions whose four longest words never include "copper" or "widgets".
+  fakeHermes(`p="$*"
+case "$p" in
+  *"research planner"*) echo '{"subQuestions":["Which alternative manufacturing materials distinguish functional performance characteristics?"],"domain":"technical"}' ;;
+  *"rigorous research analyst"*) printf '## Executive Summary\\n- Copper was chosen [S1].\\n' ;;
+  *) exit 1 ;;
+esac`);
+  const runDir = join(root, 'run-internal');
+  const result = run(skill('research/deep-research/scripts/research.ts'), ['Why use copper widgets?', '--run-dir', runDir, '--no-external', '--no-persist']);
+  expect(result.code, result.stderr + result.stdout).toBe(0);
+  const gathered = JSON.parse(readFileSync(join(runDir, '01-gather.json'), 'utf8')).sources;
+  expect(gathered.map((s: { title: string }) => s.title)).toEqual(['demo.choice']);
+  expect(calls()).toHaveLength(2);
+}, 60_000);
+
 const hasFfmpeg = Boolean(Bun.which('ffmpeg') && Bun.which('ffprobe'));
 
 test('broll-injector: the planning call goes through Hermes; dry-run renders end to end', () => {
@@ -139,7 +161,7 @@ test('broll-injector: the planning call goes through Hermes; dry-run renders end
   const planned = run(skill('media/broll-injector/scripts/extract-plan.ts'), ['--srt', join(root, 'talk.srt'), '--out', plan, '--count', '1', '--plan-model', 'm-plan']);
   expect(planned.code, planned.stderr).toBe(0);
   expect(JSON.parse(readFileSync(plan, 'utf8')).moments).toEqual([expect.objectContaining({ id: 'm1', start: 1, hold: 2.5, source: 't2v', mode: 'fullframe' })]);
-  expect(calls().at(-1)).toContain('--model m-plan -z');
+  expect(calls().at(-1)).toMatch(/--model m-plan --usage-file \S+ -z/);
   if (!hasFfmpeg) return;
   const spine = join(root, 'spine.mp4');
   const made = Bun.spawnSync(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'testsrc=size=640x360:rate=25:duration=6',
