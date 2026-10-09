@@ -40,6 +40,12 @@ the profile's own `skills/` directory takes precedence, and the distribution cop
 shadowed. Merge such a skill into the bundled one, choose a distinct name, or mark it `hermes-native`
 in the parity manifest.
 
+Refer to a skill's own files as `"${HERMES_SKILL_DIR}/scripts/..."`. Hermes substitutes the skill directory when it
+loads `SKILL.md`. Skills that write runtime state (ledgers, snapshots) write under `ZOUROBOROS_STATE_DIR`, never
+inside the skill tree. `tests/skills-portable.test.ts` checks frontmatter and licences and runs the ported
+skills' own tests. Set `HERMES_AGENT_SRC` to a Hermes checkout to also check for name collisions with bundled
+and optional Hermes skills.
+
 Skills must stay operator-neutral and portable. Do not include host paths, operator names or
 handles, persona identities, memories, run output, model catalogs or credentials. Read state through
 the variables the distribution already sets (`HERMES_ZOUROBOROS_HOME`, `ZOUROBOROS_DATA_DIR`,

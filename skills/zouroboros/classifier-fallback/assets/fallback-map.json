@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "lastUpdated": "2026-07-08",
+  "description": "Per-domain classifier fallback routing. When a soft block is detected, the map determines the action: route to an alternative model, escalate to human, or refuse by design. Fallback models are not shipped: set CLASSIFIER_FALLBACK_MODEL (or CLASSIFIER_FALLBACK_MODEL_<DOMAIN>) to a model id from your own provider config. Without one, a fallback action degrades to human_review.",
+  "defaults": {
+    "action": "fallback",
+    "fallback_model": null,
+    "fallback_label": "Configured fallback model (default fallback for classifier-blocked tasks)"
+  },
+  "domains": {
+    "security": {
+      "label": "Security research / vulnerability analysis",
+      "action": "fallback",
+      "fallback_model": null,
+      "fallback_label": "Configured fallback model (broader classifier tolerance for security research)",
+      "escalate_after_fallback_fail": true
+    },
+    "bio": {
+      "label": "Biological sciences (dual-use concern)",
+      "action": "human_review",
+      "reason": "Bio classifier blocks are safety-critical; do not auto-route around them. Flag for human review.",
+      "escalate_after_fallback_fail": false
+    },
+    "chem": {
+      "label": "Chemical sciences (dual-use concern)",
+      "action": "human_review",
+      "reason": "Chem classifier blocks are safety-critical; do not auto-route around them. Flag for human review.",
+      "escalate_after_fallback_fail": false
+    },
+    "distillation": {
+      "label": "Model distillation / weight extraction",
+      "action": "refuse_by_design",
+      "reason": "Distillation classifier blocks are intentional provider guardrails. Do NOT route around them. This is the article's key safety boundary.",
+      "escalate_after_fallback_fail": false
+    },
+    "general": {
+      "label": "General tasks (uncategorized)",
+      "action": "fallback",
+      "fallback_model": null,
+      "fallback_label": "Configured fallback model (default fallback)",
+      "escalate_after_fallback_fail": false
+    }
+  },
+  "safety_rules": [
+    "distillation blocks are NEVER routed around — refuse_by_design is enforced",
+    "bio/chem blocks escalate to human review, never auto-fallback",
+    "security blocks auto-fallback to the configured model, then escalate if the fallback also blocks",
+    "a fallback with no configured model degrades to human_review; it never guesses a model",
+    "a block + fallback is ALWAYS logged to the audit ledger"
+  ]
+}

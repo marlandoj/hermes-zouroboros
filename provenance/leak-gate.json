@@ -131,6 +131,46 @@
         "secret:credential-assignment"
       ],
       "reason": "0.1.0 import: dry-run CLI sets a padded non-secret approval placeholder before invoking the approval path; reviewed 2026-10-09."
+    },
+    {
+      "path": "skills/email/agentmail-sdk/references/admin.md",
+      "sha256": "6eface9fbc2ba477c7e25b05164c6a045ac5c57e5547e55b5a97f60fe177ff65",
+      "rules": [
+        "personal-data:email-address"
+      ],
+      "reason": "Upstream AgentMail documentation (MIT): illustrative role addresses only (agent@/support@/sales@/billing@/router@ on the vendor service domain, boss@/known-customer@ company.com, attacker@ evil.com, a random local part on agents.example). No personal data; reviewed 2026-10-09 (t1-portable)."
+    },
+    {
+      "path": "skills/email/agentmail-sdk/references/websockets.md",
+      "sha256": "3955e6ce901ecb36874c498e903a0d652d4f8fe906ec4d88bad81002119d77c9",
+      "rules": [
+        "personal-data:email-address"
+      ],
+      "reason": "Upstream AgentMail documentation (MIT): illustrative role addresses only (agent@/support@/sales@/billing@/router@ on the vendor service domain, boss@/known-customer@ company.com, attacker@ evil.com, a random local part on agents.example). No personal data; reviewed 2026-10-09 (t1-portable)."
+    },
+    {
+      "path": "skills/email/agentmail-sdk/references/webhooks.md",
+      "sha256": "76e3e303eb6b738c06c55c579aefe6369e361a1e0b7449b4c3eef5ee3f2cffee",
+      "rules": [
+        "personal-data:email-address"
+      ],
+      "reason": "Upstream AgentMail documentation (MIT): illustrative role addresses only (agent@/support@/sales@/billing@/router@ on the vendor service domain, boss@/known-customer@ company.com, attacker@ evil.com, a random local part on agents.example). No personal data; reviewed 2026-10-09 (t1-portable)."
+    },
+    {
+      "path": "skills/email/agent-email-patterns/references/topologies.md",
+      "sha256": "6e4ad9cba06b9494115399cb1f9f268199d174f540708127b26d2d2401f5cbdb",
+      "rules": [
+        "personal-data:email-address"
+      ],
+      "reason": "Upstream AgentMail documentation (MIT): illustrative role addresses only (agent@/support@/sales@/billing@/router@ on the vendor service domain, boss@/known-customer@ company.com, attacker@ evil.com, a random local part on agents.example). No personal data; reviewed 2026-10-09 (t1-portable)."
+    },
+    {
+      "path": "skills/email/agent-email-patterns/references/threat-model.md",
+      "sha256": "7048f6c81f9260df7c3a74bd8f880ce1f934b3c5cd0a01a2880df2bf729d91cf",
+      "rules": [
+        "personal-data:email-address"
+      ],
+      "reason": "Upstream AgentMail documentation (MIT): illustrative role addresses only (agent@/support@/sales@/billing@/router@ on the vendor service domain, boss@/known-customer@ company.com, attacker@ evil.com, a random local part on agents.example). No personal data; reviewed 2026-10-09 (t1-portable)."
     }
   ]
 }

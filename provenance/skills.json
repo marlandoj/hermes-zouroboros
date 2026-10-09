@@ -4,6 +4,384 @@
   "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
   "files": [
     {
+      "path": "skills/email/agent-email-patterns/LICENSE",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "3f79d3794fa6aa0dbdfb6b7a1b18ff354ad40bd0e4f4fbd1b05e3f44f0ef8d4e",
+      "adaptation": "Upstream MIT licence text (Copyright (c) 2026 AgentMail, Inc.) from agentmail-to/agentmail-plugins LICENSE (sha256 3f79d379...f8d4e). The source skill dirs carry no licence file; the copyright holder publishes the same skills (byte-identical or few-line revisions) under this licence."
+    },
+    {
+      "path": "skills/email/agent-email-patterns/references/threat-model.md",
+      "skill": "agent-email-patterns",
+      "sourcePath": "Skills/agent-email-patterns/references/threat-model.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2c6f9e91702e1f54af4ab5d03671bcb855598ae4b6216e18bd1b41ead17e2d17",
+      "distributedSha256": "7048f6c81f9260df7c3a74bd8f880ce1f934b3c5cd0a01a2880df2bf729d91cf",
+      "adaptation": "Cross-reference renamed from the 'agentmail' skill to 'agentmail-sdk' (one line); otherwise upstream text."
+    },
+    {
+      "path": "skills/email/agent-email-patterns/references/topologies.md",
+      "skill": "agent-email-patterns",
+      "sourcePath": "Skills/agent-email-patterns/references/topologies.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6e4ad9cba06b9494115399cb1f9f268199d174f540708127b26d2d2401f5cbdb",
+      "distributedSha256": "6e4ad9cba06b9494115399cb1f9f268199d174f540708127b26d2d2401f5cbdb",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/email/agent-email-patterns/SKILL.md",
+      "skill": "agent-email-patterns",
+      "sourcePath": "Skills/agent-email-patterns/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2c2953053392a18af70dfb77f09bab5b6c43f0f320a8062c495352e414fb11bc",
+      "distributedSha256": "489b2d2f8b772223e54d00d05e1a34cbaf2dd945b850887d08dade7ad87a34e3",
+      "adaptation": "Hermes frontmatter added (version, author, MIT licence, platforms, metadata.hermes tags/related_skills); SDK skill reference renamed agentmail -> agentmail-sdk."
+    },
+    {
+      "path": "skills/email/agentmail-check-email/LICENSE",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "3f79d3794fa6aa0dbdfb6b7a1b18ff354ad40bd0e4f4fbd1b05e3f44f0ef8d4e",
+      "adaptation": "Upstream MIT licence text (Copyright (c) 2026 AgentMail, Inc.) from agentmail-to/agentmail-plugins LICENSE (sha256 3f79d379...f8d4e). The source skill dirs carry no licence file; the copyright holder publishes the same skills (byte-identical or few-line revisions) under this licence."
+    },
+    {
+      "path": "skills/email/agentmail-check-email/SKILL.md",
+      "skill": "agentmail-check-email",
+      "sourcePath": "Skills/agentmail-check-email/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5165f90f8466b4580a9f448dba8e1952b3d3d16bef5218d4fa995aa16080cc76",
+      "distributedSha256": "9c5e982356144f4a3f64b5ac8225045c1ba9f727cb6c759bcda25d623b8814ee",
+      "adaptation": "Hermes frontmatter added (version, author, MIT licence, platforms, metadata.hermes tags/related_skills); unshipped sibling agentmail-manage-inboxes reference replaced by agentmail-sdk."
+    },
+    {
+      "path": "skills/email/agentmail-mcp/LICENSE",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "3f79d3794fa6aa0dbdfb6b7a1b18ff354ad40bd0e4f4fbd1b05e3f44f0ef8d4e",
+      "adaptation": "Upstream MIT licence text (Copyright (c) 2026 AgentMail, Inc.) from agentmail-to/agentmail-plugins LICENSE (sha256 3f79d379...f8d4e). The source skill dirs carry no licence file; the copyright holder publishes the same skills (byte-identical or few-line revisions) under this licence."
+    },
+    {
+      "path": "skills/email/agentmail-mcp/SKILL.md",
+      "skill": "agentmail-mcp",
+      "sourcePath": "Skills/agentmail-mcp/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d8c1c41783b0b701042f47bf5f89a0804f29b104bd01f9ea4f60ac5d6374f384",
+      "distributedSha256": "080c2f96ea0e5900ceac8553690a7ba61a8a24738e49bef6dd08fea7521a617e",
+      "adaptation": "Hermes frontmatter added (version, author, MIT licence, platforms, metadata.hermes tags/related_skills, optional AGENTMAIL_API_KEY); added a Hermes section (mcp_servers config with auth: oauth or x-api-key header via ${AGENTMAIL_API_KEY}, hermes mcp login, mcp_agentmail_<tool> naming)."
+    },
+    {
+      "path": "skills/email/agentmail-sdk/LICENSE",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "3f79d3794fa6aa0dbdfb6b7a1b18ff354ad40bd0e4f4fbd1b05e3f44f0ef8d4e",
+      "adaptation": "Upstream MIT licence text (Copyright (c) 2026 AgentMail, Inc.) from agentmail-to/agentmail-plugins LICENSE (sha256 3f79d379...f8d4e). The source skill dirs carry no licence file; the copyright holder publishes the same skills (byte-identical or few-line revisions) under this licence."
+    },
+    {
+      "path": "skills/email/agentmail-sdk/references/admin.md",
+      "skill": "agentmail",
+      "sourcePath": "Skills/agentmail/references/admin.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6eface9fbc2ba477c7e25b05164c6a045ac5c57e5547e55b5a97f60fe177ff65",
+      "distributedSha256": "6eface9fbc2ba477c7e25b05164c6a045ac5c57e5547e55b5a97f60fe177ff65",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/email/agentmail-sdk/references/deliverability.md",
+      "skill": "agentmail",
+      "sourcePath": "Skills/agentmail/references/deliverability.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "85325a940c9b6f5ca09df0cb9b42548651d297c0123e5a0b82d7cde336428f1c",
+      "distributedSha256": "85325a940c9b6f5ca09df0cb9b42548651d297c0123e5a0b82d7cde336428f1c",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/email/agentmail-sdk/references/python.md",
+      "skill": "agentmail",
+      "sourcePath": "Skills/agentmail/references/python.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d44b664dc1ad4fd3e86bba0b153df97afa14c58eb6df63e19f97096950e03e03",
+      "distributedSha256": "d44b664dc1ad4fd3e86bba0b153df97afa14c58eb6df63e19f97096950e03e03",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/email/agentmail-sdk/references/typescript.md",
+      "skill": "agentmail",
+      "sourcePath": "Skills/agentmail/references/typescript.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c0d9dd4ce21c7ae4560851c139ffadc074138306f4a59ae9248bb55c9a1e3fb1",
+      "distributedSha256": "c0d9dd4ce21c7ae4560851c139ffadc074138306f4a59ae9248bb55c9a1e3fb1",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/email/agentmail-sdk/references/webhooks.md",
+      "skill": "agentmail",
+      "sourcePath": "Skills/agentmail/references/webhooks.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "76e3e303eb6b738c06c55c579aefe6369e361a1e0b7449b4c3eef5ee3f2cffee",
+      "distributedSha256": "76e3e303eb6b738c06c55c579aefe6369e361a1e0b7449b4c3eef5ee3f2cffee",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/email/agentmail-sdk/references/websockets.md",
+      "skill": "agentmail",
+      "sourcePath": "Skills/agentmail/references/websockets.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "3955e6ce901ecb36874c498e903a0d652d4f8fe906ec4d88bad81002119d77c9",
+      "distributedSha256": "3955e6ce901ecb36874c498e903a0d652d4f8fe906ec4d88bad81002119d77c9",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/email/agentmail-sdk/SKILL.md",
+      "skill": "agentmail",
+      "sourcePath": "Skills/agentmail/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "1b727b97bd7c0fa3dfb1604a143d984c93d6b9e8a5d7c2c16291e5ea3f8e2b81",
+      "distributedSha256": "a594b9580b501ece08d4824f38fd7bae151b6a05086737ce35b03346e7dff7fd",
+      "adaptation": "Hermes frontmatter added (version, author, MIT licence, platforms, metadata.hermes tags/related_skills, required AGENTMAIL_API_KEY); renamed agentmail -> agentmail-sdk to avoid colliding with the Hermes optional 'agentmail' (CLI) skill, with a note pointing to it."
+    },
+    {
+      "path": "skills/email/agentmail-send-email/LICENSE",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "3f79d3794fa6aa0dbdfb6b7a1b18ff354ad40bd0e4f4fbd1b05e3f44f0ef8d4e",
+      "adaptation": "Upstream MIT licence text (Copyright (c) 2026 AgentMail, Inc.) from agentmail-to/agentmail-plugins LICENSE (sha256 3f79d379...f8d4e). The source skill dirs carry no licence file; the copyright holder publishes the same skills (byte-identical or few-line revisions) under this licence."
+    },
+    {
+      "path": "skills/email/agentmail-send-email/SKILL.md",
+      "skill": "agentmail-send-email",
+      "sourcePath": "Skills/agentmail-send-email/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e7231839933835b455d8f6d62816034266214fd4e4b0a99ab4ced0d14a8561d7",
+      "distributedSha256": "942a5cdf1bd49ad97c1be63f5956d7d78080dee747bce87d6f4518884bbd9453",
+      "adaptation": "Hermes frontmatter added (version, author, MIT licence, platforms, metadata.hermes tags/related_skills); unshipped sibling agentmail-manage-inboxes reference replaced by agentmail-sdk."
+    },
+    {
+      "path": "skills/media/academy-video-pipeline/SKILL.md",
+      "skill": "academy-video-pipeline",
+      "sourcePath": "Skills/academy-video-pipeline/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6e2709a2a124f103b744b5baa85860fe06af5f3f776e11e16e31b3e2192551ac",
+      "distributedSha256": "264a22c8c2856eec533e6ec6ef0e316eed9ef9b7ed64b1998fe4e045ebfd9cab",
+      "adaptation": "Rewritten operator-neutral: removed persona/channel names, operator author handle and Zo host claims; host-only Integrations/hyperframes and skill-security-gate paths replaced by upstream heygen-com/hyperframes and the Hermes optional hyperframes skill plus a generic third-party review step; Hermes frontmatter added."
+    },
+    {
+      "path": "skills/media/heygen-avatar/LICENSE",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/LICENSE",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ed9ff67751c11e70907ac5186918c8339981cf40907ba09ae896714127e5644c",
+      "distributedSha256": "ed9ff67751c11e70907ac5186918c8339981cf40907ba09ae896714127e5644c",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-avatar/references/asset-routing.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-avatar/references/asset-routing.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "014cccb51eac4377e9b5fc25a0b7f2c0f2c0b3b69a02a97f70e7d678e388855a",
+      "distributedSha256": "014cccb51eac4377e9b5fc25a0b7f2c0f2c0b3b69a02a97f70e7d678e388855a",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-avatar/references/avatar-creation.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-avatar/references/avatar-creation.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8925062c46e7086d242d6b50717698c832129ecbc6796f1d29a108be1accd289",
+      "distributedSha256": "8925062c46e7086d242d6b50717698c832129ecbc6796f1d29a108be1accd289",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-avatar/references/troubleshooting.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-avatar/references/troubleshooting.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "75472946bc0237747cb430c451a6809c63e5765cba4e9639c5878fa1a9d8d99c",
+      "distributedSha256": "75472946bc0237747cb430c451a6809c63e5765cba4e9639c5878fa1a9d8d99c",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-avatar/SKILL.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-avatar/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d178e852c931a00025ffbd8c14ce9400e6bcefbad909d9bad2dea036f328bde2",
+      "distributedSha256": "a708c7da4d9cf2f36b52a144989b2d6b9efcb01a76159808b7eb875a9cb93a0f",
+      "adaptation": "Hermes frontmatter added (metadata.hermes tags/homepage/related_skills, author, MIT licence, platforms, optional HEYGEN_API_KEY) and a Hermes note on connecting the official HeyGen MCP server (mcp_servers + hermes mcp login) and mcp_heygen_<tool> naming; CLI install advice changed from curl|bash to download-review-run (Hermes skills_guard curl_pipe_shell). Upstream body otherwise unchanged."
+    },
+    {
+      "path": "skills/media/heygen-translate/LICENSE",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/LICENSE",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ed9ff67751c11e70907ac5186918c8339981cf40907ba09ae896714127e5644c",
+      "distributedSha256": "ed9ff67751c11e70907ac5186918c8339981cf40907ba09ae896714127e5644c",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-translate/references/asset-routing.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-translate/references/asset-routing.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2472bcb8e43bf3ec286fc923b3ca518e66e784d85d6979e65355b2bb8a5ef7a4",
+      "distributedSha256": "2472bcb8e43bf3ec286fc923b3ca518e66e784d85d6979e65355b2bb8a5ef7a4",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-translate/references/language-locale-guide.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-translate/references/language-locale-guide.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "0a8248100c1eb6d867eb4f53014bd1972b3396afaa35eea00cc47792d6f3cad7",
+      "distributedSha256": "0a8248100c1eb6d867eb4f53014bd1972b3396afaa35eea00cc47792d6f3cad7",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-translate/references/proofreads-workflow.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-translate/references/proofreads-workflow.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f4a6662096e19e721f0ad6e6bd053a133c089f73bef9f8953261ebe10d0625cb",
+      "distributedSha256": "f4a6662096e19e721f0ad6e6bd053a133c089f73bef9f8953261ebe10d0625cb",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-translate/references/troubleshooting.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-translate/references/troubleshooting.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "26c0d8de8cd3fb11e613aad9ce3b2fdcff947b0ddacb0313cfdc74b351f399af",
+      "distributedSha256": "26c0d8de8cd3fb11e613aad9ce3b2fdcff947b0ddacb0313cfdc74b351f399af",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-translate/SKILL.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-translate/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "65be7a8d9ca53ceace8f6cb222ee21afeb62afd7190cbd8117175364b8ecf6ac",
+      "distributedSha256": "de1615e776776f50d8911ba785af9107ab7b38ac200cd6aa1b291b82ae7ac301",
+      "adaptation": "Hermes frontmatter added (metadata.hermes tags/homepage/related_skills, author, MIT licence, platforms, optional HEYGEN_API_KEY) and a Hermes note on connecting the official HeyGen MCP server (mcp_servers + hermes mcp login) and mcp_heygen_<tool> naming; CLI install advice changed from curl|bash to download-review-run (Hermes skills_guard curl_pipe_shell). Upstream body otherwise unchanged."
+    },
+    {
+      "path": "skills/media/heygen-video/LICENSE",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/LICENSE",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ed9ff67751c11e70907ac5186918c8339981cf40907ba09ae896714127e5644c",
+      "distributedSha256": "ed9ff67751c11e70907ac5186918c8339981cf40907ba09ae896714127e5644c",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/references/asset-routing.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/references/asset-routing.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "014cccb51eac4377e9b5fc25a0b7f2c0f2c0b3b69a02a97f70e7d678e388855a",
+      "distributedSha256": "014cccb51eac4377e9b5fc25a0b7f2c0f2c0b3b69a02a97f70e7d678e388855a",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/references/avatar-discovery.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/references/avatar-discovery.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f34f5623a1273b24ebd8449a547ad8f2cda0c2dc393b1de5ead6cab0454349ee",
+      "distributedSha256": "f34f5623a1273b24ebd8449a547ad8f2cda0c2dc393b1de5ead6cab0454349ee",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/references/frame-check.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/references/frame-check.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4339aa4cef0e75c1b3e3d6d80be872fa0425254dd3dbea18be7aabd0ace775fe",
+      "distributedSha256": "4339aa4cef0e75c1b3e3d6d80be872fa0425254dd3dbea18be7aabd0ace775fe",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/references/motion-vocabulary.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/references/motion-vocabulary.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "19a3c7e2f4043fa6495aee438afbe7d471b440699d3efe90f4c10af7accce992",
+      "distributedSha256": "19a3c7e2f4043fa6495aee438afbe7d471b440699d3efe90f4c10af7accce992",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/references/official-prompt-guide.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/references/official-prompt-guide.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5ca3b833846d01173d55bf21736d5eca3aa3cc27e277ae5e72e953f779faf8e9",
+      "distributedSha256": "5ca3b833846d01173d55bf21736d5eca3aa3cc27e277ae5e72e953f779faf8e9",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/references/prompt-craft.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/references/prompt-craft.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "847fec6b0d51bd52ad64b33a4bc20e634a3e45d7626bd087848d0b17075ca72c",
+      "distributedSha256": "847fec6b0d51bd52ad64b33a4bc20e634a3e45d7626bd087848d0b17075ca72c",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/references/prompt-styles.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/references/prompt-styles.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9b0a5610c393cdee782d0f4920d084b7cfec865cb6fad37ff9ed73a5784fd211",
+      "distributedSha256": "9b0a5610c393cdee782d0f4920d084b7cfec865cb6fad37ff9ed73a5784fd211",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/references/troubleshooting.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/references/troubleshooting.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "75472946bc0237747cb430c451a6809c63e5765cba4e9639c5878fa1a9d8d99c",
+      "distributedSha256": "75472946bc0237747cb430c451a6809c63e5765cba4e9639c5878fa1a9d8d99c",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/scripts/update-check.sh",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/scripts/update-check.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "3266524943df88d9291a54a3d9d29d95cb54315d88e1c73efa67fdbe4542de77",
+      "distributedSha256": "3266524943df88d9291a54a3d9d29d95cb54315d88e1c73efa67fdbe4542de77",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/media/heygen-video/SKILL.md",
+      "skill": "heygen-skills",
+      "sourcePath": "Skills/heygen-skills/heygen-video/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "345d220238aadcc0f62323352aad186bac03c503aff0c9386cc125abfb5375a9",
+      "distributedSha256": "2764d3fc3c5d60474f368e5cda4653efc0dad36d5577e239d61c35b2bcd3da6f",
+      "adaptation": "Hermes frontmatter added (metadata.hermes tags/homepage/related_skills, author, MIT licence, platforms, optional HEYGEN_API_KEY) and a Hermes note on connecting the official HeyGen MCP server (mcp_servers + hermes mcp login) and mcp_heygen_<tool> naming; CLI install advice changed from curl|bash to download-review-run (Hermes skills_guard curl_pipe_shell); update-check path uses ${HERMES_SKILL_DIR}; removed the host-local Client Templates section (operator-specific JHF template, not upstream). Upstream body otherwise unchanged."
+    },
+    {
+      "path": "skills/media/smart-money/SKILL.md",
+      "skill": "smart-money",
+      "sourcePath": "Skills/smart-money/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ccc1a6ea2be1a256bbdfc0a7cd483c2baf3cb4ff746cecdcdea752e3cde1e871",
+      "distributedSha256": "f28831eb68c12c75b4ca88a1c783da12cdf1d7b83193f69d08b8d84a8261b6c2",
+      "adaptation": "Rewritten operator-neutral: removed brand/funnel names, revenue target, persona identity and operator author handle; output moved from the skill dir to $ZOUROBOROS_WORKSPACE; the source .env.template (channel ID, handle, voice ID, site URL) is NOT shipped and is replaced by a names-only variable table; added educational/not-advice and human-approval content rules; Hermes frontmatter added."
+    },
+    {
       "path": "skills/README.md",
       "skill": null,
       "sourcePath": null,
@@ -11,6 +389,177 @@
       "sourceSha256": null,
       "distributedSha256": "ed851d02ec85130871a905a6543d488768412adb339c187bf8c2ce5bc14fce13",
       "adaptation": "Distribution-authored index for the skills tree; no source counterpart."
+    },
+    {
+      "path": "skills/research/tradingview-mcp-server/LICENSE",
+      "skill": "tradingview-mcp-server",
+      "sourcePath": "Skills/tradingview-mcp-server/LICENSE",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "65c54ca36b703bfdf55094a0a38c160c3823a97a1ead90dc3f654373dc2593e8",
+      "distributedSha256": "65c54ca36b703bfdf55094a0a38c160c3823a97a1ead90dc3f654373dc2593e8",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/research/tradingview-mcp-server/references/fields.md",
+      "skill": "tradingview-mcp-server",
+      "sourcePath": "Skills/tradingview-mcp-server/docs/fields.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d8b9974152c14c3b37cd40391ee73a123b3835b641ccd802cf14dbe0d94b19ec",
+      "distributedSha256": "d8b9974152c14c3b37cd40391ee73a123b3835b641ccd802cf14dbe0d94b19ec",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/research/tradingview-mcp-server/references/presets.md",
+      "skill": "tradingview-mcp-server",
+      "sourcePath": "Skills/tradingview-mcp-server/docs/presets.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4f1524a84577edd258572a43c476fde4e66e7009f8931fe83d0e74fd814d8bff",
+      "distributedSha256": "4f1524a84577edd258572a43c476fde4e66e7009f8931fe83d0e74fd814d8bff",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/research/tradingview-mcp-server/SKILL.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "addac373bdb4ebc77142d24bbe04d0cdc9d9982626655b327456d59b3ff4b791",
+      "adaptation": "Hermes skill authored for the upstream MIT tradingview-mcp-server (Fiale Plus): the source entry is a vendored MCP server repo with no SKILL.md; this skill registers the pinned npm package (0.7.1) as a Hermes stdio MCP server and adds research-only and portfolio-safety rules. Server source is not vendored."
+    },
+    {
+      "path": "skills/software-development/ponytail-audit/SKILL.md",
+      "skill": "ponytail-audit",
+      "sourcePath": "Skills/ponytail-audit/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8b8cb8d71c1ae169293c05f15ca9ab22d41c867f77b5ae2a4547d2e74057ea5a",
+      "distributedSha256": "61d5063768006380d6e970405ed9f08983ff51d944f7a2636e1e379b2021abab",
+      "adaptation": "Hermes frontmatter (metadata.hermes, upstream ponytail 4.7.0 MIT attribution kept) replaces the Zo compatibility/author fields; ponytail-review marked optional (not yet shipped)."
+    },
+    {
+      "path": "skills/software-development/ponytail-debt/scripts/ponytail-debt.py",
+      "skill": "ponytail-debt",
+      "sourcePath": "Skills/ponytail-debt/scripts/ponytail-debt.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "bcd3a87fe7dcb97b865821a80bd4d19200143f7017f15ea9d81d3c64029a9b4b",
+      "distributedSha256": "bcd3a87fe7dcb97b865821a80bd4d19200143f7017f15ea9d81d3c64029a9b4b",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/ponytail-debt/scripts/test-ponytail-debt.py",
+      "skill": "ponytail-debt",
+      "sourcePath": "Skills/ponytail-debt/scripts/test-ponytail-debt.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c684ef5c77e10299ed23d3bee8d2c3863d5015cd848b74931779625a80f550d7",
+      "distributedSha256": "c684ef5c77e10299ed23d3bee8d2c3863d5015cd848b74931779625a80f550d7",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/ponytail-debt/SKILL.md",
+      "skill": "ponytail-debt",
+      "sourcePath": "Skills/ponytail-debt/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "02b6471ea79fd88793dbe0ab211ff1eb57c9ff536e66387995a6c5fdb44082f9",
+      "distributedSha256": "0229d888c5fd021ca0a15cedc7c0b99b7c535b2433e07743abef75b01f282226",
+      "adaptation": "Hermes frontmatter (metadata.hermes, upstream ponytail 4.7.0 MIT attribution kept, python3 prerequisite) replaces Zo compatibility/author fields; script paths use ${HERMES_SKILL_DIR} instead of the source repo path."
+    },
+    {
+      "path": "skills/software-development/three-stage-eval/references/evaluator.md",
+      "skill": "three-stage-eval",
+      "sourcePath": "Skills/three-stage-eval/references/evaluator.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5b42aaf877693a0d2fe055891b46d25899ce11a93c695779f7233118244df5f8",
+      "distributedSha256": "5b42aaf877693a0d2fe055891b46d25899ce11a93c695779f7233118244df5f8",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/three-stage-eval/references/qa-judge.md",
+      "skill": "three-stage-eval",
+      "sourcePath": "Skills/three-stage-eval/references/qa-judge.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "74c4357ff677c8b10f8bd40c2924460a2ab795c5e6d2e9cf5d3aaec6335c2517",
+      "distributedSha256": "74c4357ff677c8b10f8bd40c2924460a2ab795c5e6d2e9cf5d3aaec6335c2517",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/three-stage-eval/SKILL.md",
+      "skill": "three-stage-eval",
+      "sourcePath": "Skills/three-stage-eval/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e4af2dcaaccbfbd88109be0a0ae3aca232a691acc852bb9164faea2afdd0c96d",
+      "distributedSha256": "637b6aec3a34d98d5964a54fe4c6373c58461435be822aa6de062d56cf127af3",
+      "adaptation": "Hermes frontmatter (Q00/ouroboros MIT origin kept) replaces Zo fields; Quick Start for the never-tracked scripts/evaluate.ts replaced by an agent-run procedure; zo.space checks generalised to web routes; /zo/ask consensus replaced by Hermes delegate_task or separate model invocations; references to unshipped ontologist.md/unstuck-lateral replaced by inline guidance."
+    },
+    {
+      "path": "skills/zouroboros/classifier-fallback/assets/classifier-catalog.json",
+      "skill": "classifier-fallback",
+      "sourcePath": "Skills/classifier-fallback/assets/classifier-catalog.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "619c19dba422f823eb1db3d8bcb258992aa2233c63135e7c84e3d00caa856de4",
+      "distributedSha256": "619c19dba422f823eb1db3d8bcb258992aa2233c63135e7c84e3d00caa856de4",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/classifier-fallback/assets/fallback-map.json",
+      "skill": "classifier-fallback",
+      "sourcePath": "Skills/classifier-fallback/assets/fallback-map.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e3e3ef39e52fa78ff9cda3712312aafaaf6a518fdf4bbcddc0ce3d4029dd36ef",
+      "distributedSha256": "252c34cb773ae072d934c0116204d0e226596283eabc3cfdce15e6045e4a4b14",
+      "adaptation": "Host BYOK model ids removed (fallback_model null; labels made generic); fallback models now come from CLASSIFIER_FALLBACK_MODEL[_<DOMAIN>]; added safety rule that an unconfigured fallback degrades to human_review."
+    },
+    {
+      "path": "skills/zouroboros/classifier-fallback/assets/system-card-urls.json",
+      "skill": "classifier-fallback",
+      "sourcePath": "Skills/classifier-fallback/assets/system-card-urls.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "a9c4aec281674aa265aeba1976fa551b82cbb1c2094108c7f4b85a8a64af3a7c",
+      "distributedSha256": "a9c4aec281674aa265aeba1976fa551b82cbb1c2094108c7f4b85a8a64af3a7c",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/classifier-fallback/scripts/detector.ts",
+      "skill": "classifier-fallback",
+      "sourcePath": "Skills/classifier-fallback/scripts/detector.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "daaf9506e4fa14748f6f90c7a9c83a6193dcf84b447a9dc442c9715841af702d",
+      "distributedSha256": "1fd0c2eda009a4f89a227e25d813766079bb37ed7003b9549009e72313557517",
+      "adaptation": "routeFallback reads CLASSIFIER_FALLBACK_MODEL[_<DOMAIN>] and degrades to human_review when none is set; audit ledger moved from assets/ to ledgerPath() under ZOUROBOROS_STATE_DIR (XDG default, CLASSIFIER_FALLBACK_LEDGER override); built-in tests inject env and cover the unconfigured path; strict-mode parseFloat fix."
+    },
+    {
+      "path": "skills/zouroboros/classifier-fallback/scripts/system-card-diff.ts",
+      "skill": "classifier-fallback",
+      "sourcePath": "Skills/classifier-fallback/scripts/system-card-diff.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "cedb3aa9287a941f809678b48a47a34812b713a098f821f75cd69d6ae78757dc",
+      "distributedSha256": "df3bea2e46bc06e9b840e603fbc732d1199ce26f5cf16d739cfdec42ca1d36e0",
+      "adaptation": "Snapshot dir moved from assets/card-snapshots to ZOUROBOROS_STATE_DIR/classifier-fallback/card-snapshots (CLASSIFIER_FALLBACK_SNAPSHOTS override); User-Agent de-branded; usage comment matches the actual scan/baseline commands."
+    },
+    {
+      "path": "skills/zouroboros/classifier-fallback/SKILL.md",
+      "skill": "classifier-fallback",
+      "sourcePath": "Skills/classifier-fallback/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7c56f1754e7b3d65c55c8b04d2a5b8cfaad81fb242a5118f11b8470c186ebf00",
+      "distributedSha256": "b89fff253bda145406f2fc19d9b1d1cb84a1bc0093c7bfdb9c3b4fd92f6f04b8",
+      "adaptation": "Hermes frontmatter (removed operator handle, Linear/AIEWF ids, consensus-gate dependency); commands use ${HERMES_SKILL_DIR}; ledger and snapshots moved from assets/ to $ZOUROBOROS_STATE_DIR/classifier-fallback with env overrides; documented env-configured fallback models."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-observatory/assets/install.prompt.md",
+      "skill": "zouroboros-observatory",
+      "sourcePath": "Skills/zouroboros-observatory/assets/install.prompt.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "64b63081294d418ca740d4a66cb30ea506b18246d47a1d4790d38b3a57fb08c6",
+      "distributedSha256": "8f5fcf433cdcec522799f7890936e0930af9c3e06d4c3dd72ae992f9f6e7a6dc",
+      "adaptation": "Zo Site/Zo secret steps replaced by bunx install and private remote-access guidance."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-observatory/SKILL.md",
+      "skill": "zouroboros-observatory",
+      "sourcePath": "Skills/zouroboros-observatory/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4c2c68f5146130423fecc1b5c052863c132f53813c3721e22f202c6b82241415",
+      "distributedSha256": "b122d537864f6d945add74ff9761848c55ea71e42638bea1019ca2fb6caf1505",
+      "adaptation": "Rewritten for Hermes hosts: run the published zouroboros-observatory@0.1.0 via bunx; Zo Site deploy replaced by private remote-access guidance (token, private network, approval); env var list matches packages/observatory/src/config.ts; Hermes frontmatter added; operator author handle removed."
     }
   ]
 }

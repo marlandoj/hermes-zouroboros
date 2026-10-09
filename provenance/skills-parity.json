@@ -25,9 +25,11 @@
       "nameSha256": "7f51684977abd88d0b18916c8e0e5f96ec95ea59f1d599b22168ca9871d8f782",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "Rewritten operator-neutral (persona/channel names and Zo host claims removed); host-only Integrations/ and skill-security-gate paths replaced by upstream HyperFrames and the Hermes optional hyperframes skill.",
+      "distributedAs": [
+        "skills/media/academy-video-pipeline"
+      ]
     },
     {
       "name": "agent-doctor",
@@ -43,9 +45,12 @@
       "nameSha256": "8b657e439e3ba9b1981e913e9013340ae478be09279604923b37fd0063f142dd",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "AgentMail MIT (copyright holder publishes the same skill under MIT in agentmail-to/agentmail-plugins); Hermes frontmatter added. Reference docs verbatim apart from the agentmail-sdk rename.",
+      "distributedAs": [
+        "skills/email/agent-email-patterns"
+      ],
+      "followUp": "Operator may confirm the licence judgement (source dir had no LICENSE)."
     },
     {
       "name": "agent-introspect",
@@ -70,36 +75,48 @@
       "nameSha256": "befc92b3a019d04cffb46eaec3c6dca8befcdd8cdaf0410fad67dd7d9c04bb65",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "Shipped as agentmail-sdk (renamed: Hermes optional skills include a CLI-focused \"agentmail\"). AgentMail MIT: the copyright holder publishes these skills under MIT in agentmail-to/agentmail-plugins; files are byte-identical or few-line revisions. Hermes frontmatter added; reference docs verbatim.",
+      "distributedAs": [
+        "skills/email/agentmail-sdk"
+      ],
+      "followUp": "Operator may confirm the licence judgement (source dir had no LICENSE; MIT taken from the copyright holder's agentmail-plugins repo)."
     },
     {
       "name": "agentmail-check-email",
       "nameSha256": "ce05d241d0ac16905f4d756922b17276268e43f509e78e4ea8cfef23d2367602",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "AgentMail MIT (copyright holder publishes the same skill under MIT in agentmail-to/agentmail-plugins); Hermes frontmatter added. Unshipped sibling (manage-inboxes) reference pointed at agentmail-sdk.",
+      "distributedAs": [
+        "skills/email/agentmail-check-email"
+      ],
+      "followUp": "Operator may confirm the licence judgement (source dir had no LICENSE)."
     },
     {
       "name": "agentmail-mcp",
       "nameSha256": "05a78c10a55a807bc76baeba20856cce76a565a2e705641415cb117d8bb921fc",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "AgentMail MIT (copyright holder publishes the same skill under MIT in agentmail-to/agentmail-plugins); Hermes frontmatter added. Added Hermes mcp_servers setup (OAuth or x-api-key header).",
+      "distributedAs": [
+        "skills/email/agentmail-mcp"
+      ],
+      "followUp": "Operator may confirm the licence judgement (source dir had no LICENSE)."
     },
     {
       "name": "agentmail-send-email",
       "nameSha256": "1f8b8050bc95633e8ff05aacb22a221536f82564a246a91d3b0a107fbcf58721",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "AgentMail MIT (copyright holder publishes the same skill under MIT in agentmail-to/agentmail-plugins); Hermes frontmatter added. Unshipped sibling (manage-inboxes) reference pointed at agentmail-sdk.",
+      "distributedAs": [
+        "skills/email/agentmail-send-email"
+      ],
+      "followUp": "Operator may confirm the licence judgement (source dir had no LICENSE)."
     },
     {
       "name": "ai-assistant-voice",
@@ -185,10 +202,11 @@
       "nameSha256": "469dd7f6f1d76c326105f842dbf02c4e2f52bbbde722bf30c36bb143394961f2",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1).",
-      "followUp": "Exclude assets/card-snapshots/ (captured run output)."
+      "disposition": "adapted",
+      "reason": "Host BYOK model ids removed (env-configured fallback, degrading to human_review); ledger and snapshots moved to ZOUROBOROS_STATE_DIR. Not shipped: .gitignore, assets/card-snapshots/ and the runtime ledger. Built-in tests run in CI via tests/skills-portable.test.ts.",
+      "distributedAs": [
+        "skills/zouroboros/classifier-fallback"
+      ]
     },
     {
       "name": "compile-build-spec",
@@ -242,9 +260,9 @@
       "nameSha256": "40f30ae1d2f32176b1d54b4aef354d19269939fade2341dedab2225fe81258d3",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "hermes-native",
+      "reason": "Source entry has no SKILL.md (only scripts/elevenlabs.ts.bak), so it is not a loadable skill on the VPS. Hermes core ships ElevenLabs text-to-speech and Scribe transcription (ELEVENLABS_API_KEY).",
+      "hermesSkill": "core TTS provider (tts.elevenlabs)"
     },
     {
       "name": "extract-patterns",
@@ -296,9 +314,13 @@
       "nameSha256": "75dc16c3790f551fc53281118f8b927ea3cdaf64f226ed186eb54dda8d265421",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "HeyGen MIT (LICENSE shipped in each skill). The three sub-skills ship with their references; Hermes frontmatter and an MCP note added; CLI install advice changed from curl|bash to download-review-run. Not shipped: plugin manifests for other agents, CI workflows, brand images, setup script, the nanoclaw variant, and the operator-specific JHF explainer template (reference file and the heygen-video section pointing to it).",
+      "distributedAs": [
+        "skills/media/heygen-avatar",
+        "skills/media/heygen-translate",
+        "skills/media/heygen-video"
+      ]
     },
     {
       "name": "host-resilience-probe",
@@ -314,19 +336,18 @@
       "nameSha256": "deeecbc350d55c176896d6b41fe11d5b8e17818f6ab939a0abbe8649c3aca6ed",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1).",
-      "followUp": "Hermes bundles a 'humanizer' skill: merge into it or ship under a non-colliding name; never two skills named humanizer."
+      "disposition": "hermes-native",
+      "reason": "Same upstream (blader/humanizer, MIT). The source is v2.1.1; Hermes bundles the newer v2.5.1 as creative/humanizer. Shipping a copy would collide on the name and regress the version.",
+      "hermesSkill": "humanizer"
     },
     {
       "name": "impeccable",
       "nameSha256": "8b3ed8af70bd3b1d283fdbd462a4bc22044c6d1877fac90ed56cf8d7e5c80423",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "hermes-native",
+      "reason": "Hermes optional skills include an upstream-maintained impeccable catalog entry (pbakaus/impeccable, Apache-2.0) that installs the current release with attribution. The source copy references a NOTICE.md it does not include, so shipping it would not satisfy Apache-2.0 section 4(d).",
+      "hermesSkill": "impeccable (optional catalog)"
     },
     {
       "name": "instinct-harvester",
@@ -406,8 +427,9 @@
       "trackedAtRevision": true,
       "triage": "portable",
       "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "plannedDisposition": "adapted",
+      "reason": "Reclassified from portable during t1: the script imports Projects/software-template-library (template-library.json, persona-associations) and resolves live persona identities. Neither is in hermes-zouroboros (packages/swarm has specialist-consult only).",
+      "followUp": "Port with the core runtime tasks (t3 or later): ship a portable template/association registry with generic roles, wire scripts/persona-consult.ts to packages/swarm specialist-consult, and replace the host BYOK reviewer pool with env-configured models."
     },
     {
       "name": "plan-closeout",
@@ -423,18 +445,22 @@
       "nameSha256": "ea2dd56424c53372d5352c6e7971dfecf471cdb57437eac5b3a2cb8bc9a3937a",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "Upstream ponytail 4.7.0 (MIT) attribution kept; Hermes frontmatter replaces Zo fields.",
+      "distributedAs": [
+        "skills/software-development/ponytail-audit"
+      ]
     },
     {
       "name": "ponytail-debt",
       "nameSha256": "306f2591c637633838a4e0f6782dbef23846292c396e1137d7b5bbbaa35c28a5",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "Upstream ponytail 4.7.0 (MIT) attribution kept; script and its tests ship verbatim (tests run in CI via tests/skills-portable.test.ts); paths use ${HERMES_SKILL_DIR}.",
+      "distributedAs": [
+        "skills/software-development/ponytail-debt"
+      ]
     },
     {
       "name": "ponytail-review",
@@ -479,7 +505,7 @@
       "triage": "portable",
       "disposition": "pending",
       "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1).",
+      "reason": "Re-verified in t1: still untracked at the pinned revision (symlink into the untracked Projects/reporeel-skill), so the importer cannot copy it; left pending.",
       "followUp": "Untracked in the source repository at the pinned revision; the importer only copies tracked blobs, so the source must be committed (or a reviewed import path agreed) before porting."
     },
     {
@@ -496,10 +522,11 @@
       "nameSha256": "8f8efb9736478b1151a73b40b7f138d4e384bba705faca77f1bd4316dd030a87",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1).",
-      "followUp": "Ship .env.template only with empty placeholders, as a reviewed exception."
+      "disposition": "adapted",
+      "reason": "Rewritten operator-neutral: brand, funnel, revenue target and persona identity removed; .env.template (channel ID, handle, voice ID, site URL) not shipped and replaced by a names-only variable table; not-advice and human-approval rules added. The source has no pipeline scripts, so the skill is an orchestration guide.",
+      "distributedAs": [
+        "skills/media/smart-money"
+      ]
     },
     {
       "name": "spec-first-interview",
@@ -515,9 +542,11 @@
       "nameSha256": "195649b14c4b93ab44f03884eb72f8489f72746eed14ea732474c862e8e37f9d",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "Q00/ouroboros (MIT) origin kept; never-tracked evaluate.ts quick start replaced by an agent-run procedure; zo.space and /zo/ask replaced by generic web checks and Hermes delegate_task consensus.",
+      "distributedAs": [
+        "skills/software-development/three-stage-eval"
+      ]
     },
     {
       "name": "threejs-game-production",
@@ -543,9 +572,11 @@
       "nameSha256": "87f60780172aa4f4477f0ec68bc4a0668672df1cde6f0a756d896a87d0b2d766",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "Fiale Plus MIT (LICENSE shipped). The source is a vendored MCP server repo with no SKILL.md; the distribution ships an authored Hermes skill that registers the pinned npm package as an MCP server, plus upstream field/preset docs. Server source not vendored.",
+      "distributedAs": [
+        "skills/research/tradingview-mcp-server"
+      ]
     },
     {
       "name": "ux-laws",
@@ -714,9 +745,12 @@
       "nameSha256": "b798a547836879df2a9e58d6aa9e63801be92676684117fe099184bba3665ea6",
       "trackedAtRevision": true,
       "triage": "portable",
-      "disposition": "pending",
-      "plannedDisposition": "portable",
-      "reason": "Triage: portable; re-verify files, licence and leak gate when ported (t1)."
+      "disposition": "adapted",
+      "reason": "Runs the published zouroboros-observatory@0.1.0 via bunx; Zo Site deploy replaced by private remote-access guidance.",
+      "distributedAs": [
+        "skills/zouroboros/zouroboros-observatory"
+      ],
+      "followUp": "The observatory package itself is not in the hermes-zouroboros packages; consider vendoring it so the distribution does not depend on the npm release."
     },
     {
       "name": "zouroboros-prescribe",
