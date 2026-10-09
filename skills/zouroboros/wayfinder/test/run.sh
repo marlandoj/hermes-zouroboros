@@ -101,7 +101,12 @@ const r = await handler({ prompt: "make a poster for launch day" }, { cwd: "/p",
 const none = await handler({ prompt: "" }, {});
 console.log(r.message.customType, r.message.content, r.message.display, none === undefined);
 JS
-check "pi extension returns hidden message" "$(node --experimental-strip-types --no-warnings "$T/pi.mts" 2>/dev/null)" "wayfinder LIVE:pi false true"
+# Pi loads TypeScript directly; checking it here needs Node's type stripping (Node 22.6+).
+if node --experimental-strip-types --no-warnings -e '' 2>/dev/null; then
+  check "pi extension returns hidden message" "$(node --experimental-strip-types --no-warnings "$T/pi.mts" 2>/dev/null)" "wayfinder LIVE:pi false true"
+else
+  echo "skip: pi extension check needs Node with --experimental-strip-types; found $(node --version)"
+fi
 check "hermes plugin returns context" "$(cd "$ROOT/plugins/hermes" && python3 -c '
 import wayfinder
 hooks = {}

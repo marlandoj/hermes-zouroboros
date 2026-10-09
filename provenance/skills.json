@@ -1755,8 +1755,8 @@
       "sourcePath": "Skills/verity/test/run.sh",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "f028ac9f694fa82ca80233dc3df6176909b16d170a098e9b9bc01448084e2e86",
-      "distributedSha256": "de72e81a47e61143dc388a85f7d55bd3fcd1600712e0d16a4d0b63a2fa281cb4",
-      "adaptation": "Hermetic: unsets profile env and uses a temporary HOME; adds Hermes adapter and installer checks."
+      "distributedSha256": "795ed09b1cfdc15321141b01fcd10bccbb8441921cca01c6842b2e5b4c28f587",
+      "adaptation": "Hermetic: unsets profile env and uses a temporary HOME; adds Hermes adapter and installer checks; installer wiring checks need Node 22 (Canny requirement) and are replaced by a refusal check on older Node."
     },
     {
       "path": "skills/software-development/visual-verifier/references/post-flight-wiring.md",
@@ -2754,8 +2754,8 @@
       "sourcePath": "Skills/wayfinder/test/run.sh",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "38ad76a01055e3b09044a22e65911be07a4818778ec99f99178b5341ed91059e",
-      "distributedSha256": "1238052020c1b89bf8ad44a67731184f5efffbee3f326b3d9c5da7d4603d7799",
-      "adaptation": "Throwaway HOME, never writes in the skill tree; real-engine checks only with an already cached model."
+      "distributedSha256": "f506689c2010d8b333ff8958268004ec6cc7ff1a80d832c369e08dc83974db12",
+      "adaptation": "Throwaway HOME, never writes in the skill tree; real-engine checks only with an already cached model; the Pi TypeScript plugin check needs Node type stripping (22.6+) and is skipped on older Node."
     },
     {
       "path": "skills/zouroboros/wayfinder/workflows/adoption.dag.json",

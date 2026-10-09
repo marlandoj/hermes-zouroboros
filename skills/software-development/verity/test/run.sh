@@ -118,25 +118,32 @@ check "shadow missing analyzer answers {}" "$(CANNY_CLI="$T/missing.js" hook her
 unset CANNY_CLI TYPESAFE_API_KEY VERITY_HOME
 
 # Installer: wires all four harnesses, keeps existing hooks, and is idempotent.
-mkdir -p "$T/home/.gemini" "$T/proj/.claude" "$T/canny/.git" "$T/canny/dist"
-echo '{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"keep-me"}]}]}}' > "$T/proj/.claude/settings.json"
-touch "$T/canny/dist/cli.js"
-git -C "$T/canny" init -q 2>/dev/null
-inst() { bash "$ROOT/scripts/install.sh" --harness claude,codex,kimi,gemini --project "$T/proj" --canny-dir "$T/canny" --backup-dir "$T/bk" >/dev/null 2>&1; }
-inst; check "installer exit" "$?" "0"; inst
-check "claude keeps existing hook" "$(jq -r '.hooks.Stop[0].hooks[0].command' "$T/proj/.claude/settings.json")" "keep-me"
-check "claude wired once" "$(jq '[.hooks[][] | tostring | select(test("verity-hook"))] | length' "$T/proj/.claude/settings.json")" "5"
-check "codex wired once" "$(jq '[.hooks[][] | tostring | select(test("verity-hook"))] | length' "$T/proj/.codex/hooks.json")" "4"
-check "gemini wired once" "$(jq '[.hooks[][] | tostring | select(test("verity-hook"))] | length' "$T/home/.gemini/settings.json")" "4"
-check "kimi wired once" "$(grep -c verity-hook "$T/home/.kimi-code/config.toml")" "5"
-check "custom canny dir passed" "$(grep -c "CANNY_DIR=$T/canny" "$T/home/.kimi-code/config.toml")" "5"
-check "backup written" "$(ls "$T/bk" | grep -c proj_.claude_settings)" "1"
-snippet=$(bash "$ROOT/scripts/install.sh" --canny-dir "$T/canny" --backup-dir "$T/bk" 2>&1)
-check "hermes installer exit" "$?" "0"
-check "hermes snippet has pre_verify" "$(grep -c '^  pre_verify:' <<<"$snippet")" "1"
-check "hermes snippet matcher" "$(grep -c 'matcher: "terminal|write_file|patch"' <<<"$snippet")" "2"
-check "hermes snippet passes canny dir" "$(grep -c "env CANNY_DIR=$T/canny bash .*verity-hook.sh hermes" <<<"$snippet")" "4"
-check "hermes installer writes no profile" "$(ls -A "$T/home" | grep -c hermes)" "0"
+# Canny needs Node 22+, so the installer refuses older Node; on older Node only that refusal is checked.
+if node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 22 ? 0 : 1)'; then
+  mkdir -p "$T/home/.gemini" "$T/proj/.claude" "$T/canny/.git" "$T/canny/dist"
+  echo '{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"keep-me"}]}]}}' > "$T/proj/.claude/settings.json"
+  touch "$T/canny/dist/cli.js"
+  git -C "$T/canny" init -q 2>/dev/null
+  inst() { bash "$ROOT/scripts/install.sh" --harness claude,codex,kimi,gemini --project "$T/proj" --canny-dir "$T/canny" --backup-dir "$T/bk" >/dev/null 2>&1; }
+  inst; check "installer exit" "$?" "0"; inst
+  check "claude keeps existing hook" "$(jq -r '.hooks.Stop[0].hooks[0].command' "$T/proj/.claude/settings.json")" "keep-me"
+  check "claude wired once" "$(jq '[.hooks[][] | tostring | select(test("verity-hook"))] | length' "$T/proj/.claude/settings.json")" "5"
+  check "codex wired once" "$(jq '[.hooks[][] | tostring | select(test("verity-hook"))] | length' "$T/proj/.codex/hooks.json")" "4"
+  check "gemini wired once" "$(jq '[.hooks[][] | tostring | select(test("verity-hook"))] | length' "$T/home/.gemini/settings.json")" "4"
+  check "kimi wired once" "$(grep -c verity-hook "$T/home/.kimi-code/config.toml")" "5"
+  check "custom canny dir passed" "$(grep -c "CANNY_DIR=$T/canny" "$T/home/.kimi-code/config.toml")" "5"
+  check "backup written" "$(ls "$T/bk" | grep -c proj_.claude_settings)" "1"
+  snippet=$(bash "$ROOT/scripts/install.sh" --canny-dir "$T/canny" --backup-dir "$T/bk" 2>&1)
+  check "hermes installer exit" "$?" "0"
+  check "hermes snippet has pre_verify" "$(grep -c '^  pre_verify:' <<<"$snippet")" "1"
+  check "hermes snippet matcher" "$(grep -c 'matcher: "terminal|write_file|patch"' <<<"$snippet")" "2"
+  check "hermes snippet passes canny dir" "$(grep -c "env CANNY_DIR=$T/canny bash .*verity-hook.sh hermes" <<<"$snippet")" "4"
+  check "hermes installer writes no profile" "$(ls -A "$T/home" | grep -c hermes)" "0"
+else
+  echo "skip: installer wiring checks need Node 22 or newer (Canny's requirement); found $(node --version)"
+  msg=$(bash "$ROOT/scripts/install.sh" --dry-run 2>&1); code=$?
+  check "installer refuses old node" "$code|$(grep -c 'Canny needs Node 22 or newer' <<<"$msg")" "1|1"
+fi
 
 echo "$pass passed, $fail failed"
 [ "$fail" = 0 ]

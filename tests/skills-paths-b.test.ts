@@ -49,7 +49,8 @@ test('shell and Python suites of the t7 skills pass', () => {
   expect(closeout.stdout).toMatch(/(\d+)\/\1 passed/);
   for (const suite of ['software-development/verity/test/run.sh', 'zouroboros/wayfinder/test/run.sh']) {
     const result = run('bash', [skill(suite)]);
-    expect(`${suite}: ${result.code}`).toBe(`${suite}: 0`);
+    const failures = result.stdout.split('\n').filter((line) => line.startsWith('FAIL')).join('; ');
+    expect(`${suite}: ${result.code} ${failures}`).toBe(`${suite}: 0 `);
     expect(result.stdout).toMatch(/ 0 failed/);
   }
   expect(run('python3', [skill('zouroboros/wayfinder/test/regression.py')]).code).toBe(0);
