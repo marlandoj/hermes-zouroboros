@@ -1,0 +1,18 @@
+{
+  "name": "graphrag-relational",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "extract": "bun scripts/extract.ts",
+    "index": "bun scripts/index.ts",
+    "query": "bun scripts/query.ts",
+    "test": "bun test scripts",
+    "prepare-runtime": "bun scripts/runtime.ts prepare",
+    "test:live": "bun scripts/runtime.ts prepare && GRAPHRAG_LIVE_TESTS=1 bun test scripts"
+  },
+  "dependencies": {
+    "@falkordblite/linux-x64": "8.2.3-falkordb.4.16.3",
+    "falkordblite": "0.3.0"
+  }
+}

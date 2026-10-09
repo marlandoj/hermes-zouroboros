@@ -173,9 +173,8 @@ no network. It also runs `compile-build-spec`'s own suite (35 tests) and the two
 Not shipped in t6:
 
 - `ai-engineer-learning` is dropped, because it was retired at the source.
-- `notebooklm-skill` is pending, because it is untracked in the source.
-- `graphrag-relational` is pending. It depends on `rag-telemetry` and on a native dependency that
-  builds Redis from source, which needs an operator decision.
+- `notebooklm-skill` is untracked in the source; the operator later kept it host-only (f2).
+- `graphrag-relational` waited for an operator decision on its Redis dependency; it shipped in f2.
 
 ### Path skills B (t7)
 
@@ -199,7 +198,23 @@ Not shipped in t7:
 - `ux-laws` is `held-license`. Its source text is based on CC BY-NC-ND 4.0 material, which conflicts
   with this repository's MIT licence.
 - `threejs-game-production` is dropped. It has no SKILL.md and ingests a private, paid course.
-- `graphrag-relational`, `notebooklm-skill` and `reporeel` stay pending until the operator decides.
+- `graphrag-relational`, `notebooklm-skill` and `reporeel` waited for operator decisions (see f2).
+
+### GraphRAG and the remaining dispositions (f2)
+
+- **`graphrag-relational`:** builds an embedded FalkorDB graph from a factory database, factory-log
+  JSONL, execution-state files and tracker-neutral ticket exports, and answers typed relationship
+  questions with read-only Cypher. `operator-digest` uses it for its governance graph evidence.
+  - **Dependency (operator-approved 2026-10-09):** `falkordblite` 0.3.0 (MIT), installed with
+    `bun install` inside the skill directory only, with lifecycle scripts untrusted. On first use
+    the runtime downloads the Redis 8.2.3 source, verifies its pinned SHA-256, compiles
+    `redis-server` and caches it under `$ZOUROBOROS_CACHE_DIR/falkordblite`. That needs network
+    access, `make` and a C toolchain once. Nothing is built at install time, and the build is
+    refused in CI. `FALKORDBLITE_REDIS_SERVER` points at a pre-verified binary instead.
+  - **Tests:** `tests/skills-graphrag.test.ts` runs the offline suite and checks that nothing was
+    built. Graph-backed tests run only with `GRAPHRAG_LIVE_TESTS=1` (`bun run test:live`).
+- **`notebooklm-skill`, `reporeel`:** `host-only` by operator decision (kept untracked on the VPS,
+  not distributed).
 
 Skills must stay operator-neutral and portable. Do not include host paths, operator names or
 handles, persona identities, memories, run output, model catalogs or credentials. Read state through
