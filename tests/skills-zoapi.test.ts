@@ -149,9 +149,14 @@ test('broll-injector: the planning call goes through Hermes; dry-run renders end
   expect(injected.code, injected.stderr + injected.stdout).toBe(0);
   expect(existsSync(join(root, 'broll-spine', 'spine-broll.mp4'))).toBe(true);
   // Without fal-ai-media installed, a real render fails loud instead of guessing a host path.
+  const missing = run(skill('media/broll-injector/scripts/gen-broll.ts'), ['--plan', plan, '--out-dir', join(root, 'real'), '--force'],
+    { FAL_MEDIA_SCRIPT: join(root, 'absent/fal-media.ts') });
+  expect(missing.code).toBe(1);
+  expect(missing.stderr).toContain('fal-ai-media is not installed');
+  // With the sibling fal-ai-media skill (t6) but no FAL_KEY, the render reaches it and fails loud.
   const real = run(skill('media/broll-injector/scripts/gen-broll.ts'), ['--plan', plan, '--out-dir', join(root, 'real'), '--force']);
   expect(real.code).toBe(1);
-  expect(real.stderr).toContain('fal-ai-media is not installed');
+  expect(real.stderr).toContain('FAL_KEY not set');
 }, 120_000);
 
 function writeJobs(jobs: unknown[]) {

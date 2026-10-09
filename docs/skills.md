@@ -141,6 +141,42 @@ checks, the hook selftest, two Python suites and the governance-evidence tests.
 `zouroboros-memory-evolution` is not shipped. Its eval set is derived from live operator memory,
 not synthetic data, and its harness targets the host memory database.
 
+### Path skills and financial skills (t6)
+
+These skills replace host paths with the portable roots and the profile environment:
+
+- **`all-out-game-development` and `gamedev-engine-corpus` (`gaming`):** build and query their own
+  Qdrant corpora through `integration/qdrant-corpus.ts`. That module calls an OpenAI-compatible
+  embeddings endpoint with `OPENAI_API_KEY` from the profile environment, and reproduces the
+  source's hashed BM25 sparse vectors, so existing collections stay query-compatible.
+  `QDRANT_URL` and `QDRANT_API_KEY` select the Qdrant server. No credential is read from a file.
+- **`compile-build-spec`:** independent review runs as governed one-shot calls through
+  `ask-governor`. It replaces the retired consensus gate. Export never dispatches the factory.
+- **`design-md-drift-guard`:** projects and PII config live under
+  `ZOUROBOROS_CONFIG_DIR/design-md-drift-guard`, and reports under
+  `ZOUROBOROS_STATE_DIR/design-md-drift-guard/reports`. Runs are plan-only unless `--open-pr`.
+- **`destructive-op-guard`:** a Hermes shell hook. `post_tool_call` records destructive terminal
+  commands, and `pre_llm_call` delivers one reference-sweep reminder on the next turn.
+- **`fal-ai-media`, `ai-character-builder` (`media`), `gauntlet-loop`, `n8n-setup` (`devops`):**
+  `FAL_KEY` comes from the profile. The character builder composes existing skills. n8n is an
+  optional, local-only systemd user service.
+- **`daily-top5-advisor` and `strategy-scout` (`finance`):** renamed from the source's
+  brand-prefixed skills. Both state the financial safety rules in their skill text: explicit
+  confirmation of full order details before any trade, a 5% cap per security, a stop-loss on every
+  recommendation, flags above 5% per position and 25% per sector, tax impact, and a log of every
+  recommendation. Neither script can place an order. Reports go through the profile's channel, and
+  email is draft-only until the operator sends it.
+
+`tests/skills-paths-a.test.ts` runs them offline in a disposable data root, with no credentials and
+no network. It also runs `compile-build-spec`'s own suite (35 tests) and the two finance Python suites.
+
+Not shipped in t6:
+
+- `ai-engineer-learning` is dropped, because it was retired at the source.
+- `notebooklm-skill` is pending, because it is untracked in the source.
+- `graphrag-relational` is pending. It depends on `rag-telemetry` and on a native dependency that
+  builds Redis from source, which needs an operator decision.
+
 Skills must stay operator-neutral and portable. Do not include host paths, operator names or
 handles, persona identities, memories, run output, model catalogs or credentials. Read state through
 the variables the distribution already sets (`HERMES_ZOUROBOROS_HOME`, `ZOUROBOROS_DATA_DIR`,

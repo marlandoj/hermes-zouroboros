@@ -60,7 +60,7 @@
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
       "disposition": "adapted",
-      "reason": "Audits the distribution skills tree (nested categories) instead of the host Skills/; report/status/lock under ZOUROBOROS_STATE_DIR/agent-introspect; probes run with stdin closed and bun --no-install; skip list replaced (host Zo script names \u2192 update-check.sh); codebase-memory hotspots opt-in via env; persona_audit.py and both test suites shipped. Not shipped: references/legacy-inline-instruction.md (host scheduled-agent text).",
+      "reason": "Audits the distribution skills tree (nested categories) instead of the host Skills/; report/status/lock under ZOUROBOROS_STATE_DIR/agent-introspect; probes run with stdin closed and bun --no-install; skip list replaced (host Zo script names → update-check.sh); codebase-memory hotspots opt-in via env; persona_audit.py and both test suites shipped. Not shipped: references/legacy-inline-instruction.md (host scheduled-agent text).",
       "distributedAs": [
         "skills/zouroboros/agent-introspect"
       ],
@@ -139,27 +139,31 @@
       "nameSha256": "5c1e9ea5c2ad98b524b519e1c3eea4834cc1bb425174109a8b83c3b21cd28e8f",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "disposition": "adapted",
+      "reason": "Source entry is a pointer-only SKILL.md to a canonical toolkit outside the repository (not present at the pinned revision or on the source host). Re-authored as a workflow skill composing fal-ai-media (avatars), the profile's text-to-speech provider (voice config), persona-creator (optional agent persona) and heygen-* (talking-head video); artifacts in the operator workspace; consent rules for real-person likeness/voice; no zo.space tutorial page.",
+      "distributedAs": [
+        "skills/media/ai-character-builder"
+      ],
+      "followUp": "If the original toolkit is ever committed to the source repository, review whether its scripts add anything beyond the composed skills."
     },
     {
       "name": "ai-engineer-learning",
       "nameSha256": "114e601c4b5147c1e8019d2e853d3b7d2f5a25bf697bceaa6e04a53891850e65",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "disposition": "dropped",
+      "reason": "Retired at the source: SKILL.md marks the AI Engineer video RAG pipeline retired on 2026-09-14 after the operator requested deletion of its Qdrant collection; ingestion and collection queries are disabled and must not be recreated without new operator authorization. Its notebook path also depends on the untracked notebooklm-skill. Nothing imported."
     },
     {
       "name": "all-out-game-development",
       "nameSha256": "6fd52910b8a8cfef316c1a479f1e14e0f044c95a7fd33225101549abae73fbee",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "disposition": "adapted",
+      "reason": "Category gaming. Embeddings and hashed-BM25 sparse vectors come from the new integration/qdrant-corpus.ts instead of the host zo-memory-system model client/RAG pipeline (same sparse hashing, so host-built collections stay query-compatible); the host secrets-file loader is removed (credentials from the profile environment only); SKILL_ROOT resolves from the script location; MCP contract names generic Qdrant/code-graph/memory servers. Role playbooks and check-corpus.ts verbatim. Not shipped: agents/openai.yaml (Codex UI metadata).",
+      "distributedAs": [
+        "skills/gaming/all-out-game-development"
+      ]
     },
     {
       "name": "autoloop",
@@ -199,7 +203,7 @@
       "distributedAs": [
         "skills/media/broll-injector"
       ],
-      "followUp": "Real renders need fal-ai-media (pending, t6) or FAL_MEDIA_SCRIPT."
+      "followUp": "fal-ai-media ships since t6 (sibling skill, wiring covered offline in tests/skills-zoapi.test.ts); a live render with a real FAL_KEY is still unverified."
     },
     {
       "name": "build-watchdog",
@@ -226,9 +230,11 @@
       "nameSha256": "03751b33f3dd0ae0e4e6c4afa8929eb748ffa849ba870464d3d3c3b3ab6d7113",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "disposition": "adapted",
+      "reason": "review: the retired consensus-gate panel is replaced by governed one-shot reviewer calls through ask-governor (profile executor/model; COMPILE_BUILD_SPEC_REVIEW_MODELS for a multi-model panel; any revise -> REVISE, all pass -> PASS, failure/escalation -> HOLD). factory-integration reference points at the distribution's factory/cli.ts instead of the host ticket-contract script. Tests ported (35 pass): host-only cases removed (Projects reference-case byte-for-byte, host ticket-contract parser), fixture ingest made synthetic, panel + review --dry-run tests added, persona name in fixtures made generic. Not shipped: assets/fixtures/original-vyon-26-boat-racer.prompt.md and vyon-26-boat-racer.build-spec.json (a third-party internet prompt with no licence plus its derived conversion), agents/openai.yaml.",
+      "distributedAs": [
+        "skills/software-development/compile-build-spec"
+      ]
     },
     {
       "name": "consensus-gate",
@@ -256,19 +262,23 @@
       "nameSha256": "7b60555cfef52fd8cc9a71f5029ca77f160bd95ab5f50327ab1656570a87d595",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7).",
-      "followUp": "Exclude reports/."
+      "disposition": "adapted",
+      "reason": "reports/ excluded (60 run reports never imported). New scripts/paths.ts: projects config and PII config under ZOUROBOROS_CONFIG_DIR/design-md-drift-guard, reports under ZOUROBOROS_STATE_DIR/design-md-drift-guard/reports, workspace from ZOUROBOROS_WORKSPACE; nothing written in the skill tree. scripts/projects.json (operator brand projects and host paths) NOT shipped; authored config/projects.example.json instead. Consensus-gate filtering/gating removed (retired). orchestrate.ts is plan-only by default; pushing a branch and opening a PR needs --open-pr (DESIGN_DRIFT_GITHUB_WRITES_DISABLED forces plan-only). DESIGN_DRIFT_LINT=off skips the npx spec lint for offline runs. --help paths are side-effect free. config/pii.json keeps neutral placeholders.",
+      "distributedAs": [
+        "skills/software-development/design-md-drift-guard"
+      ]
     },
     {
       "name": "destructive-op-guard",
       "nameSha256": "6083513c3a0acf21caea5497b2e9ae3448eeedccbf04976636e755c41deaea57",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "disposition": "adapted",
+      "reason": "Claude Code PostToolUse hook rewritten to the Hermes shell-hook protocol: post_tool_call (matcher terminal) records a per-session pending reminder under ZOUROBOROS_STATE_DIR (Hermes ignores post_tool_call output); pre_llm_call injects it once as context on the next turn. Unsafe session ids ignored; kill switch DESTRUCTIVE_OP_GUARD_OFF. Patterns extended to common cloud CLIs. sweep-refs.sh searches SWEEP_ROOT / ZOUROBOROS_WORKSPACE / cwd instead of a host path.",
+      "distributedAs": [
+        "skills/software-development/destructive-op-guard"
+      ],
+      "followUp": "If Hermes shell hooks gain transform_tool_result string output, deliver the reminder in the same turn."
     },
     {
       "name": "elevenlabs-skill",
@@ -296,27 +306,34 @@
       "nameSha256": "e6903ab3a146bf1c9d0e4a37a05bd94aa7b7dd018d7e15fa8bb03f14afe0b087",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "disposition": "adapted",
+      "reason": "Script verbatim except the missing-key message (FAL_KEY from the Hermes profile environment; declared as a prerequisite so Hermes can prompt for it). SKILL.md uses ${HERMES_SKILL_DIR} and workspace-relative outputs instead of host paths; Zo credit wording removed.",
+      "distributedAs": [
+        "skills/media/fal-ai-media"
+      ]
     },
     {
       "name": "gamedev-engine-corpus",
       "nameSha256": "cf0f8a2a291e0729207a81a6d57d75567c4226d51e84cb6788a1dd334e83ad95",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "disposition": "adapted",
+      "reason": "Category gaming. Ingester wired to integration/qdrant-corpus.ts (no zo-memory-system import, no secrets file); --help guard added; acquisitions go under ZOUROBOROS_CACHE_DIR, not a host workspace path. SKILL.md drops the host's private-course Three.js collection, the host Qdrant checkpoint script and the operator-retirement notes; Unreal (EULA) is documented as licensee-only and operator-requested. Offline dry-run covered in tests/skills-paths-a.test.ts.",
+      "distributedAs": [
+        "skills/gaming/gamedev-engine-corpus"
+      ]
     },
     {
       "name": "gauntlet-loop",
       "nameSha256": "9ab4c8835edce564b1e3d80e7b11c3c4b63a70f25ea5e2c33857b35a0ae0e035",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "disposition": "adapted",
+      "reason": "Method text and references/mechanics.md (paraphrased upstream method with attribution) ship; the section that drove the host Software Factory supervised browser-game runtime (a host project path) is replaced by guidance for a project-supplied supervised runner, otherwise self-kept receipts. Not shipped: agents/openai.yaml.",
+      "distributedAs": [
+        "skills/software-development/gauntlet-loop"
+      ],
+      "followUp": "If the supervised game-gauntlet runtime is ever distributed, re-link it here."
     },
     {
       "name": "graphrag-relational",
@@ -325,7 +342,8 @@
       "triage": "adapt/paths",
       "disposition": "pending",
       "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "reason": "Re-verified in t6 and deferred: it imports the rag-telemetry skill (t7 scope) for every index/query; its runtime adds third-party native dependencies (falkordblite + a platform package) that build and cache a Redis 8.2.3 binary from source on first use (network + C toolchain), which is a dependency/security trade-off for the operator; and its default inputs are the host Software Factory swarm.db, factory log and retired Linear exports. operator-digest already treats the graph as optional.",
+      "followUp": "t7 or later, after an operator decision: port together with rag-telemetry, keep the falkordblite dependency confined to the skill (own package.json, not the workspace), make the factory/kanban inputs configurable and drop the Linear sources."
     },
     {
       "name": "heygen-skills",
@@ -383,18 +401,22 @@
       "nameSha256": "592736130e559e50c289214decedb270c9ff1638f18dcc6565fc065bd0b844b3",
       "trackedAtRevision": true,
       "triage": "adapt/financial",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: financial; carry the financial safety rules into the skill text and remove personal-data references (t6)."
+      "disposition": "adapted",
+      "reason": "Renamed jhf-daily-top5 -> daily-top5-advisor (operator business brand removed). Financial safety rules carried into SKILL.md (explicit confirmation with full order details, 5% per-security cap, stop-loss always, >5% position / >25% sector / asset-class flags, tax impact incl. wash sales, log every recommendation); new gates.concentration_flags() + config sector_flag_pct 25. Personal data removed: the hardcoded recipient email address, operator project paths and brand names; delivery via the profile channel with email as operator-approved drafts. Screener DB schema documented; third-party imports lazy so --help works; tests run without pytest (17 + 5 pass). Not shipped: agents/openai.yaml, .pytest_cache.",
+      "distributedAs": [
+        "skills/finance/daily-top5-advisor"
+      ]
     },
     {
       "name": "jhf-strategy-scout",
       "nameSha256": "8fd0e70d655b8e7d52b0631986991209a0a69041f58856322a012b3e6b844e7f",
       "trackedAtRevision": true,
       "triage": "adapt/financial",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: financial; carry the financial safety rules into the skill text and remove personal-data references (t6)."
+      "disposition": "adapted",
+      "reason": "Renamed jhf-strategy-scout -> strategy-scout. Safety rules carried into SKILL.md (as daily-top5-advisor). Backtest search directory configurable (STRATEGY_SCOUT_BACKTEST_DIR) instead of a host project path; operator brand, persona name and Zo email delivery removed from the report template (adds stop-loss / max-position / tax fields); delivery through the profile channel, email only as operator-approved drafts. Invocation from the operator's private screener UI dropped.",
+      "distributedAs": [
+        "skills/finance/strategy-scout"
+      ]
     },
     {
       "name": "operator-collaboration-profile",
@@ -410,9 +432,11 @@
       "nameSha256": "24f7126c277e7cd91687165923134a97655d70f285d808acb6147c33a6ca9340",
       "trackedAtRevision": true,
       "triage": "adapt/paths",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7)."
+      "disposition": "adapted",
+      "reason": "Re-authored as a documented OPTIONAL service: pinned npm install into a user prefix under the Zouroboros data dir, systemd user unit template (references/n8n.service) listening on 127.0.0.1 only, encryption key in a 0600 env file under the config dir, private remote access, journald logs, backup/update/removal steps with operator confirmation. Source README.md not shipped (Zo-hosted instructions plus a pasted assistant transcript naming the operator's GitHub repo); Zo managed-service, public URL and /dev/shm log paths removed.",
+      "distributedAs": [
+        "skills/devops/n8n-setup"
+      ]
     },
     {
       "name": "notebooklm-skill",
@@ -421,7 +445,7 @@
       "triage": "adapt/paths",
       "disposition": "pending",
       "plannedDisposition": "adapted",
-      "reason": "Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7).",
+      "reason": "Re-verified in t6: still untracked at the pinned revision (Skills/notebooklm-skill/ is listed in the source .gitignore), so the importer cannot copy it; left pending. Port notes for when it is committed: remove the live-memory/Qdrant references (memory-ingest and brain-dump-to-Qdrant scripts, research collections), the cookie/session files and any captured notebooks, and move state under ZOUROBOROS_STATE_DIR.",
       "followUp": "Untracked in the source repository at the pinned revision; the importer only copies tracked blobs, so the source must be committed (or a reviewed import path agreed) before porting."
     },
     {

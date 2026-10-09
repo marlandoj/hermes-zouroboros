@@ -1,0 +1,21 @@
+{
+  "projects": [
+    {
+      "slug": "example-brand",
+      "name": "Example Brand",
+      "designMd": "/absolute/path/to/example-brand/DESIGN.md",
+      "siteCss": [
+        "/absolute/path/to/example-brand/src/index.css"
+      ],
+      "exemptScopes": [
+        ".legacy-widget"
+      ]
+    },
+    {
+      "slug": "docs-only",
+      "name": "Docs-only brand (no site yet)",
+      "designMd": "/absolute/path/to/docs-only/DESIGN.md",
+      "siteCss": []
+    }
+  ]
+}
