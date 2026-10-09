@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -16,8 +18,20 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: '8.15.0'
+      - name: Install pinned gitleaks (SHA-256 verified)
+        run: |
+          bin="$(bash scripts/ci/install-gitleaks.sh "$RUNNER_TEMP/gitleaks")"
+          echo "GITLEAKS_BIN=$bin" >> "$GITHUB_ENV"
+      - name: Leak gate (full tree)
+        run: bun scripts/ci/leak-gate.ts
+      - name: Skill parity manifest
+        run: bun scripts/ci/skills-parity.ts check
       - run: bash scripts/setup.sh
+      - run: bun scripts/import-skill.ts verify
       - run: pnpm test
       - run: bun examples/offline-demo.ts
       - run: python3 -m unittest discover -s factory -p 'test_*.py'
       - run: pnpm run verify:portable
+      - name: Leak gate (pull request diff and commits)
+        if: github.event_name == 'pull_request'
+        run: bun scripts/ci/leak-gate.ts --diff "origin/${{ github.base_ref }}"

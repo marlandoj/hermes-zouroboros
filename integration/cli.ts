@@ -2,7 +2,7 @@
 import { parseArgs } from 'node:util';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { initialize, paths, repoRoot, runtimeEnv, settings } from './profile.ts';
+import { initialize, paths, registerSkills, repoRoot, runtimeEnv, settings, skillsDir } from './profile.ts';
 
 const [command, ...args] = process.argv.slice(2);
 try {
@@ -10,6 +10,8 @@ try {
     const { values } = parseArgs({ args, options: { workspace: { type: 'string' } } });
     if (!values.workspace) throw new Error('init requires --workspace /absolute/workspace');
     console.log(JSON.stringify(initialize(values.workspace), null, 2));
+  } else if (command === 'skills' && args[0] === 'register') {
+    console.log(JSON.stringify({ ...registerSkills(), skillsDir }, null, 2));
   } else if (command === 'doctor') {
     const p = paths();
     const checks = {
@@ -36,7 +38,7 @@ try {
     const child = Bun.spawn([process.execPath, join(repoRoot, 'integration/swarm-worker.ts'), resolve(args[0]!)], { env: runtimeEnv(), cwd: settings().workspace, stdin: 'ignore', stdout: 'inherit', stderr: 'inherit' });
     process.exitCode = await child.exited;
   } else {
-    console.log('Hermes Zouroboros\n  init --workspace PATH\n  doctor\n  hermes [setup | chat | ...]\n  memory store|search ...\n  swarm /absolute/tasks.json (opt-in)\nMCP: bun integration/mcp.ts');
+    console.log('Hermes Zouroboros\n  init --workspace PATH\n  skills register (add skills/ to an existing profile)\n  doctor\n  hermes [setup | chat | ...]\n  memory store|search ...\n  swarm /absolute/tasks.json (opt-in)\nMCP: bun integration/mcp.ts');
     if (command && !['help', '--help', '-h'].includes(command)) process.exitCode = 2;
   }
 } catch (error) {

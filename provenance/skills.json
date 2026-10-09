@@ -1,0 +1,16 @@
+{
+  "schema": "hermes-zouroboros/skill-provenance/v1",
+  "source": "Zouroboros VPS workspace, Skills/ tree",
+  "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+  "files": [
+    {
+      "path": "skills/README.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "ed851d02ec85130871a905a6543d488768412adb339c187bf8c2ce5bc14fce13",
+      "adaptation": "Distribution-authored index for the skills tree; no source counterpart."
+    }
+  ]
+}

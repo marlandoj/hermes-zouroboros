@@ -7,3 +7,4 @@
 - The worker disables production-installation seed/gap audits and automatic RAG enrichment. Its task contract validates the DAG, and post-flight result evaluation remains enabled. This is an explicit release boundary, not evidence of production Factory certification.
 - Factory TypeScript intake requires explicit board and manifest paths; production defaults were removed. Python offline intake is retained with original tests.
 - Live settings, identities, memories, model catalogs, run results, credentials, and host service configuration are not exported.
+- Skills are imported through `scripts/import-skill.ts` from the pinned source revision into `skills/`, one allowlisted file at a time; `skills.json` records both hashes and the adaptation note per file. The leak gate (`scripts/ci/leak-gate.ts`) blocks data/log/report files, host paths, operator personal data, secrets and unprovenanced files before push and in CI.

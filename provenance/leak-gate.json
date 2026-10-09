@@ -1,0 +1,136 @@
+{
+  "schema": "hermes-zouroboros/leak-gate/v1",
+  "note": "Patterns only. Personal-data entries are salted SHA-256 hashes of normalized tokens; this file must never contain the data it guards against. Escape path separators in host-path regexes so the config does not match itself.",
+  "blockedPaths": {
+    "extensions": "\\.(jsonl|ndjson|db|sqlite[0-9]*|duckdb|log|pem|key|p12|pfx|kdbx)(-wal|-shm|-journal)?$",
+    "fileNames": "^(\\.env(\\..+)?|\\.envrc|\\.netrc|\\.pgpass|id_(rsa|dsa|ecdsa|ed25519)|credentials(\\.json)?|secrets?\\.(json|ya?ml|toml))$",
+    "pathSegments": [
+      "data",
+      "logs",
+      "reports",
+      "card-snapshots",
+      ".mcp-trust",
+      "memories",
+      "sessions",
+      ".zo"
+    ]
+  },
+  "hostPathPatterns": [
+    {
+      "id": "host-workspace",
+      "regex": "\\/home\\/workspace(?![\\w-])"
+    },
+    {
+      "id": "host-operator-home",
+      "regex": "\\/home\\/zouroboros(?![\\w-])"
+    },
+    {
+      "id": "host-repo-root",
+      "regex": "\\/opt\\/zouroboros(?![\\w-])"
+    },
+    {
+      "id": "host-state-root",
+      "regex": "\\/var\\/lib\\/zouroboros(?![\\w-])"
+    },
+    {
+      "id": "host-zo-home",
+      "regex": "\\/(home|root)\\/\\.z(?![\\w-])"
+    },
+    {
+      "id": "host-root-state",
+      "regex": "\\/root\\/\\.(zouroboros|zo_secrets)(?![\\w-])"
+    },
+    {
+      "id": "hardcoded-dev-shm",
+      "regex": "\\/dev\\/shm\\/"
+    }
+  ],
+  "personalData": {
+    "salt": "hermes-zouroboros-leak-gate/v1:",
+    "normalization": "split camelCase, lowercase, split on non-alphanumerics; unigrams and adjacent bigrams (joined by one space) are hashed",
+    "hashes": [
+      {
+        "label": "operator-name-1",
+        "sha256": "a85f07aa2f1b4959441ba9ef4f751ff2936b5df952eca288f77fbf7e982e96c2"
+      },
+      {
+        "label": "operator-name-2",
+        "sha256": "bb8a73cbed43b840639b12ca05cb909efaa013ca646fa657e3eda5912534c60b"
+      },
+      {
+        "label": "restricted-org-1",
+        "sha256": "146857764d1c9ba543cc93bad56560260abddb883022e6207f24068e4971eaa0"
+      },
+      {
+        "label": "restricted-org-2",
+        "sha256": "dd69888e9e438a45cc64868909534cca05486fef69b11863c2703060f5c70e09"
+      }
+    ],
+    "emailAllowDomains": [
+      "example.com",
+      "example.org",
+      "example.net",
+      "example.invalid",
+      "anthropic.com",
+      "users.noreply.github.com"
+    ],
+    "emailAllowLocalParts": [
+      "git",
+      "noreply",
+      "no-reply"
+    ],
+    "phoneRegex": "(?<![\\w.+/-])(\\+?1[-. ])?\\(?[2-9]\\d{2}\\)?[-. ][2-9]\\d{2}[-. ]\\d{4}(?![\\w-])"
+  },
+  "secretPatterns": [
+    {
+      "id": "private-key-block",
+      "regex": "-----BEGIN (RSA |EC |DSA |OPENSSH |PGP |ENCRYPTED )?PRIVATE KEY( BLOCK)?-----"
+    },
+    {
+      "id": "aws-access-key-id",
+      "regex": "\\b(AKIA|ASIA)[0-9A-Z]{16}\\b"
+    },
+    {
+      "id": "github-token",
+      "regex": "\\b(gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{40,})\\b"
+    },
+    {
+      "id": "anthropic-key",
+      "regex": "\\bsk-ant-[A-Za-z0-9_-]{20,}"
+    },
+    {
+      "id": "openai-style-key",
+      "regex": "\\bsk-(proj-|svcacct-)?[A-Za-z0-9_-]{40,}"
+    },
+    {
+      "id": "slack-token",
+      "regex": "\\bxox[abposr]-[A-Za-z0-9-]{10,}"
+    },
+    {
+      "id": "google-api-key",
+      "regex": "\\bAIza[0-9A-Za-z_-]{35}\\b"
+    },
+    {
+      "id": "stripe-live-key",
+      "regex": "\\b(sk|rk)_live_[A-Za-z0-9]{20,}"
+    },
+    {
+      "id": "bearer-literal",
+      "regex": "\\b[Bb]earer [A-Za-z0-9._~+/-]{32,}=*"
+    },
+    {
+      "id": "credential-assignment",
+      "regex": "(?:^\\s*(?:export\\s+)?[A-Z][A-Z0-9_]*(?:API_KEY|APIKEY|TOKEN|SECRET|PASSWORD|PASSWD)=(?!['\"]?[$<{]|['\"]?(?:your|changeme|xxx|placeholder|example|replace|dummy))['\"]?[^\\s'\"#]{8,}|(?<![A-Za-z0-9])[A-Z][A-Z0-9_]*(?:API_KEY|APIKEY|TOKEN|SECRET|PASSWORD|PASSWD)['\"]?\\s*[:=]\\s*['\"](?![$<{]|(?:your|changeme|xxx|placeholder|example|replace|dummy))[^\\s'\"]{8,}['\"])"
+    }
+  ],
+  "reviewedExceptions": [
+    {
+      "path": "packages/selfheal/src/cli/crystallize.ts",
+      "sha256": "ab06ff42b59289672186c9d7c8ded7a39dd1fd11c032f843874ff5ce741068bc",
+      "rules": [
+        "secret:credential-assignment"
+      ],
+      "reason": "0.1.0 import: dry-run CLI sets a padded non-secret approval placeholder before invoking the approval path; reviewed 2026-10-09."
+    }
+  ]
+}
