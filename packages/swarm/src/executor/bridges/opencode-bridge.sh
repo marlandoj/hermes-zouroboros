@@ -15,7 +15,7 @@ if [[ "${1:-}" == "--acp" ]]; then
 fi
 
 PROMPT="${1:?Usage: opencode-bridge.sh \"prompt\" [workdir]}"
-WORKDIR="${2:-/opt/zouroboros/repo}"
+WORKDIR="${2:-${ZOUROBOROS_WORKSPACE:-$PWD}}"
 TIMEOUT="${OPENCODE_TIMEOUT:-600}"
 
 cd "$WORKDIR"

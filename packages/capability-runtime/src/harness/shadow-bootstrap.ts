@@ -7,7 +7,9 @@ import { canonicalPayloadDigest } from "../fingerprint.js";
 
 const SHADOW_EVIDENCE_PAYLOAD = "zcr-008-shadow-observer-evidence/v1";
 const SHADOW_PRINCIPAL = "zcr-008-shadow-observer";
-const SHADOW_REPOSITORY = "marlandoj/zouroboros";
+// Labels recorded in a newly generated envelope; an existing envelope keeps its own values.
+const shadowRepository = () => process.env.ZCR_SHADOW_REPOSITORY || "local/zouroboros";
+const shadowActor = () => process.env.ZCR_SHADOW_ACTOR || "operator";
 const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 
 export interface ShadowBootstrap {
@@ -132,7 +134,7 @@ function buildEnvelope(input: {
     validity: { not_before: input.notBefore, expires_at: input.expiresAt },
     environment: input.environment,
     approval_binding: {
-      actor: "marlandoj",
+      actor: shadowActor(),
       session_id: "zcr-008-shadow-window",
       run_id: "zcr-008-shadow-window",
       tool: "zcr-shadow-bootstrap",
@@ -174,7 +176,7 @@ export function ensureShadowBootstrap(input: {
   const environment = {
     runtime_root: stateDir,
     isolation_mode: "read-only",
-    repository: SHADOW_REPOSITORY,
+    repository: shadowRepository(),
     state_dir: stateDir,
   };
 

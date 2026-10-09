@@ -10,7 +10,7 @@ Run `bash scripts/setup.sh` to install the committed lockfile, build every inclu
 - real CLI/worker/orchestrator wiring through a fake Hermes executable;
 - bridge argument preservation, model/provider pass-through, timeout, failure, empty output and scratch cleanup;
 - read-only factory intake, SQLite integrity/schema checks, selection and invalid-input rejection;
-- the leak gate (blocked data files, host paths, personal data, secrets, missing/mismatched skill provenance, content-pinned exceptions, baseline ratchet), the allowlisted skill importer, the parity check, and skills-dir registration in the profile.
+- the leak gate (blocked data files, host paths, personal data, persona/brand identity tokens, private and tailnet IP ranges, context allowances, secrets, missing/mismatched skill provenance, content-pinned exceptions, baseline ratchet), the allowlisted skill importer, the parity check, and skills-dir registration in the profile.
 
 `python3 -m unittest discover -s factory -p 'test_*.py'` validates the offline Factory projection. `pnpm run verify:portable` validates upstream configuration and state export/import relocation under a scrubbed environment.
 

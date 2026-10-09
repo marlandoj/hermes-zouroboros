@@ -1517,6 +1517,211 @@
       "path": "packages/swarm/src/api/server.ts",
       "reason": "No default CORS origin (cross-origin requests refused) instead of the source operator's site; set SWARM_API_CORS_ORIGINS to allow origins (v1-audit).",
       "distributed_sha256": "a87b21f19089b03939c959bd0975e6bf58669c033e952d62547e52d6e67e4d1f"
+    },
+    {
+      "path": "packages/swarm/src/host-roots.ts",
+      "reason": "New (distribution-authored, f2): resolves the workspace, state, log and runtime roots from zouroboros-core and the Factory namespaces (FACTORY_SOURCE_ROOT, else the workspace; FACTORY_EXTERNAL_ROOT, else <state>/factory) at call time.",
+      "distributed_sha256": "994618a85a86ba2c6b27a8a47fcdfdf0135046f3622f336228cba74d031fe8f4"
+    },
+    {
+      "path": "packages/rag/src/candidate-policy.ts",
+      "reason": "New (distribution-authored, f2): candidate corpus approval and the sensitive-content pattern from configuration (ZOUROBOROS_CANDIDATE_REPOSITORY, fail closed when unset; ZOUROBOROS_RESTRICTED_EMAIL_DOMAINS, subdomains included) instead of source-host literals.",
+      "distributed_sha256": "bad81f960dea7f979401ac6e4676add7a0eec5963f2f9091bf4922d26eeb2a61"
+    },
+    {
+      "path": "packages/swarm/src/transport/factory-path-profile.ts",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): Factory source, legacy worktree and external namespace roots come from host-roots.ts; the source-host workspace and Zo factory paths are no longer literals. agent-containment: per-spawn IPC dirs under SWARM_EXEC_IPC_DIR, else the OS temp dir; optional bridge/tier-resolver binds under the workspace or SWARM_BRIDGE_RUNTIME_ROOT/SWARM_TIER_RESOLVER.",
+      "distributed_sha256": "6bb8f4fbd563828d7d02402ee77eb34bd9a752a9fee3214785cb92e998437434"
+    },
+    {
+      "path": "packages/swarm/src/transport/agent-containment.ts",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): Factory source, legacy worktree and external namespace roots come from host-roots.ts; the source-host workspace and Zo factory paths are no longer literals. agent-containment: per-spawn IPC dirs under SWARM_EXEC_IPC_DIR, else the OS temp dir; optional bridge/tier-resolver binds under the workspace or SWARM_BRIDGE_RUNTIME_ROOT/SWARM_TIER_RESOLVER.",
+      "distributed_sha256": "48d10e53679a9a5115369a804799f3a7a6c9c7d6fe751dd8acc87d6ab7fab110"
+    },
+    {
+      "path": "packages/swarm/src/executor/bridges/claude-code-bridge.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): workdir defaults to ZOUROBOROS_WORKSPACE, else $PWD; operator-profile locations (Hermes install and HERMES_HOME, CODEX_HOME) derive from ZOUROBOROS_OPERATOR_HOME, else $HOME.",
+      "distributed_sha256": "dfc2bb6b126ede59de09280bdb02b9e1db4c2935e6a1202fbb6616bf616fb979"
+    },
+    {
+      "path": "packages/swarm/src/executor/bridges/codex-bridge.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): workdir defaults to ZOUROBOROS_WORKSPACE, else $PWD; operator-profile locations (Hermes install and HERMES_HOME, CODEX_HOME) derive from ZOUROBOROS_OPERATOR_HOME, else $HOME.",
+      "distributed_sha256": "a31420370dfe1fff89c31bdab6caab8ff0af89d6dd8b98b7471e5920294678c1"
+    },
+    {
+      "path": "packages/swarm/src/executor/bridges/gemini-bridge.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): workdir defaults to ZOUROBOROS_WORKSPACE, else $PWD; operator-profile locations (Hermes install and HERMES_HOME, CODEX_HOME) derive from ZOUROBOROS_OPERATOR_HOME, else $HOME.",
+      "distributed_sha256": "e30b07b7f4aa10dcb105f55e13f6842625dd245485a1b97f9fac686ef34e17c4"
+    },
+    {
+      "path": "packages/swarm/src/executor/bridges/kimi-bridge.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): workdir defaults to ZOUROBOROS_WORKSPACE, else $PWD; operator-profile locations (Hermes install and HERMES_HOME, CODEX_HOME) derive from ZOUROBOROS_OPERATOR_HOME, else $HOME.",
+      "distributed_sha256": "6b04df904c1a76e3069e19f3f88619a6d8c137737159924adcafea952eab9084"
+    },
+    {
+      "path": "packages/swarm/src/executor/bridges/opencode-bridge.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): workdir defaults to ZOUROBOROS_WORKSPACE, else $PWD; operator-profile locations (Hermes install and HERMES_HOME, CODEX_HOME) derive from ZOUROBOROS_OPERATOR_HOME, else $HOME.",
+      "distributed_sha256": "fff9958bee5cd65a457d3aa204a5cb9d56272dc9783ca09a2d62d45e62232152"
+    },
+    {
+      "path": "packages/swarm/src/executor/bridges/pi-bridge.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): workdir defaults to ZOUROBOROS_WORKSPACE, else $PWD; operator-profile locations (Hermes install and HERMES_HOME, CODEX_HOME) derive from ZOUROBOROS_OPERATOR_HOME, else $HOME.",
+      "distributed_sha256": "9313686e4dd2f1cd43af387ae2fefe27b005e850486fdeb31300665d3d634a9d"
+    },
+    {
+      "path": "packages/swarm/src/executor/bridges/template-bridge.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): workdir defaults to ZOUROBOROS_WORKSPACE, else $PWD; operator-profile locations (Hermes install and HERMES_HOME, CODEX_HOME) derive from ZOUROBOROS_OPERATOR_HOME, else $HOME.",
+      "distributed_sha256": "df778a63892c561a246ef6963ecf1642368e922ddff4ef5ea608f1e7ed3ecfd3"
+    },
+    {
+      "path": "packages/swarm/src/executor/bridges/hermes-bridge.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): workdir defaults to ZOUROBOROS_WORKSPACE, else $PWD; operator-profile locations (Hermes install and HERMES_HOME, CODEX_HOME) derive from ZOUROBOROS_OPERATOR_HOME, else $HOME.",
+      "distributed_sha256": "3f7e9614d60d904c5b1d28a60933b4f42cd3eb969ebc2dfb1aee7004864fe17e"
+    },
+    {
+      "path": "packages/swarm/src/executor/bridges/model-catalog-resolve.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): catalog under ZOUROBOROS_STATE_DIR (else $XDG_STATE_HOME/zouroboros)/model-routing/swarm.",
+      "distributed_sha256": "dc37ccb25755325d34d8ac04aa209b5e229fb7b57d3561ed832f6de89ab5532a"
+    },
+    {
+      "path": "packages/swarm/src/executor/pre-swarm-hook.sh",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): Hermes project dir defaults under ZOUROBOROS_WORKSPACE.",
+      "distributed_sha256": "6e3badcb50c73e8cb5a9693ad7ee32800733afc509b5ccbec25ac8d092d09c9d"
+    },
+    {
+      "path": "packages/swarm/src/executor/gemini-daemon.ts",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): daemon log under ZOUROBOROS_LOG_DIR (was /dev/shm); directory created on first write.",
+      "distributed_sha256": "9dd7eb5d3922025e1f9a3bc22ed13419f1ea0b246bb957cc8671137d10f079da"
+    },
+    {
+      "path": "packages/swarm/src/executor/registry/executor-registry.json",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): wayfinder shadow engineDir/home/skillsRoots removed (the transport falls back to WAYFINDER_DIR, WAYFINDER_HOME or <cwd>/.wayfinder, WAYFINDER_SKILLS_ROOTS); documentation strings name the portable variables.",
+      "distributed_sha256": "e500e74b59232fa4a9ed6082be52fa7ededb14bea3c40bc82239c6832d035b1c"
+    },
+    {
+      "path": "packages/swarm/src/plan-gate-preflight.ts",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): constitution gate default under the workspace root (ZOUROBOROS_CONSTITUTION_GATE still overrides).",
+      "distributed_sha256": "f103bf67a8c880693ee4a813f992b10d3b31a877afab2e7bbe65208eb39a8a3f"
+    },
+    {
+      "path": "packages/swarm/src/rag/telemetry.ts",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): sink RAG_TELEMETRY_PATH, else ZOUROBOROS_LOG_DIR/rag-telemetry.jsonl (was /dev/shm); directory created on write.",
+      "distributed_sha256": "6668e73ccae13f89e7753950bc7bbb5ed5e9e52201a0f1fec9573f421241e23f"
+    },
+    {
+      "path": "packages/swarm/src/routing/model-catalog.ts",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): default catalog under <state>/model-routing/swarm.",
+      "distributed_sha256": "ae134d2dbd58bf75acdf0c5bf688223e7e298a97542f56e758b52cf8e9cd9b35"
+    },
+    {
+      "path": "packages/swarm/src/routing/shared-catalog.ts",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): default shared catalog under <state>/model-routing.",
+      "distributed_sha256": "9c5a33cca7c1f39a5461accee0202ac2fbc2a3c3913467da005c996c05c18cfc"
+    },
+    {
+      "path": "packages/swarm/src/cli/t3-run.ts",
+      "reason": "Comment names the workspace-relative default instead of a source-host path (f2).",
+      "distributed_sha256": "0e2b0a9fb2fcfd2181a275fb081d64d7c3cf4674866187c182695b126eae0aed"
+    },
+    {
+      "path": "packages/swarm/src/client/executor-client.ts",
+      "reason": "Neutral default persona/seat: ZOUROBOROS_DEFAULT_PERSONA, else 'default', instead of the source host's persona name (f2).",
+      "distributed_sha256": "14cc8e6175108dc4c4c19e95adb05bd680c20434db35ef0474ea752eb18e6b99"
+    },
+    {
+      "path": "packages/selfheal/src/prescribe/plan-gate.ts",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): workspace from zouroboros-core getWorkspaceRoot() (ZOUROBOROS_WORKSPACE/ZO_WORKSPACE, else cwd).",
+      "distributed_sha256": "fe4661695336b59e4c4505c0f07e0304ab5d57f0e50d1712942c5f9de3c8e7c8"
+    },
+    {
+      "path": "packages/selfheal/src/crystallize/orchestrate.ts",
+      "reason": "Doc comment names the workspace root instead of a source-host path (f2).",
+      "distributed_sha256": "4d1d52ac962949c6e7d09985e0d8ea5b2585c2b9fcad79eef8b335b104541660"
+    },
+    {
+      "path": "packages/selfheal/src/crystallize/grep-validate.ts",
+      "reason": "Doc comment example uses a neutral absolute path (f2).",
+      "distributed_sha256": "16b0ccf1ce5cd4604156bc6ab9be45cbd166c2069b2c666bdbb2b3c0e70caf1f"
+    },
+    {
+      "path": "packages/capability-runtime/src/harness/shadow-cli.ts",
+      "reason": "0.1.0 host-path default replaced by the portable roots (f2): shadow state ZCR_SHADOW_STATE_DIR, else <ZOUROBOROS_STATE_DIR>/zcr-shadow, else <workspace>/.zouroboros/zcr-shadow.",
+      "distributed_sha256": "1c351bc997341047476a16d858604c389acfa7069438163a6f214f367a06a2b5"
+    },
+    {
+      "path": "packages/capability-runtime/src/harness/shadow-bootstrap.ts",
+      "reason": "Operator handle removed from newly generated shadow envelopes (f2): repository label ZCR_SHADOW_REPOSITORY (default local/zouroboros) and approval actor ZCR_SHADOW_ACTOR (default operator); existing envelopes keep their recorded values.",
+      "distributed_sha256": "f8443dba5e7534c12930650ca5552bf21fefb8fe002dc0b59d41cea4c4e0bfbc"
+    },
+    {
+      "path": "packages/memory/hooks/opencode-observer.ts",
+      "reason": "Wiring example uses a checkout-relative path (f2).",
+      "distributed_sha256": "ca357eef2c78c0e30f6fd271d9aaf0843b7ca45667e68ddeca4312ea786aa7a9"
+    },
+    {
+      "path": "packages/memory/src/eval-heldout-recall.ts",
+      "reason": "Eval fixtures use a neutral 'researcher' persona instead of the source host's persona name, and UTC instead of the operator's time zone (f2); gold answers unchanged.",
+      "distributed_sha256": "b048cdfdc49334edaf0ec2cf018960bfba441efeb987405fa4e741f93fe50f17"
+    },
+    {
+      "path": "packages/rag/README.md",
+      "reason": "Example persona argument is a placeholder (f2).",
+      "distributed_sha256": "c1faebd1ebf421e78d899d96a1a10d4cc7c07a58e129149e30ae06ecb8169314"
+    },
+    {
+      "path": "packages/rag/src/candidate-collection.ts",
+      "reason": "Approved repository and restricted mail domains from candidate-policy.ts (configuration) instead of the operator's repository URL and an employer domain literal in the redaction regex (f2).",
+      "distributed_sha256": "c1d36e541c1685fabaae9a31200365021fd7e1fb0fbc396ee04cd1fceeb386be"
+    },
+    {
+      "path": "packages/rag/src/candidate-qualification.ts",
+      "reason": "Approved repository and restricted mail domains from candidate-policy.ts (configuration) instead of the operator's repository URL and an employer domain literal in the redaction regex (f2).",
+      "distributed_sha256": "1208ce5aacb6cb8b5aac7cf5384edfa4cb995f32a9f366fbe2ca2ac022e0d653"
+    },
+    {
+      "path": "packages/rag/src/candidate-corpus-builder.ts",
+      "reason": "Approved repository and restricted mail domains from candidate-policy.ts (configuration) instead of the operator's repository URL and an employer domain literal in the redaction regex (f2).",
+      "distributed_sha256": "1d9009753f14576bc6e49503c4208899119cb4c331aebbc958cc7dcd7799a0b0"
+    },
+    {
+      "path": "packages/rag/src/index.ts",
+      "reason": "Exports candidate-policy (f2).",
+      "distributed_sha256": "ce9502ed2655df41a3f820612f68ea163dc7d0a2295c8bd64d80d7ac148e38fe"
+    },
+    {
+      "path": "packages/personas/package.json",
+      "reason": "Package metadata: repository URL aligned with packages/core and packages/memory, and the source-host author address removed; attribution stays in LICENSE (f2).",
+      "distributed_sha256": "b082b55a82d76fe0de4ab92637f27c1903b729ac86e4fde2ec154f27e268b305"
+    },
+    {
+      "path": "packages/rag/package.json",
+      "reason": "Package metadata: repository URL aligned with packages/core and packages/memory, and the source-host author address removed; attribution stays in LICENSE (f2).",
+      "distributed_sha256": "4b5d8d4948e6b7214c1e8cf2e8796651cff0ae58ae737b17db40ac2a97777454"
+    },
+    {
+      "path": "packages/selfheal/package.json",
+      "reason": "Package metadata: repository URL aligned with packages/core and packages/memory, and the source-host author address removed; attribution stays in LICENSE (f2).",
+      "distributed_sha256": "8b9e0fc1954d4498c79e80ca8b5643b1cc24839804d4e41d7a794d2dde03e564"
+    },
+    {
+      "path": "packages/swarm/package.json",
+      "reason": "Package metadata: repository URL aligned with packages/core and packages/memory, and the source-host author address removed; attribution stays in LICENSE (f2).",
+      "distributed_sha256": "ef89218e160eecfc39d55638d0d29b738ae0137360e9735444ecb9cdc1d931cd"
+    },
+    {
+      "path": "packages/workflow/package.json",
+      "reason": "Package metadata: repository URL aligned with packages/core and packages/memory, and the source-host author address removed; attribution stays in LICENSE (f2).",
+      "distributed_sha256": "71930f83e118029cff84fe2d952e9e14f1888952b763e2b05f1bc20699f56f37"
+    },
+    {
+      "path": "packages/workflow/src/plan-gate/__fixtures__/zou-725-regressions.json",
+      "reason": "Receipt actor id 'operator' instead of the operator handle in 6 regression fixtures (f2).",
+      "distributed_sha256": "1c83e1798a7bbb8f13704f9e74e669040272146ea58da7033177ed774dd3a3f5"
+    },
+    {
+      "path": "cli/README.md",
+      "reason": "Install-from-source steps use a checkout of this repository instead of the operator's upstream clone URL (f2).",
+      "distributed_sha256": "e403a296594461a6abb7ab11d5d685a221de6b2e334d1b9574f95d4f1d7ac3b4"
     }
   ]
 }

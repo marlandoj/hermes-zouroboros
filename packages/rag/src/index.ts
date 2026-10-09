@@ -46,6 +46,7 @@ export const EMBEDDING_MODEL = "text-embedding-3-small";
 
 export * from './candidate-collection.js';
 export * from './candidate-corpus-builder.js';
+export * from './candidate-policy.js';
 export * from './candidate-qualification.js';
 export * from './ingestion.js';
 export * from './candidate-retrieval.js';

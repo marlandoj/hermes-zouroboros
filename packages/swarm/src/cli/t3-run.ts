@@ -422,7 +422,7 @@ export async function runT3Subcommand(argv: string[]): Promise<number> {
     },
     // Bench harness runs as an ephemeral, single-task process — point the
     // swarm SQLite at a writable per-invocation temp file instead of the
-    // shared default (/home/workspace/.swarm/swarm.db). The default dir is
+    // shared default (<workspace>/.swarm/swarm.db). The default dir is
     // unwritable for the non-root CI runner, so the orchestrator constructor
     // would otherwise throw EACCES before any task runs.
     dbPath: path.join(tmpdir(), 'zouroboros-t3', `swarm-${process.pid}-${randomUUID().slice(0, 8)}.db`),

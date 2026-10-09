@@ -16,12 +16,14 @@
  *   bun gemini-daemon.ts --status       # Check daemon status
  */
 
-import { existsSync, unlinkSync, writeFileSync, readFileSync } from "fs";
+import { existsSync, mkdirSync, unlinkSync, writeFileSync, readFileSync } from "fs";
+import { dirname, join } from "path";
 import { getWorkspaceRoot } from "zouroboros-core";
+import { logRoot } from "../host-roots.js";
 
 const SOCKET_PATH = "/tmp/gemini-daemon.sock";
 const PID_FILE = "/tmp/gemini-daemon.pid";
-const LOG_FILE = "/dev/shm/gemini-daemon.log";
+const LOG_FILE = join(logRoot(), "gemini-daemon.log");
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const MAX_CONCURRENT = 4;
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
@@ -36,6 +38,7 @@ function log(msg: string) {
   const line = `[${new Date().toISOString()}] ${msg}`;
   console.log(line);
   try {
+    mkdirSync(dirname(LOG_FILE), { recursive: true });
     const existing = existsSync(LOG_FILE) ? readFileSync(LOG_FILE, "utf-8").slice(-50000) : "";
     writeFileSync(LOG_FILE, existing + line + "\n");
   } catch {

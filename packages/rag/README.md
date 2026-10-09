@@ -12,7 +12,7 @@ Retrieval-Augmented Generation for the Zouroboros ecosystem. Provides context in
 | `vault-hybrid.ts` | Semantic + wikilink graph RRF fusion search | `bun scripts/vault-hybrid.ts --hybrid "query"` |
 | `autoloop-memory.ts` | Experiment history recall for autoloop | `bun scripts/autoloop-memory.ts --query "optimize"` |
 | `eval-memory.ts` | Prior eval results and AC templates | `bun scripts/eval-memory.ts --prior /path/to/file.ts` |
-| `persona-memory-gate.ts` | Domain fact injection per persona | `bun scripts/persona-memory-gate.ts --persona "Alaric"` |
+| `persona-memory-gate.ts` | Domain fact injection per persona | `bun scripts/persona-memory-gate.ts --persona "<persona>"` |
 | `seed-rag-config.ts` | Initialize config DB with 9 RAG configs | `bun scripts/seed-rag-config.ts` |
 | `daily-rag-maintenance.ts` | Unified daily maintenance for all 4 areas | `bun scripts/daily-rag-maintenance.ts run` |
 | `qdrant-rag-mcp.ts` | MCP server exposing `rag_search` over Qdrant collections | `bun scripts/qdrant-rag-mcp.ts` |

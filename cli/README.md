@@ -16,11 +16,10 @@ database and will not run under plain Node.
 
 ## Installation
 
-Until the package is published, install from source:
+Until the package is published, install from a checkout of this repository:
 
 ```bash
-git clone https://github.com/marlandoj/zouroboros.git
-cd zouroboros
+cd hermes-zouroboros     # your clone of this repository
 npm install -g pnpm      # if you don't have pnpm
 pnpm install
 pnpm run build

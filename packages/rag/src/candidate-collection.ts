@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { approvedCandidateRepository, sensitiveContentPattern } from './candidate-policy.js';
 import {
   RAG_CHUNK_CHARS,
   RAG_CHUNK_OVERLAP,
@@ -72,7 +73,8 @@ export interface CandidateCorpusManifest {
   schemaVersion: 1;
   corpusId: string;
   classification: 'public';
-  repository: 'https://github.com/marlandoj/zouroboros';
+  /** The approved repository (ZOUROBOROS_CANDIDATE_REPOSITORY) at validation time. */
+  repository: string;
   sourceCommit: string;
   createdAt: string;
   collection: {
@@ -120,7 +122,6 @@ const COMMIT = /^[a-f0-9]{40}$/;
 const PHYSICAL_COLLECTION = /^zouroboros-modal-minilm-v1-[a-f0-9]{12}$/;
 const SAFE_PATH = /^(?!\/)(?!.*(?:^|\/)\.\.?(?:\/|$))[A-Za-z0-9._\/-]+$/;
 const SENSITIVE_PATH = /(?:^|\/)(?:\.env(?:\.|$)|secrets?|credentials?|private|shared-facts\.db)(?:\/|$)/i;
-const SENSITIVE_CONTENT = /-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{16,}\b|\b[^\s@]+@(?:jnj\.com|its\.jnj\.com)\b/i;
 
 export function sha256CandidateContent(content: string | Uint8Array): string {
   return createHash('sha256').update(content).digest('hex');
@@ -209,7 +210,8 @@ export function validateCandidateCorpusManifest(value: unknown): CandidateCorpus
   const raw = object(value, 'candidate corpus manifest');
   if (raw.schemaVersion !== 1) throw new Error('Candidate corpus schemaVersion must be 1');
   if (raw.classification !== 'public') throw new Error('Candidate corpus must be classified public');
-  if (raw.repository !== 'https://github.com/marlandoj/zouroboros') throw new Error('Candidate corpus repository is not approved');
+  const repository = approvedCandidateRepository();
+  if (raw.repository !== repository) throw new Error('Candidate corpus repository is not approved');
   const sourceCommit = string(raw.sourceCommit, 'sourceCommit');
   if (!COMMIT.test(sourceCommit)) throw new Error('sourceCommit must be a full lowercase Git commit');
   const corpusId = string(raw.corpusId, 'corpusId');
@@ -312,7 +314,7 @@ export function validateCandidateCorpusManifest(value: unknown): CandidateCorpus
     schemaVersion: 1,
     corpusId,
     classification: 'public',
-    repository: 'https://github.com/marlandoj/zouroboros',
+    repository,
     sourceCommit,
     createdAt,
     collection: {
@@ -352,7 +354,7 @@ export function validateCandidateHeldOutQuerySet(value: unknown, manifest: Candi
     const stratum = query.stratum as CandidateCorpusStratum;
     if (ids.has(id)) throw new Error(`Duplicate query ID: ${id}`);
     if (!MODAL_RAG_CORPUS_STRATA.includes(stratum)) throw new Error(`Invalid query stratum: ${query.stratum}`);
-    if (query.classification !== 'public' || SENSITIVE_CONTENT.test(text)) throw new Error(`Invalid public query: ${id}`);
+    if (query.classification !== 'public' || sensitiveContentPattern().test(text)) throw new Error(`Invalid public query: ${id}`);
     if (!Array.isArray(query.relevantChunkIds) || query.relevantChunkIds.length < 1 || query.relevantChunkIds.some((chunkId) => typeof chunkId !== 'string' || !knownChunks.has(chunkId))) {
       throw new Error(`Query relevance labels are invalid: ${id}`);
     }

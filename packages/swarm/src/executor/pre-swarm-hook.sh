@@ -56,7 +56,7 @@ warmup_claude_code() {
 }
 
 warmup_hermes() {
-  local hermes_dir="${HERMES_PROJECT_DIR:-/home/workspace/hermes-agent}"
+  local hermes_dir="${HERMES_PROJECT_DIR:-${ZOUROBOROS_WORKSPACE:-$PWD}/hermes-agent}"
   if [ -f "$hermes_dir/cli.py" ]; then
     echo "  Hermes: checking..."
     if [ -f "$hermes_dir/.venv/bin/activate" ]; then

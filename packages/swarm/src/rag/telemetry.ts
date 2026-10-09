@@ -1,7 +1,8 @@
 /**
  * RAG Telemetry Sink
  *
- * Emits per-enrichment-call JSONL records to /dev/shm/rag-telemetry.jsonl.
+ * Emits per-enrichment-call JSONL records to RAG_TELEMETRY_PATH, else
+ * <ZOUROBOROS_LOG_DIR>/rag-telemetry.jsonl (the portable log root).
  * Non-blocking, fire-and-forget. Failures are swallowed.
  *
  * Each record captures: trigger match, collections queried, per-collection
@@ -10,7 +11,9 @@
  * Consumed by the /api/rag-telemetry zo.space route and the
  * /dashboard/rag-telemetry page.
  */
-import { appendFile } from 'fs/promises';
+import { appendFile, mkdir } from 'fs/promises';
+import { dirname, join } from 'path';
+import { logRoot } from '../host-roots.js';
 
 export interface RAGTelemetryRecord {
   ts: string;
@@ -44,7 +47,7 @@ export interface RAGTelemetryRecord {
   candidateError?: string;
 }
 
-const TELEMETRY_PATH = process.env.RAG_TELEMETRY_PATH || '/dev/shm/rag-telemetry.jsonl';
+const TELEMETRY_PATH = process.env.RAG_TELEMETRY_PATH || join(logRoot(), 'rag-telemetry.jsonl');
 const TELEMETRY_DISABLED = process.env.RAG_TELEMETRY_DISABLED === '1';
 
 export async function emitRAGTelemetry(record: Partial<RAGTelemetryRecord>): Promise<void> {
@@ -76,6 +79,7 @@ export async function emitRAGTelemetry(record: Partial<RAGTelemetryRecord>): Pro
     ...record,
   };
   try {
+    await mkdir(dirname(TELEMETRY_PATH), { recursive: true });
     await appendFile(TELEMETRY_PATH, JSON.stringify(full) + '\n', 'utf8');
   } catch {
     // swallow — telemetry must never break the enrichment path

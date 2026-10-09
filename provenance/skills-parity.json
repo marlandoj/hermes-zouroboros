@@ -352,7 +352,7 @@
       "trackedAtRevision": true,
       "triage": "portable",
       "disposition": "adapted",
-      "reason": "HeyGen MIT (LICENSE shipped in each skill). The three sub-skills ship with their references; Hermes frontmatter and an MCP note added; CLI install advice changed from curl|bash to download-review-run. Not shipped: plugin manifests for other agents, CI workflows, brand images, setup script, the nanoclaw variant, and the operator-specific JHF explainer template (reference file and the heygen-video section pointing to it).",
+      "reason": "HeyGen MIT (LICENSE shipped in each skill). The three sub-skills ship with their references; Hermes frontmatter and an MCP note added; CLI install advice changed from curl|bash to download-review-run. Not shipped: plugin manifests for other agents, CI workflows, brand images, setup script, the nanoclaw variant, and the operator-specific brand explainer template (reference file and the heygen-video section pointing to it).",
       "distributedAs": [
         "skills/media/heygen-avatar",
         "skills/media/heygen-translate",

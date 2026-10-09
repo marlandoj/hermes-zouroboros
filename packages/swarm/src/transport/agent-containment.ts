@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { canonicalFactoryPath, insideFactoryPath, loadFactoryPathProfile } from './factory-path-profile.js';
+import { factoryRoots, workspaceRoot } from '../host-roots.js';
 import {
   chownSync,
   closeSync,
@@ -15,6 +16,7 @@ import {
   rmdirSync,
   unlinkSync,
 } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 export interface AdapterSpawnSpec {
@@ -30,7 +32,10 @@ export interface AdapterSpawnSpec {
 const BWRAP = '/usr/bin/bwrap';
 const SETPRIV = '/usr/bin/setpriv';
 const FACTORY_ROOT_NAME = '.factory-worktrees';
-const IPC_HOST_PREFIX = '/dev/shm/zouroboros-sandbox-ipc-';
+// Per-spawn IPC directories: SWARM_EXEC_IPC_DIR (for example a tmpfs), else the OS
+// temporary directory. The parent must stay traversable by the unprivileged sandbox uid, so a private
+// (0700) runtime root is not used here.
+const ipcHostPrefix = (env: Record<string, string | undefined>) => join(env.SWARM_EXEC_IPC_DIR || tmpdir(), 'zouroboros-sandbox-ipc-');
 
 function isStrictDescendant(root: string, candidate: string): boolean {
   const rel = relative(root, candidate);
@@ -119,7 +124,7 @@ function assignedGitBinds(assigned: string, env: Record<string, string>): string
     if (!record || record.status !== 'active' || !insideFactoryPath(profile.source_root, canonicalFactoryPath(record.repoPath))) throw new Error('assigned repository has no active ledger authority');
     const result = spawnSync('git', ['-C', record.repoPath, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8', timeout: 10_000 });
     if (result.status !== 0 || realpathSync(result.stdout.trim()) !== common) throw new Error('assigned repository Git metadata mismatch');
-  } else if (!insideFactoryPath('/home/workspace', common) && !insideFactoryPath(dirname(realpathSync(env.SWARM_EXEC_CONTAINMENT_ROOT)), common)) {
+  } else if (!insideFactoryPath(factoryRoots(env).source, common) && !insideFactoryPath(dirname(realpathSync(env.SWARM_EXEC_CONTAINMENT_ROOT)), common)) {
     throw new Error('Git metadata outside authorized source root');
   }
   if (existsSync(join(common, 'objects', 'info', 'alternates'))) throw new Error('external Git object alternates are unsupported');
@@ -150,7 +155,7 @@ export function prepareFilesystemContainedSpawn(
     throw new Error('SWARM_EXEC_CONTAINMENT_ROOT must be an absolute path');
   }
   const profile = loadFactoryPathProfile(env);
-  if (!profile && insideFactoryPath('/home/.z/factory', resolve(configuredRoot))) throw new Error('external containment requires a pinned Factory profile');
+  if (!profile && insideFactoryPath(factoryRoots(env).external, resolve(configuredRoot))) throw new Error('external containment requires a pinned Factory profile');
   const assigned = assignedWorktree(configuredRoot, workdir);
   if (profile && realpathSync(configuredRoot) !== profile.worktrees_root) throw new Error('containment root diverges from profile');
   const gitArgs = assignedGitBinds(assigned, env);
@@ -159,7 +164,7 @@ export function prepareFilesystemContainedSpawn(
   }
   validateAndChownTree(assigned, uid, gid);
 
-  const ipcHostRoot = `${IPC_HOST_PREFIX}${randomUUID()}`;
+  const ipcHostRoot = `${ipcHostPrefix(env)}${randomUUID()}`;
   mkdirSync(ipcHostRoot, { mode: 0o700 });
   chownSync(ipcHostRoot, uid, gid);
   const ipcGuestRoot = '/sandbox-ipc';
@@ -202,11 +207,12 @@ export function prepareFilesystemContainedSpawn(
   for (const [source, destination] of toolFiles) {
     if (existsSync(source)) optionalToolBinds.push('--ro-bind', source, destination);
   }
-  const bridgeRuntimeRoot = '/home/workspace/Skills/zo-swarm-executors';
+  // Optional read-only binds for bash bridges; the paths follow the workspace layout.
+  const bridgeRuntimeRoot = env.SWARM_BRIDGE_RUNTIME_ROOT || join(workspaceRoot(env), 'Skills/zo-swarm-executors');
   const bridgeRuntimeArgs = spawnSpec.command === 'bash' && existsSync(bridgeRuntimeRoot)
     ? [...directoryArgs(bridgeRuntimeRoot), '--ro-bind', bridgeRuntimeRoot, bridgeRuntimeRoot]
     : [];
-  const tierResolver = '/home/workspace/Skills/zo-swarm-orchestrator/scripts/tier-resolve.ts';
+  const tierResolver = env.SWARM_TIER_RESOLVER || join(workspaceRoot(env), 'Skills/zo-swarm-orchestrator/scripts/tier-resolve.ts');
   const tierResolverArgs = spawnSpec.command === 'bash' && existsSync(tierResolver)
     ? [...directoryArgs(tierResolver), '--ro-bind', tierResolver, tierResolver]
     : [];

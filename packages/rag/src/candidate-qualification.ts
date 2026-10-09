@@ -5,6 +5,7 @@ import {
   sha256CandidateContent,
   type CandidateCorpusManifest,
 } from './candidate-collection.js';
+import { sensitiveContentPattern } from './candidate-policy.js';
 
 export interface RagQualificationBatchItem {
   id: string;
@@ -49,7 +50,6 @@ export interface RagQualificationEmbeddingArtifact {
 
 const SHA256 = /^[a-f0-9]{64}$/;
 const CONTENT_ADDRESS = /^sha256:[a-f0-9]{64}$/;
-const SENSITIVE_CONTENT = /-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{16,}\b|\b[^\s@]+@(?:jnj\.com|its\.jnj\.com)\b/i;
 
 function object(value: unknown, label: string): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} must be an object`);
@@ -144,7 +144,7 @@ export function validateRagQualificationBatch(value: unknown): RagQualificationB
     const text = string(item.text, `Qualification batch item[${index}].text`);
     const contentSha256 = digest(item.contentSha256, `Qualification batch item[${index}].contentSha256`);
     if (ids.has(id)) throw new Error(`Duplicate qualification item: ${id}`);
-    if (SENSITIVE_CONTENT.test(text)) throw new Error(`Sensitive-data pattern in qualification item: ${id}`);
+    if (sensitiveContentPattern().test(text)) throw new Error(`Sensitive-data pattern in qualification item: ${id}`);
     if (sha256CandidateContent(text) !== contentSha256) throw new Error(`Qualification item content digest mismatch: ${id}`);
     ids.add(id);
     return { id, text, contentSha256 };

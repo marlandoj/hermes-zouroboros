@@ -7,7 +7,8 @@
 #   ./hermes-bridge.sh "Your prompt here" /path/to/workdir
 #
 # Environment:
-#   HERMES_PROJECT_DIR — path to hermes-agent project (default: updater-selected checkout, otherwise /home/zouroboros/hermes-agent)
+#   ZOUROBOROS_OPERATOR_HOME — home of the operator whose Hermes install and profile are used (default: $HOME)
+#   HERMES_PROJECT_DIR — path to hermes-agent project (default: updater-selected checkout, otherwise $ZOUROBOROS_OPERATOR_HOME/hermes-agent)
 #   HERMES_VENV        — path to venv activate script (default: $HERMES_PROJECT_DIR/.venv/bin/activate)
 #   HERMES_BIN         — Hermes launcher (default: resolved from the activated venv)
 #   HERMES_TIMEOUT     — timeout in seconds (default: 300)
@@ -15,13 +16,14 @@
 set -euo pipefail
 
 PROMPT="${1:?Usage: hermes-bridge.sh \"prompt\" [workdir]}"
-WORKDIR="${2:-/home/zouroboros}"
+OPERATOR_HOME="${ZOUROBOROS_OPERATOR_HOME:-$HOME}"
+WORKDIR="${2:-${ZOUROBOROS_WORKSPACE:-$OPERATOR_HOME}}"
 # Follow the updater-selected checkout before activating a venv. Explicit
 # HERMES_PROJECT_DIR/HERMES_VENV overrides retain their existing behavior.
-DEFAULT_PROJECT_DIR="/home/zouroboros/hermes-agent"
-SELECTED_HERMES="$(readlink -f /home/zouroboros/.local/bin/hermes 2>/dev/null || true)"
+DEFAULT_PROJECT_DIR="$OPERATOR_HOME/hermes-agent"
+SELECTED_HERMES="$(readlink -f "$OPERATOR_HOME/.local/bin/hermes" 2>/dev/null || true)"
 case "$SELECTED_HERMES" in
-  /home/zouroboros/.local/share/harness-updater/releases/hermes/*/.venv/bin/hermes)
+  "$OPERATOR_HOME"/.local/share/harness-updater/releases/hermes/*/.venv/bin/hermes)
     DEFAULT_PROJECT_DIR="${SELECTED_HERMES%/.venv/bin/hermes}" ;;
 esac
 PROJECT_DIR="${HERMES_PROJECT_DIR:-$DEFAULT_PROJECT_DIR}"
@@ -60,9 +62,10 @@ source "$VENV_ACTIVATE"
 
 # Load shared secrets (OPENAI_API_KEY, QDRANT_URL, QDRANT_API_KEY, ...) so MCP
 # servers spawned by hermes inherit them. File is 0640 root:zouroboros; never printed.
-# Pin hermes to the operator profile: campaign sessions run with HOME=/opt/zouroboros/repo;
+# Pin hermes to the operator profile: campaign sessions may run with HOME set to a checkout, so set
+# ZOUROBOROS_OPERATOR_HOME there;
 # get_hermes_home() honors HERMES_HOME env ahead of the HOME default (hermes_constants.py:71,118).
-export HERMES_HOME="${HERMES_HOME:-/home/zouroboros/.hermes}"
+export HERMES_HOME="${HERMES_HOME:-$OPERATOR_HOME/.hermes}"
 
 if [ -r /etc/zouroboros/zouroboros.env ]; then
   set -a

@@ -10,6 +10,18 @@ export const defaultConfigPath = join(repoRoot, 'provenance/leak-gate.json');
 
 export interface PatternRule { id: string; regex: string }
 export interface ReviewedException { path: string; sha256: string; rules: string[]; reason: string }
+/**
+ * A narrow, reasoned allowance: in the listed files, a finding for one of the listed rules is
+ * dropped only when it disappears after masking the allowed context on that line. The context is
+ * a regex, or the source entry names recorded in provenance/skills-parity.json.
+ */
+export interface ContextAllowance {
+  id: string;
+  files: string[];
+  rules: string[];
+  context: { regex: string } | { sourceEntryNames: true };
+  reason: string;
+}
 export interface LeakGateConfig {
   schema: string;
   blockedPaths: { extensions: string; fileNames: string; pathSegments: string[] };
@@ -21,11 +33,19 @@ export interface LeakGateConfig {
     emailAllowLocalParts: string[];
     phoneRegex: string;
   };
+  /** Source-host persona names and the operator's business brands: salted hashes, same normalization. */
+  identityData?: { hashes: { label: string; sha256: string }[] };
+  /** Private, CGNAT/tailnet and tailnet IPv6 address ranges. */
+  networkPatterns?: PatternRule[];
   secretPatterns: PatternRule[];
   reviewedExceptions: ReviewedException[];
+  contextAllowances?: ContextAllowance[];
 }
 
-export type FindingKind = 'blocked-path' | 'host-path' | 'personal-data' | 'secret' | 'provenance' | 'parity';
+/** Masks for the context allowances that apply to one file (built by the caller). */
+export interface ContextMask { rules: string[]; pattern: RegExp }
+
+export type FindingKind = 'blocked-path' | 'host-path' | 'personal-data' | 'private-network' | 'secret' | 'provenance' | 'parity';
 export interface Finding { kind: FindingKind; rule: string; file: string; line?: number; detail?: string }
 
 export function sha256(data: string | Buffer): string {
@@ -68,20 +88,41 @@ export function personalHashes(text: string, salt: string): string[] {
 
 const emailPattern = /[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)+[A-Za-z]{2,}/g;
 
+function escapeRegex(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Context masks for `file`; source entry names come from the parity manifest the caller passes. */
+export function contextMasks(file: string, config: LeakGateConfig, sourceEntryNames: string[] = []): ContextMask[] {
+  return (config.contextAllowances ?? []).filter((allowance) => allowance.files.includes(file)).flatMap((allowance) => {
+    if ('regex' in allowance.context) return [{ rules: allowance.rules, pattern: new RegExp(allowance.context.regex, 'g') }];
+    const names = [...new Set(sourceEntryNames)].sort((a, b) => b.length - a.length).map(escapeRegex);
+    return names.length ? [{ rules: allowance.rules, pattern: new RegExp(`(?<![A-Za-z0-9])(?:${names.join('|')})(?![A-Za-z0-9])`, 'g') }] : [];
+  });
+}
+
 /** Content rules for one text file. Each finding records only rule ID and line number. */
-export function scanText(path: string, text: string, config: LeakGateConfig): Finding[] {
+export function scanText(path: string, text: string, config: LeakGateConfig, masks: ContextMask[] = []): Finding[] {
   const findings: Finding[] = [];
-  const denied = new Map(config.personalData.hashes.map((entry) => [entry.sha256, entry.label]));
+  const denied = new Map([...config.personalData.hashes, ...(config.identityData?.hashes ?? [])].map((entry) => [entry.sha256, entry.label]));
   const hostRules = config.hostPathPatterns.map((rule) => ({ id: rule.id, regex: new RegExp(rule.regex) }));
+  const networkRules = (config.networkPatterns ?? []).map((rule) => ({ id: rule.id, regex: new RegExp(rule.regex) }));
+  const labelsOf = (line: string) => new Set(personalHashes(line, config.personalData.salt).map((hash) => denied.get(hash)).filter((label): label is string => Boolean(label)));
   const secretRules = config.secretPatterns.map((rule) => ({ id: rule.id, regex: new RegExp(rule.regex) }));
   const phone = new RegExp(config.personalData.phoneRegex);
   const lines = text.split('\n');
   lines.forEach((content, index) => {
     const line = index + 1;
     for (const rule of hostRules) if (rule.regex.test(content)) findings.push({ kind: 'host-path', rule: `host-path:${rule.id}`, file: path, line });
+    for (const rule of networkRules) if (rule.regex.test(content)) findings.push({ kind: 'private-network', rule: `private-network:${rule.id}`, file: path, line });
     for (const rule of secretRules) if (rule.regex.test(content)) findings.push({ kind: 'secret', rule: `secret:${rule.id}`, file: path, line });
-    const labels = new Set(personalHashes(content, config.personalData.salt).map((hash) => denied.get(hash)).filter(Boolean));
-    for (const label of labels) findings.push({ kind: 'personal-data', rule: `personal-data:${label}`, file: path, line });
+    const labels = labelsOf(content);
+    for (const label of labels) {
+      const rule = `personal-data:${label}`;
+      const applicable = masks.filter((mask) => mask.rules.includes(rule));
+      if (applicable.length && !labelsOf(applicable.reduce((line, mask) => line.replace(mask.pattern, ' '), content)).has(label)) continue;
+      findings.push({ kind: 'personal-data', rule, file: path, line });
+    }
     for (const match of content.matchAll(emailPattern)) {
       const [local, domain] = match[0].toLowerCase().split('@') as [string, string];
       const allowedDomain = config.personalData.emailAllowDomains.some((allowed) => domain === allowed || domain.endsWith(`.${allowed}`));

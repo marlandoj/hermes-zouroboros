@@ -68,10 +68,10 @@ const MM_FACTS: FixtureFact[] = [
   { entity: 'user.preferences', key: 'terminal', value: 'Terminal: tmux with prefix Ctrl-A, vi copy mode', importance: 0.97 },
   { entity: 'deploy.arch', key: 'api', value: 'API runs on a Hetzner CX32 in Falkenstein behind Caddy', importance: 0.97 },
   { entity: 'deploy.arch', key: 'db', value: 'Postgres 16 primary with daily restic backups to B2', importance: 0.97 },
-  { entity: 'user.routine', key: 'review', value: 'Weekly review every Sunday 18:00 Phoenix in the Zouroboros dashboard', importance: 0.97 },
+  { entity: 'user.routine', key: 'review', value: 'Weekly review every Sunday 18:00 UTC in the Zouroboros dashboard', importance: 0.97 },
   { entity: 'user.routine', key: 'plan', value: 'Review ends with a Linear backlog sync and a Monday plan', importance: 0.96 },
-  { entity: 'alaric.research', key: 'topic', value: 'Alaric is evaluating cross-encoder rerankers for memory recall', persona: 'alaric', importance: 0.97 },
-  { entity: 'alaric.research', key: 'method', value: 'Alaric benchmarks rerankers on held-out question sets', persona: 'alaric', importance: 0.96 },
+  { entity: 'researcher.research', key: 'topic', value: 'The researcher persona is evaluating cross-encoder rerankers for memory recall', persona: 'researcher', importance: 0.97 },
+  { entity: 'researcher.research', key: 'method', value: 'The researcher persona benchmarks rerankers on held-out question sets', persona: 'researcher', importance: 0.96 },
 ];
 
 /** Temporal updates: stale fact has HIGHER importance, so the retrieval
@@ -112,7 +112,7 @@ const STANDING_QUESTIONS: Array<{ persona?: string; question: string }> = [
   { question: 'What are the user editor and terminal preferences?' },
   { question: 'What is the production deployment architecture?' },
   { question: 'What is the user weekly review routine?' },
-  { persona: 'alaric', question: 'What is Alaric current research focus?' },
+  { persona: 'researcher', question: 'What is the researcher persona current research focus?' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -136,7 +136,7 @@ const QUESTIONS: EvalQuestion[] = [
   { category: 'mental-model', question: 'What are the user editor and terminal preferences?', searchTerm: 'editor terminal setup', gold: 'Neovim' },
   { category: 'mental-model', question: 'What is the production deployment architecture?', searchTerm: 'deployment architecture', gold: 'Hetzner' },
   { category: 'mental-model', question: 'What is the user weekly review routine?', searchTerm: 'weekly review routine', gold: 'Sunday 18:00' },
-  { category: 'mental-model', question: 'What is Alaric current research focus?', searchTerm: 'research focus', gold: 'cross-encoder', persona: 'alaric' },
+  { category: 'mental-model', question: 'What is the researcher persona current research focus?', searchTerm: 'research focus', gold: 'cross-encoder', persona: 'researcher' },
   // Temporal updates: baseline surfaces the stale fact by importance.
   ...UPDATE_GROUPS.map(g => ({
     category: 'observation-update' as const,

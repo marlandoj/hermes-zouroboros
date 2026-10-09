@@ -13,11 +13,12 @@
 set -euo pipefail
 
 PROMPT="${1:?Usage: codex-bridge.sh \"prompt\" [workdir]}"
-WORKDIR="${2:-/opt/zouroboros/repo}"
+WORKDIR="${2:-${ZOUROBOROS_WORKSPACE:-$PWD}}"
 
-# Pin codex to the operator profile: campaign sessions run with HOME=/opt/zouroboros/repo,
+# Pin codex to the operator profile: campaign sessions may run with HOME set to a checkout (set
+# ZOUROBOROS_OPERATOR_HOME there),
 # which has no auth.json (401 exit-1, item 5); codex honors CODEX_HOME ahead of $HOME/.codex.
-export CODEX_HOME="${CODEX_HOME:-/home/zouroboros/.codex}"
+export CODEX_HOME="${CODEX_HOME:-${ZOUROBOROS_OPERATOR_HOME:-$HOME}/.codex}"
 
 # Load shared secrets (OPENAI_API_KEY, QDRANT_URL, QDRANT_API_KEY, ...) so MCP
 # servers spawned by codex inherit them. File is 0640 root:zouroboros; never printed.
