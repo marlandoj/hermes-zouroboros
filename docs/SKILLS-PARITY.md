@@ -9,15 +9,15 @@ Entry names containing operator identifiers are redacted to `operator`; the mani
 | Disposition | Count |
 | --- | ---: |
 | portable | 0 |
-| adapted | 14 |
+| adapted | 19 |
 | host-only | 8 |
 | dropped | 3 |
 | hermes-native | 3 |
 | held-license | 0 |
-| pending | 52 |
+| pending | 47 |
 | **total** | **80** |
 
-Pending work: 1 planned portable, 51 planned adapted.
+Pending work: 1 planned portable, 46 planned adapted.
 
 Dispositions: `portable` ships unchanged apart from recorded hashes; `adapted` ships with recorded changes; `host-only` stays on the VPS; `dropped` is not a skill; `hermes-native` is covered by a bundled Hermes skill; `held-license` awaits a licensing decision; `pending` is not yet ported.
 
@@ -38,7 +38,7 @@ Dispositions: `portable` ships unchanged apart from recorded hashes; `adapted` s
 | `ai-character-builder` | adapt/paths | pending | adapted | yes |  | Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7). |  |
 | `ai-engineer-learning` | adapt/paths | pending | adapted | yes |  | Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7). |  |
 | `all-out-game-development` | adapt/paths | pending | adapted | yes |  | Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7). |  |
-| `autoloop` | adapt/core-runtime | pending | adapted | yes |  | Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code. |  |
+| `autoloop` | adapt/core-runtime | adapted |  | yes | `skills/zouroboros/autoloop` | Real loop shipped (the package zouroboros-autoloop CLI is a simulation): proposals via the profile registry bridge (default hermes-vps), model id from the tier-resolver catalog, opt-in via HERMES_ZOUROBOROS_ALLOW_SWARM=1, host ZCR shadow hook removed. Authored SKILL.md (source has none). Not shipped: host MCP servers (the distribution MCP is the entry point). Offline e2e in tests/skills-core-a.test.ts. |  |
 | `automation-resilience` | host-only | host-only |  | yes |  | Zo/VPS turn-budget, checkpoint and restart-recovery controller bound to this host's automation ledger and managed processes. | Concept follow-up: portable turn checkpointing and restart recovery for Hermes runs. |
 | `bridge-watchdog` | host-only | host-only |  | yes |  | Watches the VPS's own executor bridges and services. |  |
 | `broll-injector` | adapt/zo-api | pending | adapted | yes |  | Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4). |  |
@@ -81,7 +81,7 @@ Dispositions: `portable` ships unchanged apart from recorded hashes; `adapted` s
 | `spec-first-interview` | adapt/paths | pending | adapted | yes |  | Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7). |  |
 | `three-stage-eval` | portable | adapted |  | yes | `skills/software-development/three-stage-eval` | Q00/ouroboros (MIT) origin kept; never-tracked evaluate.ts quick start replaced by an agent-run procedure; zo.space and /zo/ask replaced by generic web checks and Hermes delegate_task consensus. |  |
 | `threejs-game-production` | adapt/paths | pending | adapted | yes |  | Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7). |  |
-| `tier-resolver` | adapt/core-runtime | pending | adapted | yes |  | Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code. | Ship a fresh default model catalog; never data/feedback.jsonl or the host catalog/weights. |
+| `tier-resolver` | adapt/core-runtime | adapted |  | yes | `skills/zouroboros/tier-resolver` | Resolver and calibration shipped with portable paths: hand-written default catalog (empty ids = Hermes profile model), operator catalog in ZOUROBOROS_CONFIG_DIR, feedback/tuned weights only in ZOUROBOROS_STATE_DIR. Never shipped: data/feedback.jsonl, data/models.json, data/external-models.json, data/weights.json (built-in reference weights used). Decision gate wired to packages/swarm (synced to the pin). Reviewed synthetic tests/test-suite.jsonl shipped as assets/test-suite.json. Not shipped: Zo/OmniRoute routing scripts (zo-ask-route, catalog-sync, model-route hooks, deprecated resolvers) and model-routing-policy.test.ts (tests the host catalog + Zo route). Own tests + regression floors run in CI. |  |
 | `tradingview-mcp-server` | portable | adapted |  | yes | `skills/research/tradingview-mcp-server` | Fiale Plus MIT (LICENSE shipped). The source is a vendored MCP server repo with no SKILL.md; the distribution ships an authored Hermes skill that registers the pinned npm package as an MCP server, plus upstream field/preset docs. Server source not vendored. |  |
 | `ux-laws` | adapt/paths | pending | adapted | yes |  | Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7). |  |
 | `verity` | adapt/paths | pending | adapted | yes |  | Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7). |  |
@@ -90,10 +90,10 @@ Dispositions: `portable` ships unchanged apart from recorded hashes; `adapted` s
 | `workspace-search` | adapt/paths | pending | adapted | yes |  | Triage: host paths; replace hardcoded workspace/state paths with portable configuration (t6/t7). |  |
 | `zo-ask-governor` | adapt/zo-api | pending | adapted | yes |  | Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4). |  |
 | `zo-ask-retry` | adapt/zo-api | pending | adapted | yes |  | Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4). |  |
-| `zo-memory-system` | adapt/core-runtime | pending | adapted | yes |  | Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code. | Exclude scripts/.mcp-trust/ manifest history. |
+| `zo-memory-system` | adapt/core-runtime | adapted |  | yes | `skills/zouroboros/zo-memory-system` | Wired to the distribution: facts/episodes via the zouroboros-memory package and the zouroboros MCP server, always against the profile DB ($HERMES_ZOUROBOROS_HOME/memory.db; inherited ZO_MEMORY_DB/ZOUROBOROS_MEMORY_DB ignored). Authored zmem.ts replaces the host CLI. Not shipped: host scripts (hosted embeddings, memory gate hook, auto-capture, vault, RAG freshness daemons), .merge-scratch/, scripts/.mcp-trust/ (manifest history), persona example files, reports and assets. Offline e2e test in tests/skills-core-a.test.ts. |  |
 | `zo-persona-creator` | adapt/zo-api | pending | adapted | yes |  | Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4). |  |
-| `zo-swarm-executors` | adapt/core-runtime | pending | adapted | yes |  | Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code. |  |
-| `zo-swarm-orchestrator` | adapt/core-runtime | pending | adapted | yes |  | Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code. |  |
+| `zo-swarm-executors` | adapt/core-runtime | adapted |  | yes | `skills/zouroboros/zo-swarm-executors` | Wired to the profile-generated executor registry and integration/hermes-bridge.sh; list/doctor script, bridge protocol reference and template (host paths removed). Not shipped: host bridges (claude-code, codex, gemini, kimi, opencode, pi), Zo identities, host registry, daemons and hooks. Tests in tests/skills-core-a.test.ts. |  |
+| `zo-swarm-orchestrator` | adapt/core-runtime | adapted |  | yes | `skills/zouroboros/zo-swarm-orchestrator` | Wired to the distribution: packages/swarm decision gate, integration/tasks.ts DAG contract, profile campaigns dir and the opt-in integration/cli.ts swarm runner (hermes-vps workers). Not shipped: orchestrate-v4/v5 host scripts, persona registry, host campaigns/examples/evaluations, data/. Offline e2e (fake Hermes through the real orchestrator) in tests/skills-core-a.test.ts. |  |
 | `zo-to-zo-consult` | host-only | host-only |  | yes |  | Calls between Zo Computer instances; requires the Zo platform. |  |
 | `zouroboros` | adapt/core-runtime | pending | adapted | yes |  | Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code. |  |
 | `zouroboros-evolution-10` | drop | dropped |  | yes |  | Generated evolution-episode stub with no implementation; not a skill. |  |

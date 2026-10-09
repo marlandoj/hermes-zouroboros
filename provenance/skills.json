@@ -490,6 +490,24 @@
       "adaptation": "Hermes frontmatter (Q00/ouroboros MIT origin kept) replaces Zo fields; Quick Start for the never-tracked scripts/evaluate.ts replaced by an agent-run procedure; zo.space checks generalised to web routes; /zo/ask consensus replaced by Hermes delegate_task or separate model invocations; references to unshipped ontologist.md/unstuck-lateral replaced by inline guidance."
     },
     {
+      "path": "skills/zouroboros/autoloop/scripts/autoloop.ts",
+      "skill": "autoloop",
+      "sourcePath": "Skills/autoloop/scripts/autoloop.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8f6e13d05f7ce4095919f5ae3232476d936caaa2fba1678074a391693d587415",
+      "distributedSha256": "cfbb49368c007c63431554bdfb5062c4d3161dfc338b2a3b33748218886f69d5",
+      "adaptation": "Removed the host-only ZCR shadow-observation hook and host paths; proposals use the bridge of an executor in the profile registry (default hermes-vps) with the profile runtime env and workdir; model override from the tier-resolver skill catalog id (empty = profile model) instead of host swarm-light/mid/heavy aliases; execution requires HERMES_ZOUROBOROS_ALLOW_SWARM=1; git/run steps run in the program directory."
+    },
+    {
+      "path": "skills/zouroboros/autoloop/SKILL.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "a917a7d0bf8f879d309238de0f8ebab35b40afbeba6bd3d65c8b265270eddbc1",
+      "adaptation": "Authored: the source entry has scripts only (no SKILL.md). Documents program.md format, safety model and opt-in run."
+    },
+    {
       "path": "skills/zouroboros/classifier-fallback/assets/classifier-catalog.json",
       "skill": "classifier-fallback",
       "sourcePath": "Skills/classifier-fallback/assets/classifier-catalog.json",
@@ -542,6 +560,150 @@
       "sourceSha256": "7c56f1754e7b3d65c55c8b04d2a5b8cfaad81fb242a5118f11b8470c186ebf00",
       "distributedSha256": "b89fff253bda145406f2fc19d9b1d1cb84a1bc0093c7bfdb9c3b4fd92f6f04b8",
       "adaptation": "Hermes frontmatter (removed operator handle, Linear/AIEWF ids, consensus-gate dependency); commands use ${HERMES_SKILL_DIR}; ledger and snapshots moved from assets/ to $ZOUROBOROS_STATE_DIR/classifier-fallback with env overrides; documented env-configured fallback models."
+    },
+    {
+      "path": "skills/zouroboros/tier-resolver/assets/models.default.json",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "f9c021ad3230c0e00a1615488f0131b6b7610acaf79c8b1cae863d0931408472",
+      "adaptation": "Hand-written default catalog for Hermes: fast/balanced/deep slots with empty ids (profile model), no host BYOK ids, no persona overrides, no external routing. Replaces data/models.json (host catalog, not exported)."
+    },
+    {
+      "path": "skills/zouroboros/tier-resolver/assets/test-suite.json",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "4ab9b715ee07cc01a61357284e2e8fc169d7be3dfd34dfe074490064a9f8d53b",
+      "adaptation": "Synthetic eval set converted from Skills/tier-resolver/tests/test-suite.jsonl (source sha256 10b5ccdc13e812d663c318cbc2895b837bd5401471eba1cc264ae48a84722966 at the pin) to a JSON array, content unchanged: 50 generic, reviewed prompts with expected tier/type; no operator data or routing telemetry."
+    },
+    {
+      "path": "skills/zouroboros/tier-resolver/scripts/persona-tier-resolve.ts",
+      "skill": "tier-resolver",
+      "sourcePath": "Skills/tier-resolver/scripts/persona-tier-resolve.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e54f9ca9a7b2e90c47025acca93df553a025fb46e508fd5c9ede23ac7b6af678",
+      "distributedSha256": "eb17697a55d44b2e3471598de20c77fccff13d7fbefe25314323912646dcd3fd",
+      "adaptation": "Portable paths: catalog from TIER_RESOLVER_CONFIG_DIR or ZOUROBOROS_CONFIG_DIR/tier-resolver/models.json else assets/models.default.json; feedback.jsonl and tuned weights.json only under TIER_RESOLVER_STATE_DIR or ZOUROBOROS_STATE_DIR/tier-resolver (no state dir = no telemetry, built-in weights); external pool only from config dir; removed skill-dir .env loader; fallback provider 'hermes'; help example persona made generic. OmniRoute comment reworded."
+    },
+    {
+      "path": "skills/zouroboros/tier-resolver/scripts/routing-calibration.test.ts",
+      "skill": "tier-resolver",
+      "sourcePath": "Skills/tier-resolver/tests/routing-calibration.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "01e4c980b70fb54ecfd17347cc785c014a2e7062dc9c83461ea1761676c496f4",
+      "distributedSha256": "c2c8be417cf39643c736061364a55cdda4efd77d5e42e4edce8517e864a6188c",
+      "adaptation": "Import paths point at sibling scripts; two type-only fixes for the root tsc (Record<string, number> candidate; Set.intersection replaced by an equivalent filter). Assertions unchanged."
+    },
+    {
+      "path": "skills/zouroboros/tier-resolver/scripts/routing-calibration.ts",
+      "skill": "tier-resolver",
+      "sourcePath": "Skills/tier-resolver/scripts/routing-calibration.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "0dc2766efd74cc75da0b678627e1b158aeead8e8fc1d549fb609bc12dce3855b",
+      "distributedSha256": "0dc2766efd74cc75da0b678627e1b158aeead8e8fc1d549fb609bc12dce3855b",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/tier-resolver/scripts/run-test-suite.ts",
+      "skill": "tier-resolver",
+      "sourcePath": "Skills/tier-resolver/tests/run-test-suite.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "89ac4a31a394d1120369efb0041b865c970b5b4485b105380f04505136479e46",
+      "distributedSha256": "c71d779ab101521cadd1aba6eaf5e61b57f5e7df65d5f0a88af07585e176ef6e",
+      "adaptation": "Moved next to the resolver; reads the reviewed synthetic suite from assets/test-suite.json (JSON array) instead of tests/test-suite.jsonl; results file only with --out (never written into the skill tree). Floors unchanged (tier 84%, type 68%)."
+    },
+    {
+      "path": "skills/zouroboros/tier-resolver/scripts/swarm-decision-gate.test.ts",
+      "skill": "tier-resolver",
+      "sourcePath": "Skills/tier-resolver/tests/swarm-decision-gate.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4f566b3e0c86921e5bfdb432ce6e790104855e5077559386105740a50a744179",
+      "distributedSha256": "9f910cdac471157a219fea4b66a5715658f84c419fb8f3166fab2298cb28f558",
+      "adaptation": "Replaced with the superset suite from packages/swarm/src/__tests__/routing/swarm-decision-gate.test.ts at the same source revision (adds the #850 explicit-request cases; 'trading service' instead of an operator project name); runs against the distribution package gate instead of a skill copy; two example prompts made generic (city, memory system)."
+    },
+    {
+      "path": "skills/zouroboros/tier-resolver/SKILL.md",
+      "skill": "tier-resolver",
+      "sourcePath": "Skills/tier-resolver/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7b8ed58a21a181c0c18c30dc4bec6764c2a05fa18f700f2468bab2348083b6b6",
+      "distributedSha256": "f06f629bb6e0b2cae46cd5609308d59059f3444d2c9939d02f272ad2fac0fd35",
+      "adaptation": "Rewritten for Hermes: default host-free catalog (fast/balanced/deep, empty ids = profile model), operator catalog in ZOUROBOROS_CONFIG_DIR, feedback/weights only in ZOUROBOROS_STATE_DIR, regression suite; decision gate wired to packages/swarm. Removed host BYOK ids, persona names, OmniRoute/Zo routing and operator handle."
+    },
+    {
+      "path": "skills/zouroboros/zo-memory-system/scripts/zmem.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "31998a48287c84e005456b8c6b1ba084c5f5e2ecea26cf0edfe802e55967be9d",
+      "adaptation": "Distribution-authored CLI over zouroboros-memory (facts, episodes, stats) bound to the profile DB from integration/profile.ts; ignores inherited ZO_MEMORY_DB/ZOUROBOROS_MEMORY_DB. Replaces the source scripts/memory.ts host CLI."
+    },
+    {
+      "path": "skills/zouroboros/zo-memory-system/SKILL.md",
+      "skill": "zo-memory-system",
+      "sourcePath": "Skills/zo-memory-system/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "086fa98b9b42d610644c6c2d8d4997ea2d0cf7d480c8ee3ba09b2281808e78e4",
+      "distributedSha256": "394d0b4b751590dcf409f4f9e44856c19f32298d226f5be9f9889aa86677795f",
+      "adaptation": "Rewritten for Hermes: Hermes frontmatter; memory lives only in the distribution profile DB ($HERMES_ZOUROBOROS_HOME/memory.db) shared with the zouroboros MCP server; documents MCP tools + scripts/zmem.ts. Removed Zo/persona/host paths, hosted-embedding/HyDE/gate-hook/auto-capture/vault/RAG-daemon sections (not in the distribution), operator author handle and deprecation banner."
+    },
+    {
+      "path": "skills/zouroboros/zo-swarm-executors/references/bridge-protocol.md",
+      "skill": "zo-swarm-executors",
+      "sourcePath": "Skills/zo-swarm-executors/docs/BRIDGE_PROTOCOL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4f604351dd0aa3dc7857bc4af6193810f4363b8fbfe5f55d4aefb9cb4ccc2aec",
+      "distributedSha256": "58d34b6ada1173295a26a04d41ce2c21ff81869766e18fe09638e7e588e312af",
+      "adaptation": "Default workdir is the current directory; registry location is the profile's generated executors.json with absolute bridge paths; documents the distribution bridge's credential-safe stderr handling and recursion guard. Host paths removed."
+    },
+    {
+      "path": "skills/zouroboros/zo-swarm-executors/scripts/executors.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "bf561cfe11695f148da66e58c1ad2562cb015bd624e1b6d8e70962edebcc7621",
+      "adaptation": "Distribution-authored list/doctor over the profile executor registry; reports pass/fail only."
+    },
+    {
+      "path": "skills/zouroboros/zo-swarm-executors/SKILL.md",
+      "skill": "zo-swarm-executors",
+      "sourcePath": "Skills/zo-swarm-executors/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6400f171bd49452d9f0f9201d85e11c37b0ed890286a26ea1258cd6bac735aa7",
+      "distributedSha256": "618e8dd2abe17fb91fb69c68e476695dbc8925e5a8bf3f5d02e77672d796ba9b",
+      "adaptation": "Rewritten for Hermes: profile-generated executor registry (hermes-vps via integration/hermes-bridge.sh), list/doctor script, troubleshooting, adding a bridge. Removed host bridge set (claude-code/codex/gemini/kimi/pi/opencode), Zo identities and host paths."
+    },
+    {
+      "path": "skills/zouroboros/zo-swarm-executors/templates/template-bridge.sh",
+      "skill": "zo-swarm-executors",
+      "sourcePath": "Skills/zo-swarm-executors/bridges/template-bridge.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6c30eaf1bbd5927d44d12afbb6bc98e047af10ab205e0e8ca236dc5d52e53ca5",
+      "distributedSha256": "b974549cb0b6df51d746bd5dfe759d1d5303c1958c5023294d204239925cfe81",
+      "adaptation": "Default workdir is the current directory (host workspace path removed); example stderr capture uses mktemp."
+    },
+    {
+      "path": "skills/zouroboros/zo-swarm-orchestrator/scripts/swarm.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "e2e6662106e4b456faea4c3f5f280bc2444e7d9a04b38936300262614bf25c7d",
+      "adaptation": "Distribution-authored wrapper: package decision gate, integration/tasks.ts validation, profile campaigns dir, run via integration/cli.ts swarm (opt-in). Replaces the source orchestrate-v4/v5 host scripts."
+    },
+    {
+      "path": "skills/zouroboros/zo-swarm-orchestrator/SKILL.md",
+      "skill": "zo-swarm-orchestrator",
+      "sourcePath": "Skills/zo-swarm-orchestrator/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "3bc2ad52b13428b0e119ed423d371465faacd10d83ba09acdbc2e283c2fbb926",
+      "distributedSha256": "ff0d4aff179eb6c9c479105e6d0e782becc34f4710be8dfe01a2a423128f5139",
+      "adaptation": "Rewritten for Hermes: decision gate -> bounded task DAG (integration/tasks.ts contract) -> prepare -> operator opt-in run via integration/cli.ts swarm (hermes-vps workers). Removed Zo API executors, persona registry, host campaigns/examples, operator handle."
     },
     {
       "path": "skills/zouroboros/zouroboros-observatory/assets/install.prompt.md",
