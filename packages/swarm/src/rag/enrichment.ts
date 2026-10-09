@@ -101,7 +101,7 @@ async function getEmbedding(text: string): Promise<number[]> {
   return vec;
 }
 
-const DEFAULT_QDRANT_URL = 'http://100.69.35.3:6333';
+const DEFAULT_QDRANT_URL = 'http://127.0.0.1:6333';
 
 async function searchQdrantCollection(
   collection: string,

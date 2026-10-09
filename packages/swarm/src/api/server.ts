@@ -45,7 +45,7 @@ export function createSwarmAPI(config: SwarmAPIConfig) {
   const sseClients: Set<ReadableStreamDefaultController> = new Set();
   const eventLog: SSEEvent[] = [];
 
-  const corsOrigins = (process.env.SWARM_API_CORS_ORIGINS || 'https://marlandoj.zo.space')
+  const corsOrigins = (process.env.SWARM_API_CORS_ORIGINS || '')
     .split(',').map(s => s.trim()).filter(Boolean);
   app.use('*', cors({ origin: corsOrigins }));
 

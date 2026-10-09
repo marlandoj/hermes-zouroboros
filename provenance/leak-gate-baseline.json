@@ -88,11 +88,6 @@
       "count": 2
     },
     {
-      "file": "packages/swarm/src/api/server.ts",
-      "rule": "personal-data:operator-name-2",
-      "count": 1
-    },
-    {
       "file": "packages/swarm/src/cli/t3-run.ts",
       "rule": "host-path:host-workspace",
       "count": 1

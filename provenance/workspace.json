@@ -1507,6 +1507,16 @@
       "path": "packages/selfheal/src/cli/crystallize.ts",
       "reason": "Invocation log under ZOUROBOROS_LOG_DIR (default: temp dir) instead of a hardcoded /dev/shm path (t5).",
       "distributed_sha256": "4ba786a38877c06af7ff07cb45c7ed198e1b55f6b9cbfdbe7e4a5ace8708af97"
+    },
+    {
+      "path": "packages/swarm/src/rag/enrichment.ts",
+      "reason": "Default Qdrant URL is local (http://127.0.0.1:6333, as in packages/rag and integration/qdrant-corpus.ts) instead of a source-host private network address; QDRANT_URL still overrides (v1-audit).",
+      "distributed_sha256": "87488ee1bae562be43c6b26d8a4982879f307c3bc3e119121af9e78ca02c12ef"
+    },
+    {
+      "path": "packages/swarm/src/api/server.ts",
+      "reason": "No default CORS origin (cross-origin requests refused) instead of the source operator's site; set SWARM_API_CORS_ORIGINS to allow origins (v1-audit).",
+      "distributed_sha256": "a87b21f19089b03939c959bd0975e6bf58669c033e952d62547e52d6e67e4d1f"
     }
   ]
 }
