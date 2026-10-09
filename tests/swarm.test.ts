@@ -63,7 +63,10 @@ describe('CLI swarm execution through the real orchestrator', () => {
     else expect(result.error).toContain('exit 7');
     expect(execution.stdout + execution.stderr).not.toContain('fake-provider-private-diagnostic');
 
-    expect(readFileSync(f.capture + '.args', 'utf8').split('\0')).toEqual(['-z', 'Reply with OK', '']);
+    const args = readFileSync(f.capture + '.args', 'utf8').split('\0');
+    // The bridge adds a private --usage-file report; no model or provider is selected.
+    expect(args[0]).toBe('--usage-file');
+    expect(args.slice(2)).toEqual(['-z', 'Reply with OK', '']);
     const context = readFileSync(f.capture + '.context', 'utf8').trim().split('\n');
     expect(context.slice(0, 6)).toEqual([
       f.workspace, f.home, join(f.data, 'hermes'), join(f.data, 'memory.db'), join(f.data, 'executors.json'), '0',

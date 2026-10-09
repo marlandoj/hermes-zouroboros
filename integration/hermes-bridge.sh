@@ -41,12 +41,20 @@ cd -- "$workdir"
 # A swarm child may consume the same MCP profile but must not recursively
 # dispatch another swarm through that profile's MCP entrypoint.
 export HERMES_ZOUROBOROS_ALLOW_SWARM=0
+# `hermes -z` can exit 0 with a provider error as its final response (for example
+# HTTP 402 from an unfunded account). Its --usage-file report records the failure.
+# HERMES_USAGE_REPORT=0 disables the report for a Hermes build without that flag.
+[[ "${HERMES_USAGE_REPORT:-1}" == 0 ]] || args+=(--usage-file "$scratch/usage.json")
 timeout --kill-after=5s "${duration}s" "$launcher" "${args[@]}" -z "$prompt" \
   >"$scratch/output" 2>"$scratch/error" &
 child=$!
 status=0
 wait "$child" || status=$?
 child=''
+if [[ -f "$scratch/usage.json" ]] && LC_ALL=C grep -Eq '"failed"[[:space:]]*:[[:space:]]*true' "$scratch/usage.json"; then
+  # Exit 1 (a failed run) even when Hermes exits 0 or 2; callers read 2 as a usage error.
+  fail "Hermes reported a failed run (exit $status); inspect the private Hermes session logs."
+fi
 if [[ "$status" -ne 0 ]]; then
   # Provider stderr may contain credential values. Report status without
   # reflecting untrusted provider diagnostics into orchestrator logs.

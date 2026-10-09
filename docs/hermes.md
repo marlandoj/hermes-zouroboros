@@ -13,8 +13,12 @@ HERMES_HOME=/absolute/path/to/generated-profile \
 ```
 
 The bridge calls `hermes -z`, whose installed implementation emits the final
-response on stdout and reports failures with a nonzero exit. The bridge also
-rejects empty responses, imposes a timeout, and removes private temporary files.
+response on stdout and reports most failures with a nonzero exit. A non-retryable
+provider error (for example HTTP 402 from an unfunded account) can instead exit 0
+with the error text as the final response, so the bridge passes a private
+`--usage-file` and fails with exit 1 whenever that report says `"failed": true`.
+The bridge also rejects empty responses, imposes a timeout, and removes private
+temporary files.
 It passes prompts as a single argument and uses the supplied working directory
 (or the caller’s current directory). It preserves `HOME` and `HERMES_HOME`.
 
@@ -33,6 +37,7 @@ a separate profile does not isolate filesystem or network access.
 | `HERMES_MODEL` | Model override when no swarm model is supplied |
 | `HERMES_INFERENCE_MODEL` / `LLM_MODEL` | Further model fallbacks, in that order |
 | `SWARM_PROVIDER` / `HERMES_PROVIDER` | Optional provider override, in that order |
+| `HERMES_USAGE_REPORT` | `0` omits `--usage-file`, for a Hermes build without that flag (provider errors then pass as responses) |
 
 A provider override requires an explicit model. With neither override Hermes uses
 its configured defaults. The bridge does not rewrite model IDs, retry on another
