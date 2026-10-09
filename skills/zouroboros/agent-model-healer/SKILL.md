@@ -44,14 +44,26 @@ until someone notices.
 
 ### Probe semantics
 
-- **Healthy threshold:** `healthyResponseMs` (default 10000). A *completed* response at or
+- **Healthy threshold:** `healthyResponseMs` (default **20000**). A *completed* response at or
   above it is **degraded**, with its real elapsed time. So is a completed response that lacks
   the expected marker. Degraded models are still usable.
+  - Why 20 s: every probe runs `hermes -z`, which costs about 8 s of CLI startup before the
+    provider sees the request. Healthy live probes took 9.9–11 s end to end, so the source's
+    10 s marked them degraded. 20 s leaves about 2x headroom and keeps a 20–30 s degraded band
+    under the example 30 s timeout.
+  - Override per host with `AGENT_MODEL_HEALER_HEALTHY_RESPONSE_MS` (positive integer ms), which
+    wins over the config value. Lower it only if you measure faster probes on your host.
 - **Timeout:** `timeoutMs` must be strictly greater than `healthyResponseMs` and in whole
   seconds (it becomes the bridge's `HERMES_TIMEOUT`). A timeout records `latencyMs: null` and
   `failureCategory: "timeout"`.
 - **Failure categories:** `timeout`, `provider_error` and `empty_response`. The bridge never
   reflects provider stderr; look in the private Hermes session logs for details.
+- **Unfunded providers:** a provider that refuses for billing (HTTP 402, insufficient balance,
+  payment required) reports `health: "unfunded"`, `failureCategory: "unfunded"` and the
+  informational status `unfunded (skipped)`. It is not an alarm: it is not retried, does not
+  count as unhealthy, never triggers an exhaustion alert or exit 3, and is never chosen as a
+  fallback target. Jobs pinned to an unfunded model are listed under `unfundedJobs` and left
+  where they are. Fund the account, or move those jobs by hand.
 - **Probe path unavailable:** if the Hermes CLI, the profile or the registry is missing, the
   run aborts with exit 2. It does not declare every model unhealthy, which could reassign the
   whole fleet.

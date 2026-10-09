@@ -51,7 +51,19 @@ child=$!
 status=0
 wait "$child" || status=$?
 child=''
-if [[ -f "$scratch/usage.json" ]] && LC_ALL=C grep -Eq '"failed"[[:space:]]*:[[:space:]]*true' "$scratch/usage.json"; then
+failed_run=0
+if [[ -f "$scratch/usage.json" ]] && LC_ALL=C grep -Eq '"failed"[[:space:]]*:[[:space:]]*true' "$scratch/usage.json"; then failed_run=1; fi
+# Unfunded provider (HTTP 402, insufficient balance/credits, payment required): a failed run,
+# never a success, but an expected one. Exit 88 so callers skip to the next model without
+# retrying or warning; the diagnostic is printed only with HERMES_ZOUROBOROS_DEBUG=1.
+# Matched files are only tested, never printed (provider text may hold secrets).
+unfunded='payment[ _-]?required|insufficient[ _-]?(balance|credits?|funds|quota)|credit balance is too low|(http|status|error|code)[ :=]{0,3}402([^0-9]|$)'
+if [[ "$failed_run" == 1 || "$status" -ne 0 ]] && [[ "$status" -ne 124 && "$status" -ne 137 && "$status" -ne 130 && "$status" -ne 143 ]] \
+  && LC_ALL=C grep -Eiqs -- "$unfunded" "$scratch/usage.json" "$scratch/output" "$scratch/error"; then
+  [[ "${HERMES_ZOUROBOROS_DEBUG:-0}" != 1 ]] || printf 'hermes-zouroboros: unfunded: the provider reported payment required or insufficient balance (exit %s).\n' "$status" >&2
+  exit 88
+fi
+if [[ "$failed_run" == 1 ]]; then
   # Exit 1 (a failed run) even when Hermes exits 0 or 2; callers read 2 as a usage error.
   fail "Hermes reported a failed run (exit $status); inspect the private Hermes session logs."
 fi

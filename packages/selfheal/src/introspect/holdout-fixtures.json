@@ -2,7 +2,7 @@
   "name": "holdout-anti-goodhart-v1",
   "windowDays": 14,
   "threshold": 0.85,
-  "_provenance": "Fresh reserved held-out eval bank for the anti-Goodhart tripwire (seed-antigoodhart-wiring-2026-06-01). Synthetic, disjoint-by-construction from Skills/zo-memory-system/assets/continuation-eval-fixture-set.json. NO visible introspect collector reads this file. Domains here (atlas/cobalt/kraken/helios) never appear in the visible set.",
+  "_provenance": "Fresh reserved held-out eval bank for the anti-Goodhart tripwire (seed-antigoodhart-wiring-2026-06-01). Synthetic, disjoint-by-construction from the visible memory-recall set (memory-recall-fixtures.json). NO visible introspect collector reads this file. Domains here (atlas/cobalt/kraken/helios) never appear in the visible set.",
   "facts": [
     {
       "entity": "project.atlas-data-migration",

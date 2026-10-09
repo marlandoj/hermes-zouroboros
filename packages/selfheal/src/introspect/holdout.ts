@@ -87,10 +87,10 @@ export interface EvalIntegrityReport {
 
 const FIXTURES_PATH = fileURLToPath(new URL('./holdout-fixtures.json', import.meta.url));
 
+// Distribution-relative only; a workspace skill is never consulted. ZOUROBOROS_HOLDOUT_RUNNER overrides.
 const RUNNER_CANDIDATES = [
+  ...(process.env.ZOUROBOROS_HOLDOUT_RUNNER ? [process.env.ZOUROBOROS_HOLDOUT_RUNNER] : []),
   fileURLToPath(new URL('../standalone/holdout-eval.ts', import.meta.url)),
-  join(WORKSPACE, 'packages/selfheal/src/standalone/holdout-eval.ts'),
-  join(WORKSPACE, 'Skills/zouroboros/skills/selfheal/scripts/holdout-eval.ts'),
 ];
 
 export function loadHoldoutFixtures(): HoldoutFixtureSet {
@@ -368,8 +368,11 @@ export const FRESHNESS_CRITICAL_DAYS = 28;
 
 const LOCAL_BANK_FILENAME = 'holdout-fixtures.local.json';
 
+// The visible set is the distribution's synthetic memory-recall fixture bank (the one introspect's
+// Memory Recall metric runs); ZOUROBOROS_MEMORY_RECALL_FIXTURES overrides it, as it does for the eval.
 const VISIBLE_FIXTURE_CANDIDATES = [
-  join(WORKSPACE, 'Skills/zo-memory-system/assets/continuation-eval-fixture-set.json'),
+  ...(process.env.ZOUROBOROS_MEMORY_RECALL_FIXTURES ? [process.env.ZOUROBOROS_MEMORY_RECALL_FIXTURES] : []),
+  fileURLToPath(new URL('./memory-recall-fixtures.json', import.meta.url)),
 ];
 
 /** A real open loop mined from the live memory DB, ready for synthesis. */

@@ -18,7 +18,7 @@
     "zouroboros-replay": "./dist/cli/replay.js"
   },
   "scripts": {
-    "build": "tsc && cp src/introspect/holdout-fixtures.json dist/introspect/holdout-fixtures.json",
+    "build": "tsc && cp src/introspect/holdout-fixtures.json src/introspect/memory-recall-fixtures.json dist/introspect/",
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",

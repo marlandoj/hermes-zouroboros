@@ -48,7 +48,8 @@ test('ask layer: model and provider reach Hermes, Zo credentials do not, failure
 
   // A provider error Hermes prints as its final response (exit 0) is a failed run, not an answer.
   fakeHermes(`while [[ $# -gt 0 ]]; do [[ "$1" == --usage-file ]] && echo '{"failed": true}' > "$2"; shift; done; echo 'API error 402: insufficient balance'`);
-  expect(JSON.parse(run(probe, [JSON.stringify({ prompt: 'ping' })]).stdout)).toMatchObject({ ok: false, failure: 'failed', exitCode: 1, output: '' });
+  // An unfunded provider (HTTP 402) is classified as such: a quiet failure, never success.
+  expect(JSON.parse(run(probe, [JSON.stringify({ prompt: 'ping' })]).stdout)).toMatchObject({ ok: false, failure: 'unfunded', exitCode: 88, output: '' });
 
   fakeHermes('sleep 5');
   expect(JSON.parse(run(probe, [JSON.stringify({ prompt: 'ping', timeoutSec: 1 })]).stdout)).toMatchObject({ ok: false, failure: 'timeout', exitCode: 124 });
@@ -222,6 +223,75 @@ test('agent-doctor: audits the profile cron jobs and applies only safe fixes thr
   expect(run(doctor, ['apply']).code).toBe(2);
   expect(calls().sort()).toEqual(['cron edit chatty --deliver local', 'cron pause zombie']);
 });
+
+/** Fake Hermes that answers every model except those named in UNFUNDED_MODELS, which get a 402. */
+const unfundedHermes = (models: string[]) => fakeHermes(`[[ "$1" == cron ]] && exit 0
+usage=''; model=''; prev=''
+for a in "$@"; do [[ "$prev" == --usage-file ]] && usage="$a"; [[ "$prev" == --model ]] && model="$a"; prev="$a"; done
+case " ${models.join(' ')} " in *" $model "*) [[ -z "$usage" ]] || echo '{"failed": true}' > "$usage"; echo 'API error 402: Insufficient Balance'; exit 0 ;; esac
+echo "HEALTH_CHECK_PASS from $model"`);
+
+test('unfunded providers fail quietly: no retry, silent fallback, never success (fake 402, no live calls)', () => {
+  unfundedHermes(['broke/model']);
+  const probe = join(root, 'probe.ts');
+  writeFileSync(probe, `import { ask } from '${join(repo, 'integration/ask.ts')}';\nconsole.log(JSON.stringify(await ask(JSON.parse(process.argv[2]!))));\n`);
+  // ask(): falls through to the next model, silently, and records the skip.
+  const fell = run(probe, [JSON.stringify({ prompt: 'ping', model: 'broke/model', fallbacks: [{ model: 'funded/model' }] })]);
+  expect(JSON.parse(fell.stdout)).toMatchObject({ ok: true, model: 'funded/model', output: 'HEALTH_CHECK_PASS from funded/model', skippedUnfunded: ['broke/model'] });
+  expect(fell.stderr).toBe('');
+  const alone = JSON.parse(run(probe, [JSON.stringify({ prompt: 'ping', model: 'broke/model' })]).stdout);
+  expect(alone).toMatchObject({ ok: false, failure: 'unfunded', output: '' });
+  expect(run(probe, [JSON.stringify({ prompt: 'ping', model: 'broke/model' })], { HERMES_ZOUROBOROS_DEBUG: '1' }).stderr).toContain('[debug] ask: broke/model is unfunded');
+
+  // ask-retry: one call on the unfunded model (no retry, no backoff), then the next chain model; nothing on stderr.
+  rmSync(join(root, 'hermes.calls'));
+  const retry = skill('zouroboros/ask-retry/scripts/ask-retry.ts');
+  const chained = run(retry, ['--chain', 'broke/model,funded/model', '--max-attempts', '1', '--base-delay-ms', '60000', '--input', 'q', '--json']);
+  expect(chained.code).toBe(0);
+  expect(chained.stderr).toBe('');
+  expect(JSON.parse(chained.stdout)).toMatchObject({ ok: true, model: 'funded/model', outcome: 'success' });
+  expect(calls().map((line) => line.match(/--model (\S+)/)?.[1])).toEqual(['broke/model', 'funded/model']);
+  const none = run(retry, ['--model', 'broke/model', '--max-attempts', '4', '--input', 'q', '--json']);
+  expect(none.code).toBe(1);
+  expect(none.stderr).toBe('');
+  expect(JSON.parse(none.stdout)).toMatchObject({ ok: false, outcome: 'unfunded', attempts: [expect.objectContaining({ failure: 'unfunded' })] });
+  expect(JSON.parse(none.stdout).attempts).toHaveLength(1);
+
+  // Healer: the unfunded model reports "unfunded (skipped)", is not an alarm, is never a fallback target.
+  const healer = skill('zouroboros/agent-model-healer/scripts/healer.ts');
+  const config = JSON.parse(readFileSync(skill('zouroboros/agent-model-healer/assets/fallback-chain.example.json'), 'utf8'));
+  Object.assign(config, { healingEnabled: true, hysteresis: { consecutiveUnhealthyToHeal: 1, consecutiveHealthyToRestore: 1 } });
+  config.probeConfig.retries = 2;
+  mkdirSync(join(root, 'data', 'config', 'agent-model-healer'), { recursive: true });
+  writeFileSync(join(root, 'data', 'config', 'agent-model-healer', 'fallback-chain.json'), JSON.stringify(config));
+  writeJobs([job('j1', { model: 'example/claude-sonnet' }), job('j2', { model: 'example/gpt-oss-120b' })]);
+  unfundedHermes(['example/gpt-oss-120b']);
+  rmSync(join(root, 'hermes.calls'), { force: true });
+  const result = run(healer, ['auto']);
+  expect(result.code).toBe(0);
+  const json = JSON.parse(result.stdout);
+  expect(json).toMatchObject({ phase: 'complete', healActions: [], exhaustedAlerts: [], unhealthy: [], unfunded: ['example/gpt-oss-120b'],
+    unfundedJobs: [{ agentId: 'j2', agentTitle: 'Job j2', model: 'example/gpt-oss-120b', status: 'unfunded (skipped)' }] });
+  expect(result.stderr).toContain('unfunded (skipped)');
+  expect(result.stderr).not.toMatch(/❌|EXHAUSTED/);
+  // Probed once, not retried.
+  expect(calls().filter((line) => line.includes('--model example/gpt-oss-120b'))).toHaveLength(1);
+  const status = JSON.parse(run(healer, ['status']).stdout);
+  expect(status.lastProbe['example/gpt-oss-120b']).toMatchObject({ healthy: false, health: 'unfunded', failureCategory: 'unfunded', warning: 'unfunded (skipped)' });
+
+  // With the proprietary model down, the healer never moves a job onto the unfunded fallback.
+  unfundedHermes(['example/gpt-oss-120b']);
+  fakeHermes(`[[ "$1" == cron ]] && exit 0
+usage=''; model=''; prev=''
+for a in "$@"; do [[ "$prev" == --usage-file ]] && usage="$a"; [[ "$prev" == --model ]] && model="$a"; prev="$a"; done
+[[ "$model" == example/claude-sonnet || "$model" == example/gemini-pro ]] && exit 1
+[[ -z "$usage" ]] || echo '{"failed": true}' > "$usage"; echo 'API error 402: Insufficient Balance'`);
+  const down = run(healer, ['auto']);
+  const downJson = JSON.parse(down.stdout);
+  expect(downJson.healActions).toEqual([]);
+  expect(downJson.exhaustedAlerts).toEqual([expect.objectContaining({ agentId: 'j1', model: 'example/claude-sonnet' })]);
+  expect(calls().filter((line) => line.startsWith('cron '))).toEqual([]);
+}, 120_000);
 
 test('agent-model-healer: probes through Hermes, heals with hysteresis via hermes cron edit, restores', () => {
   const healer = skill('zouroboros/agent-model-healer/scripts/healer.ts');

@@ -123,6 +123,20 @@ Each root falls back to the profile data directory.
     configurable. Without the portable variables, the old workspace-relative defaults are kept.
   - Any evolve run other than `--dry-run` needs `HERMES_ZOUROBOROS_ALLOW_SWARM=1`. Autoloop mode
     runs the distribution's `autoloop` skill.
+  - **Memory Recall** runs the shipped synthetic eval
+    `packages/selfheal/src/introspect/memory-recall-eval.ts`. It seeds a throwaway database with the
+    hand-written fixtures in `memory-recall-fixtures.json` (fictional projects, never live memory)
+    and asks each case through the distribution's keyword and graph-boosted search; the score is
+    the share of cases whose expected phrase is in the top 3. A fresh profile therefore scores its
+    recall machinery instead of CRITICAL for a missing workspace file. Overrides:
+    `ZOUROBOROS_MEMORY_RECALL_EVAL` (eval script) and `ZOUROBOROS_MEMORY_RECALL_FIXTURES` (fixture
+    file, also the holdout tripwire's visible set). A missing eval reports insufficient evidence.
+  - **Graph Connectivity** is measured from the profile database
+    (`introspect/graph-connectivity.ts`, or `ZOUROBOROS_MEMORY_GRAPH_SCRIPT`).
+  - **Evolve recipes** (`prescribe/playbook.ts`) target distribution files by absolute path in this
+    checkout: the recall fixtures, `packages/memory/src/graph.ts`, the swarm routing engine and the
+    collector. Autoloop edits and commits that target file, so run an approved evolve with the
+    workspace set to this checkout (or a clone of it), never a workspace skill.
 - **`instinct-harvester`:** the trigger→action instinct store, under
   `ZOUROBOROS_STATE_DIR/instincts`. js-yaml is replaced by a shim over the distribution's `yaml`
   dependency.

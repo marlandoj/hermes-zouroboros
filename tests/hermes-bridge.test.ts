@@ -27,6 +27,8 @@ case "$FAKE_MODE" in provider-error|failed-empty) failed=true ;; esac
 [[ -z "$usage" ]] || printf '{"failed": %s}\\n' "$failed" > "$usage"
 case "$FAKE_MODE" in
  provider-error) printf 'API error 402: insufficient balance\\n' ;;
+ unfunded-exit) printf 'HTTP 402 Payment Required credential-value-must-not-leak' >&2; exit 1 ;;
+ answer-mentions-billing) printf 'Error code 402 means insufficient balance.\\n' ;;
  failed-empty) exit 2 ;;
  failure) printf 'credential-value-must-not-leak' >&2; exit 7 ;;
  empty) printf '  \\n\\t'; exit 0 ;;
@@ -72,7 +74,7 @@ describe('portable Hermes bridge', () => {
     expect(capturedArgs(f.capture)).toBe('-z\nhello\n');
   });
 
-  test.each([['failure', 7], ['empty', 1], ['timeout', 124], ['provider-error', 1], ['failed-empty', 1]] as const)('fails closed for %s and removes scratch', async (mode, code) => {
+  test.each([['failure', 7], ['empty', 1], ['timeout', 124], ['failed-empty', 1]] as const)('fails closed for %s and removes scratch', async (mode, code) => {
     const f = fixture();
     const p = Bun.spawn(['bash', bridge, 'hello'], { cwd: f.workdir, env: { ...f.env, FAKE_MODE: mode, HERMES_TIMEOUT: '1' }, stdout: 'pipe', stderr: 'pipe' });
     expect(await p.exited).toBe(code);
@@ -81,6 +83,27 @@ describe('portable Hermes bridge', () => {
     expect(error).toContain('hermes-zouroboros:');
     expect(error).not.toContain('credential-value-must-not-leak');
     expect(readdirSync(f.scratch)).toEqual([]);
+  });
+
+  test.each(['provider-error', 'unfunded-exit'] as const)('an unfunded provider (%s) exits 88 quietly; debug prints a diagnostic only', async (mode) => {
+    const f = fixture();
+    const quiet = Bun.spawn(['bash', bridge, 'hello'], { cwd: f.workdir, env: { ...f.env, FAKE_MODE: mode }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await quiet.exited).toBe(88);
+    expect(await new Response(quiet.stdout).text()).toBe('');
+    expect(await new Response(quiet.stderr).text()).toBe('');
+    const debug = Bun.spawn(['bash', bridge, 'hello'], { cwd: f.workdir, env: { ...f.env, FAKE_MODE: mode, HERMES_ZOUROBOROS_DEBUG: '1' }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await debug.exited).toBe(88);
+    const error = await new Response(debug.stderr).text();
+    expect(error).toContain('hermes-zouroboros: unfunded');
+    expect(error).not.toContain('credential-value-must-not-leak');
+    expect(readdirSync(f.scratch)).toEqual([]);
+  });
+
+  test('a successful answer that merely mentions 402 or balance is still a success', async () => {
+    const f = fixture();
+    const p = Bun.spawn(['bash', bridge, 'hello'], { cwd: f.workdir, env: { ...f.env, FAKE_MODE: 'answer-mentions-billing' }, stdout: 'pipe', stderr: 'pipe' });
+    expect(await p.exited).toBe(0);
+    expect(await new Response(p.stdout).text()).toBe('Error code 402 means insufficient balance.\n');
   });
 
   test('omits the usage report when HERMES_USAGE_REPORT=0', async () => {

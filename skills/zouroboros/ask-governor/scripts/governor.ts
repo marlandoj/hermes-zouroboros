@@ -121,6 +121,8 @@ const FAILURE_STATUS: Record<string, [number, string]> = {
   timeout: [504, "upstream_timeout"],
   interrupted: [503, "upstream_interrupted"],
   failed: [502, "upstream_error"],
+  // Expected and quiet: never retried and never counted toward the circuit breaker.
+  unfunded: [402, "upstream_unfunded"],
 };
 
 export class AskGovernor {

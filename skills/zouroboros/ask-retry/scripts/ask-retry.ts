@@ -12,10 +12,13 @@
  *      output are transient; usage errors, a missing Hermes CLI and interrupts are permanent.
  *   2. Retries transient failures with exponential backoff + jitter.
  *   3. Optional model chain rotation after --same-model-retries attempts on one model.
- *   4. Exit codes: 0 success, 1 permanent failure, 2 retries exhausted, 3 usage error.
+ *   4. Unfunded providers (HTTP 402, insufficient balance) fail quietly: the model is skipped at
+ *      once for the next chain model, with no retry, no backoff and no warning (debug log only).
+ *      Skips do not use up --max-attempts. If no funded model is left the outcome is "unfunded".
+ *   5. Exit codes: 0 success, 1 permanent failure (including unfunded), 2 retries exhausted, 3 usage error.
  */
 import { readFileSync } from "node:fs";
-import { ask, TRANSIENT_FAILURES, type AskFailure, type AskOutcome, type AskRequest } from "../../../../integration/ask.ts";
+import { ask, debugLog, TRANSIENT_FAILURES, type AskFailure, type AskOutcome, type AskRequest } from "../../../../integration/ask.ts";
 
 export interface RetryOptions {
   /** Model ids to rotate through; [""] means the profile's configured model. */
@@ -42,8 +45,9 @@ export interface RetryResult {
   output: string;
   model: string;
   attempts: AttemptRecord[];
-  /** "permanent" stops immediately; "exhausted" means every attempt failed transiently. */
-  outcome: "success" | "permanent" | "exhausted";
+  /** "permanent" stops immediately; "exhausted" means every attempt failed transiently;
+   * "unfunded" means every model left in the chain had an unfunded provider. */
+  outcome: "success" | "permanent" | "exhausted" | "unfunded";
 }
 
 export function backoffMs(attemptIndex: number, base: number, cap: number, random = Math.random): number {
@@ -63,17 +67,33 @@ export async function askWithRetry(prompt: string, options: RetryOptions): Promi
   const models = options.models.length ? options.models : [""];
   const maxAttempts = Math.max(1, options.maxAttempts);
   const attempts: AttemptRecord[] = [];
-  for (let index = 0; index < maxAttempts; index++) {
-    const model = modelForAttempt(models, index, options.sameModelRetries);
+  const per = Math.max(1, options.sameModelRetries);
+  let modelIndex = 0;
+  let onModel = 0;
+  for (let index = 0; index < maxAttempts;) {
+    const model = models[modelIndex] ?? "";
     const result = await call({
       prompt, model: model || undefined, provider: model ? options.provider : undefined,
       timeoutSec: options.timeoutSec, workdir: options.workdir, executor: options.executor,
     });
-    attempts.push({ attempt: index + 1, model, ok: result.ok, ms: result.ms, failure: result.failure, detail: result.detail });
-    if (options.verbose) console.error(`[ask-retry] attempt ${index + 1}/${maxAttempts} model=${model || "(profile)"} ${result.ok ? "ok" : `failed: ${result.failure}${result.detail ? ` (${result.detail})` : ""}`} ${result.ms}ms`);
-    if (result.ok) return { ok: true, output: result.output, model, attempts, outcome: "success" };
+    attempts.push({ attempt: attempts.length + 1, model, ok: result.ok, ms: result.ms, failure: result.failure, detail: result.detail });
+    if (result.ok) {
+      if (options.verbose) console.error(`[ask-retry] attempt ${index + 1}/${maxAttempts} model=${model || "(profile)"} ok ${result.ms}ms`);
+      return { ok: true, output: result.output, model, attempts, outcome: "success" };
+    }
+    if (result.failure === "unfunded") {
+      // Expected and quiet: skip to the next model without retrying, backing off or warning.
+      debugLog(`ask-retry: model=${model || "(profile)"} unfunded, skipped`);
+      if (modelIndex + 1 >= models.length) return { ok: false, output: "", model, attempts, outcome: "unfunded" };
+      modelIndex++;
+      onModel = 0;
+      continue;
+    }
+    if (options.verbose) console.error(`[ask-retry] attempt ${index + 1}/${maxAttempts} model=${model || "(profile)"} failed: ${result.failure}${result.detail ? ` (${result.detail})` : ""} ${result.ms}ms`);
     if (!result.failure || !TRANSIENT_FAILURES.has(result.failure)) return { ok: false, output: "", model, attempts, outcome: "permanent" };
-    if (index + 1 < maxAttempts) await sleep(backoffMs(index, options.baseDelayMs, options.maxDelayMs, options.random));
+    index++;
+    if (++onModel >= per && modelIndex + 1 < models.length) { modelIndex++; onModel = 0; }
+    if (index < maxAttempts) await sleep(backoffMs(index - 1, options.baseDelayMs, options.maxDelayMs, options.random));
   }
   return { ok: false, output: "", model: attempts.at(-1)?.model ?? "", attempts, outcome: "exhausted" };
 }
@@ -98,7 +118,10 @@ Flags:
   --verbose, -v              attempt log to stderr
   --dry-run                  print the resolved configuration, make no call
 
-Exit: 0 success, 1 permanent failure, 2 retries exhausted, 3 usage error.`;
+Unfunded providers (HTTP 402, insufficient balance) are skipped quietly for the next --chain model
+(no retry, no warning; HERMES_ZOUROBOROS_DEBUG=1 logs them).
+
+Exit: 0 success, 1 permanent failure or every model unfunded, 2 retries exhausted, 3 usage error.`;
 
 function parse(argv: string[]) {
   const get = (flag: string) => { const i = argv.indexOf(flag); return i >= 0 ? argv[i + 1] : undefined; };
@@ -148,6 +171,7 @@ if (import.meta.main) {
   const result = await askWithRetry(prompt, o);
   if (o.json) console.log(JSON.stringify(result, null, 2));
   else if (result.ok) console.log(result.output);
-  else console.error(`ask-retry: ${result.outcome} after ${result.attempts.length} attempt(s): ${result.attempts.at(-1)?.failure ?? "unknown"}`);
-  process.exit(result.ok ? 0 : result.outcome === "permanent" ? 1 : 2);
+  else if (result.outcome !== "unfunded") console.error(`ask-retry: ${result.outcome} after ${result.attempts.length} attempt(s): ${result.attempts.at(-1)?.failure ?? "unknown"}`);
+  else debugLog("ask-retry: every model in the chain is unfunded");
+  process.exit(result.ok ? 0 : result.outcome === "exhausted" ? 2 : 1);
 }

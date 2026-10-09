@@ -88,6 +88,10 @@ bun integration/cli.ts doctor
 bun integration/cli.ts hermes chat
 ```
 
+`hermes setup` is interactive. For an unattended setup, pass the model to `init` instead and skip that step: `bun integration/cli.ts init --workspace "$HOME/work/hermes-projects" --model <model-id> [--provider <hermes-provider>]` writes `model.default` (and `model.provider`) into the new profile's `config.yaml`. Provider credentials still come from the environment or a later `hermes auth`/`hermes setup`.
+
+`init` and `doctor` print a one-line notice while `ZOUROBOROS_RESTRICTED_EMAIL_DOMAINS` is unset: until you set it to your comma-separated employer or client mail domains, the public candidate-corpus guard cannot block addresses at those domains (secret and token patterns are checked regardless). See [VPS operation](docs/operations.md#restricted-email-domains).
+
 The workshop's isolated worker profile remains under `~/.local/share/hermes-zouroboros/hermes`; its provider login is separate. Connecting shared-memory tools to a normal profile does not copy credentials or merge session histories. Read the [walkthrough](walkthrough/README.md) for the separate model setup, campaign execution, and factory wiring.
 
 ### Recognize your first successful run
@@ -109,6 +113,8 @@ After setup and initialization, `bun integration/cli.ts doctor` should exit with
   "note": "Local prerequisites only; provider authentication and live model execution need an operator smoke test."
 }
 ```
+
+While `ZOUROBOROS_RESTRICTED_EMAIL_DOMAINS` is unset, the output also carries a `notices` entry (and the same line on stderr); it does not affect `ok`.
 
 A `false` check means a local prerequisite needs attention: build with `bash scripts/setup.sh`, install Hermes if `hermes` is false, or check your initialized profile and workspace paths. Doctor verifies the local installation; confirm provider access with `hermes chat` from the commands above.
 

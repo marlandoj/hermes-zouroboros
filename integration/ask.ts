@@ -19,9 +19,18 @@ export interface AskRequest {
   workdir?: string;
   /** Registry executor id; defaults to hermes-vps. */
   executor?: string;
+  /**
+   * Models to try, in order, only when the requested model's provider is unfunded (HTTP 402,
+   * insufficient balance). Other failures never fall through: callers own their retry policy.
+   */
+  fallbacks?: { model: string; provider?: string }[];
 }
 
-export type AskFailure = 'usage' | 'unavailable' | 'timeout' | 'interrupted' | 'failed';
+/**
+ * `unfunded`: the provider refused for billing (HTTP 402, insufficient balance, payment
+ * required). An expected, quiet failure: never success, never retried, logged at debug level only.
+ */
+export type AskFailure = 'usage' | 'unavailable' | 'timeout' | 'interrupted' | 'failed' | 'unfunded';
 
 export interface AskOutcome {
   ok: boolean;
@@ -32,14 +41,25 @@ export interface AskOutcome {
   failure?: AskFailure;
   /** Bridge diagnostic (its own messages only; provider stderr is never reflected). */
   detail?: string;
+  /** Models skipped before this outcome because their provider was unfunded. */
+  skippedUnfunded?: string[];
 }
 
-/** Transient failures are worth retrying; usage errors, a missing CLI and interrupts are not. */
+/** Transient failures are worth retrying; usage errors, a missing CLI, interrupts and unfunded providers are not. */
 export const TRANSIENT_FAILURES: ReadonlySet<AskFailure> = new Set(['timeout', 'failed']);
+
+/** Bridge exit status for an unfunded provider (see integration/hermes-bridge.sh). */
+export const UNFUNDED_EXIT = 88;
+
+/** Debug-level log: silent unless HERMES_ZOUROBOROS_DEBUG=1. */
+export function debugLog(message: string): void {
+  if (process.env.HERMES_ZOUROBOROS_DEBUG === '1') console.error(`[debug] ${message}`);
+}
 
 /** Map a bridge exit status to a failure class (see integration/hermes-bridge.sh). */
 export function classifyExit(code: number): AskFailure | undefined {
   if (code === 0) return undefined;
+  if (code === UNFUNDED_EXIT) return 'unfunded';
   if (code === 2) return 'usage';
   if (code === 126 || code === 127) return 'unavailable';
   // GNU timeout: 124 on expiry, 137 when the kill-after grace period also expires.
@@ -74,8 +94,24 @@ export function askEnv(request: Pick<AskRequest, 'model' | 'provider' | 'timeout
   return env;
 }
 
-/** Run one prompt through the executor bridge. Never throws for model failures. */
+/**
+ * Run one prompt through the executor bridge. Never throws for model failures. When the model's
+ * provider is unfunded, quietly falls back through request.fallbacks (debug log only).
+ */
 export async function ask(request: AskRequest): Promise<AskOutcome> {
+  const skipped: string[] = [];
+  const candidates = [{ model: request.model, provider: request.provider }, ...(request.fallbacks ?? [])];
+  let outcome: AskOutcome | undefined;
+  for (const candidate of candidates) {
+    outcome = await askOnce({ ...request, model: candidate.model, provider: candidate.provider });
+    if (outcome.failure !== 'unfunded') break;
+    skipped.push(outcome.model || '(profile)');
+    debugLog(`ask: ${outcome.model || '(profile model)'} is unfunded; ${skipped.length < candidates.length ? 'trying the next fallback' : 'no fallback left'}`);
+  }
+  return skipped.length ? { ...outcome!, skippedUnfunded: skipped } : outcome!;
+}
+
+async function askOnce(request: AskRequest): Promise<AskOutcome> {
   const started = Date.now();
   const model = request.model ?? '';
   if (!request.prompt.trim()) return { ok: false, output: '', exitCode: 2, ms: 0, model, failure: 'usage', detail: 'empty prompt' };

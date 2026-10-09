@@ -6,7 +6,7 @@
     "terminalRung": "open-weight",
     "cascadeOnExhaustion": false,
     "alertOnExhaustion": true,
-    "probeTiming": "healthyResponseMs=10000 (completed responses at/above are degraded); timeoutMs=30000 strictly above it and in whole seconds, so slow-but-complete responses are distinguishable from timeouts. Timeouts record latencyMs=null.",
+    "probeTiming": "healthyResponseMs=20000 (completed responses at/above are degraded; each hermes -z probe pays ~8 s of CLI startup; AGENT_MODEL_HEALER_HEALTHY_RESPONSE_MS overrides); timeoutMs=30000 strictly above it and in whole seconds, so slow-but-complete responses are distinguishable from timeouts. Timeouts record latencyMs=null.",
     "watchmen": "Schedule the healer as a no_agent Hermes cron job whose script runs `healer.ts auto`, so it has no model dependency of its own. Never add a model the healer depends on to a chain it heals."
   },
 
@@ -15,7 +15,7 @@
     "expectedSubstring": "HEALTH_CHECK_PASS",
     "timeoutMs": 30000,
     "retries": 1,
-    "healthyResponseMs": 10000
+    "healthyResponseMs": 20000
   },
 
   "probeExecutor": "hermes-vps",

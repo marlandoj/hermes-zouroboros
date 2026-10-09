@@ -6,6 +6,8 @@ import {
   classifyLatency,
   classifyProbe,
   classifyRung,
+  DEFAULT_HEALTHY_RESPONSE_MS,
+  HEALTHY_RESPONSE_ENV,
   healthyResponseThresholdMs,
   healthyThreshold,
   isExcludedModel,
@@ -75,9 +77,28 @@ describe("model healer fallback-chain policy", () => {
 });
 
 describe("probe timing semantics", () => {
-  test("healthy-response threshold defaults to 10s", () => {
+  test("healthy-response threshold defaults to 20s (hermes -z pays ~8s of startup per probe)", () => {
     const config = configWith([], {});
-    expect(healthyResponseThresholdMs(config)).toBe(10000);
+    delete config.probeConfig.healthyResponseMs;
+    expect(DEFAULT_HEALTHY_RESPONSE_MS).toBe(20000);
+    expect(healthyResponseThresholdMs(config, {})).toBe(20000);
+    // A probe at the observed healthy end-to-end time (~11 s) is healthy, not degraded.
+    expect(classifyLatency(11_000, config).health).toBe("healthy");
+    expect(validateProbeSemantics(config).ok).toBe(true);
+  });
+
+  test("the configured threshold applies, and the environment override wins", () => {
+    const config = configWith([], {});
+    expect(healthyResponseThresholdMs(config, {})).toBe(10000);
+    expect(healthyResponseThresholdMs(config, { [HEALTHY_RESPONSE_ENV]: "25000" })).toBe(25000);
+    expect(healthyResponseThresholdMs(config, { [HEALTHY_RESPONSE_ENV]: "" })).toBe(10000);
+    for (const bad of ["0", "-5", "12.5", "fast"]) expect(() => healthyResponseThresholdMs(config, { [HEALTHY_RESPONSE_ENV]: bad })).toThrow(HEALTHY_RESPONSE_ENV);
+  });
+
+  test("the shipped example uses the 20s default under a 30s timeout", () => {
+    const example = JSON.parse(readFileSync(new URL("../assets/fallback-chain.example.json", import.meta.url), "utf8")) as Config;
+    expect(example.probeConfig.healthyResponseMs).toBe(20000);
+    expect(validateProbeSemantics(example).ok).toBe(true);
   });
 
   test("legacy latencyThresholds still feed the threshold when healthyResponseMs is absent", () => {
@@ -148,6 +169,19 @@ describe("probes through the Hermes ask layer", () => {
     expect(classifyProbe("m", outcome({ failure: "timeout", exitCode: 124 }), config)).toMatchObject({ healthy: false, latencyMs: null, failureCategory: "timeout" });
     expect(classifyProbe("m", outcome({ failure: "failed", detail: "empty output" }), config)).toMatchObject({ failureCategory: "empty_response" });
     expect(classifyProbe("m", outcome({ failure: "failed", exitCode: 1 }), config)).toMatchObject({ failureCategory: "provider_error" });
+  });
+
+  test("an unfunded provider is an informational status, never healthy, never retried", async () => {
+    const config = configWith([], {});
+    expect(classifyProbe("m", outcome({ failure: "unfunded", exitCode: 88 }), config)).toMatchObject({
+      healthy: false, health: "unfunded", failureCategory: "unfunded", warning: "unfunded (skipped)", latencyMs: null,
+    });
+    expect(classifyProbe("m", outcome({ failure: "unfunded", exitCode: 88 }), config).error).toBeUndefined();
+    config.probeConfig.retries = 3;
+    let calls = 0;
+    const result = await probeModel("vendor/gpt-oss", config, async () => { calls++; return outcome({ failure: "unfunded", exitCode: 88 }); });
+    expect(result.health).toBe("unfunded");
+    expect(calls).toBe(1);
   });
 
   test("an unavailable probe path aborts instead of marking models unhealthy", () => {
