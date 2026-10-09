@@ -34,6 +34,6 @@
     - the recorded upstream repository and source skill entry names in provenance, through narrow `contextAllowances`;
     - two source-host directory mentions in the 0.1.0 build log `PROGRESS.md` (historical record).
 - **The leak gate gained identity and private-network rules.**
-  - Persona names and brands are salted hashes in `identityData`.
+  - Persona names and brands are HMAC hashes keyed with a secret salt in `identityData` (salt never committed; see docs/skills.md).
   - `networkPatterns` covers RFC 1918, CGNAT/Tailscale IPv4 and the Tailscale IPv6 ULA prefix. These findings cannot be grandfathered.
   - `contextAllowances` are reasoned, file-scoped masks. The baseline fell from 53 entries (105 occurrences) to 2 entries (3).

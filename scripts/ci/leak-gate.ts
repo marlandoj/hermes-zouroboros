@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
-  blockedPathRule, contextMasks, exceptionFor, isBinary, listFiles, loadConfig, readFile, repoRoot, scanText,
+  blockedPathRule, contextMasks, exceptionFor, identityRulesActive, isBinary, listFiles, loadConfig, readFile, repoRoot, scanText,
   type Finding, type LeakGateConfig,
 } from '../lib/leak-rules.ts';
 import { checkSkillProvenance, loadSkillsManifest } from '../lib/skill-provenance.ts';
@@ -31,14 +31,22 @@ export interface GateOptions {
   gitleaks?: string | false;
   /** Also scan commits in <diffBase>..HEAD with gitleaks. */
   diffBase?: string;
+  /** Secret identity salt; undefined resolves LEAK_GATE_SALT or the local salt file, false disables identity rules. */
+  identitySalt?: string | false;
 }
-export interface GateResult { findings: Finding[]; grandfathered: number; staleBaseline: BaselineEntry[]; scanned: number; gitleaks: 'ran' | 'skipped' }
+export interface GateResult {
+  findings: Finding[]; grandfathered: number; staleBaseline: BaselineEntry[]; scanned: number; gitleaks: 'ran' | 'skipped';
+  /** Persona-name and brand rules need the secret salt; without it they skip and every other rule still runs. */
+  identity: 'ran' | 'skipped';
+}
+
+export const IDENTITY_SKIPPED_NOTICE = 'NOTICE identity rules (persona names, brands) skipped: no secret salt. Set LEAK_GATE_SALT or create ~/.config/hermes-zouroboros/leak-gate-salt (mode 0600); see docs/skills.md. All other rules ran.';
 
 function countKey(file: string, rule: string) { return `${file}\0${rule}`; }
 
 export function runGate(options: GateOptions = {}): GateResult {
   const root = resolve(options.root ?? repoRoot);
-  const config = loadConfig(options.configPath ?? join(root, 'provenance/leak-gate.json'));
+  const config = loadConfig(options.configPath ?? join(root, 'provenance/leak-gate.json'), options.identitySalt);
   const allFiles = listFiles(root);
   const files = options.only ? allFiles.filter((file) => options.only!.includes(file)) : allFiles;
   const raw: Finding[] = [];
@@ -88,7 +96,7 @@ export function runGate(options: GateOptions = {}): GateResult {
   });
   const scope = new Set(files);
   const staleBaseline = (baseline?.entries ?? []).filter((entry) => scope.has(entry.file) && (counts.get(countKey(entry.file, entry.rule)) ?? 0) < entry.count);
-  return { findings: blocking, grandfathered, staleBaseline, scanned: files.length, gitleaks };
+  return { findings: blocking, grandfathered, staleBaseline, scanned: files.length, gitleaks, identity: identityRulesActive(config) ? 'ran' : 'skipped' };
 }
 
 function loadBaseline(path: string): Baseline | undefined {
@@ -127,7 +135,7 @@ function gitleaksReport(binary: string, args: string[], report: string, rename: 
 }
 
 export function writeBaseline(root: string, path: string): number {
-  const result = runGate({ root, baselinePath: false, gitleaks: false });
+  const result = runGate({ root, baselinePath: false, gitleaks: false, identitySalt: false });
   const counts = new Map<string, BaselineEntry>();
   for (const finding of result.findings.filter(baselineable)) {
     const key = countKey(finding.file, finding.rule);
@@ -175,11 +183,15 @@ if (import.meta.main) {
     }
     const only = values.diff ? changedFiles(root, values.diff) : undefined;
     const result = runGate({ root, gitleaks, only, diffBase: values.diff });
+    if (result.identity === 'skipped') {
+      if (process.env.LEAK_GATE_REQUIRE_SALT === '1') throw new Error('LEAK_GATE_REQUIRE_SALT=1 but no identity salt is available (LEAK_GATE_SALT secret missing?)');
+      console.error(IDENTITY_SKIPPED_NOTICE);
+    }
     if (values.json) console.log(JSON.stringify(result, null, 2));
     else {
       for (const finding of result.findings) console.log(`FAIL ${describe(finding)}`);
       for (const entry of result.staleBaseline) console.log(`NOTE baseline can be lowered: ${entry.rule} ${entry.file} (allowance ${entry.count})`);
-      console.log(`leak-gate ${values.diff ? `diff vs ${values.diff}` : 'full tree'}: ${result.scanned} files, ${result.findings.length} blocking, ${result.grandfathered} grandfathered (0.1.0 baseline), gitleaks ${result.gitleaks}`);
+      console.log(`leak-gate ${values.diff ? `diff vs ${values.diff}` : 'full tree'}: ${result.scanned} files, ${result.findings.length} blocking, ${result.grandfathered} grandfathered (0.1.0 baseline), gitleaks ${result.gitleaks}, identity rules ${result.identity}`);
     }
     process.exitCode = result.findings.length ? 1 : 0;
   } catch (error) {

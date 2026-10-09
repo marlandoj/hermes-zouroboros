@@ -5,6 +5,12 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      # Secret identity salt for the persona-name and brand leak rules. Forks and fork PRs get no
+      # secrets: those rules then skip with a notice and every other rule still runs. Runs in this
+      # repository (pushes and same-repository PRs) must have it.
+      LEAK_GATE_SALT: ${{ secrets.LEAK_GATE_SALT }}
+      LEAK_GATE_REQUIRE_SALT: ${{ (!github.event.repository.fork && (github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork)) && '1' || '0' }}
     steps:
       - uses: actions/checkout@v4
         with:
