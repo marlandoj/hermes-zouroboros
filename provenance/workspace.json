@@ -1467,6 +1467,21 @@
       "path": "packages/swarm/src/routing/swarm-decision-gate.ts",
       "reason": "Synced to the Zouroboros workspace revision b6dff3e5e6c12070f90064f4146f9f08d8612d01 (#850: explicit 'use a/the swarm', 'swarm campaign', 'as a swarm' requests force SWARM) so the tier-resolver and zo-swarm-orchestrator skills wire to the package gate instead of shipping a copy.",
       "distributed_sha256": "426529a09124e0a8e359cb7a6c570e2abc8403797b72910909d3efb2d6141952"
+    },
+    {
+      "path": "packages/personas/src/generators/persona.ts",
+      "reason": "Platform-neutral wording for Hermes: generated prompts say 'Agent Tools'/'standard agent tools' instead of Zo tools, and the optional generated skill stub gets Hermes frontmatter instead of Zo compatibility/author lines (persona-creator skill, t4).",
+      "distributed_sha256": "ad36d33554267ec385b64f61223174be4c259d28c214a507d22f76fb7e6455f5"
+    },
+    {
+      "path": "packages/personas/src/templates/identity.ts",
+      "reason": "Platform-neutral wording for Hermes: generated prompts say 'Agent Tools'/'standard agent tools' instead of Zo tools, and the optional generated skill stub gets Hermes frontmatter instead of Zo compatibility/author lines (persona-creator skill, t4).",
+      "distributed_sha256": "a28f1c8f68ccd2b51ca07a2870e390fa42320c3d7e96f0a7084cafffa22db1aa"
+    },
+    {
+      "path": "packages/personas/src/templates/prompt.ts",
+      "reason": "Platform-neutral wording for Hermes: generated prompts say 'Agent Tools'/'standard agent tools' instead of Zo tools, and the optional generated skill stub gets Hermes frontmatter instead of Zo compatibility/author lines (persona-creator skill, t4).",
+      "distributed_sha256": "c504c5b6cfdbca6860f89fc970af2a1d878f64e1a71ac3df154b8bacb1e4389b"
     }
   ]
 }

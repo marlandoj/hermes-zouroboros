@@ -36,7 +36,7 @@ ${config.safetyRules.map((rule, i) => `${i + 1}. ${rule}`).join('\n')}
 
 ## Tools at Your Disposal
 
-**Zo Tools:**
+**Agent Tools:**
 - Web research for external information
 - File reading/writing for workspace operations
 - Memory access for context retrieval

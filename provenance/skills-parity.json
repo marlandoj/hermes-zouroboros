@@ -36,9 +36,11 @@
       "nameSha256": "5aa47afbb7a72d67dfb7af764352b5ebf15953f7d196ec4eb283216c1dad4f4e",
       "trackedAtRevision": true,
       "triage": "adapt/zo-api",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+      "disposition": "adapted",
+      "reason": "Targets the Hermes profile's scheduled agents: reads $HERMES_HOME/cron/jobs.json and outputs; applies safe fixes only via hermes cron pause|edit, never touching its own/healer/excluded jobs. Check families kept except persona-fitness (Zo personas). Not shipped: audit-agent-paths.py (Zo MCP automation fetch; folded into the hygiene check), host model-tiers ids (generic example shipped). Own tests ported.",
+      "distributedAs": [
+        "skills/zouroboros/agent-doctor"
+      ]
     },
     {
       "name": "agent-email-patterns",
@@ -66,9 +68,12 @@
       "nameSha256": "f3bb5d9520e436cf08226f3cf022685c33ff780a3a14a22a4a36e9e945a7ea97",
       "trackedAtRevision": true,
       "triage": "adapt/zo-api",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+      "disposition": "adapted",
+      "reason": "Targets the Hermes profile's pinned-model cron jobs: probes through integration/ask.ts, heal/restore via hermes cron edit --model/--provider. Probe timing semantics, failure categories, exclusions, chain validation (open-weight terminal), hysteresis and the healingEnabled dry-run gate kept; aborts when the probe path is unavailable. Not shipped: fallback-chain.json.bak-20260923 (host backup), host model ids/exclusions. Own tests ported.",
+      "distributedAs": [
+        "skills/zouroboros/agent-model-healer"
+      ],
+      "followUp": "Notification is the cron job's own delivery; no email path."
     },
     {
       "name": "agentmail",
@@ -186,9 +191,12 @@
       "nameSha256": "8811be9ff9fa0ef653ca093299aa6f6646b0119ce5f6960149fb1c1ef40e9df3",
       "trackedAtRevision": true,
       "triage": "adapt/zo-api",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+      "disposition": "adapted",
+      "reason": "Planning call via ask-governor (--plan-model); fal-ai-media located via FAL_MEDIA_SCRIPT or the sibling skill (fails loud when absent); compose.py, plan schema and gen/inject flow kept; presenter persona/channel names and host paths removed. Dry-run DAG proven offline in tests/skills-zoapi.test.ts.",
+      "distributedAs": [
+        "skills/media/broll-injector"
+      ],
+      "followUp": "Real renders need fal-ai-media (pending, t6) or FAL_MEDIA_SCRIPT."
     },
     {
       "name": "build-watchdog",
@@ -233,9 +241,12 @@
       "nameSha256": "7e51e8f3436ed6769e1a6ec1dc3c939b4d8e97d31a2bc22c420f0ba12c144847",
       "trackedAtRevision": true,
       "triage": "adapt/zo-api",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+      "disposition": "adapted",
+      "reason": "DAG kept (plan, gather, fuse, synthesize, claim-check, report, persist); every model call via ask-governor; literature/web gathered by the Hermes agent with the profile's own tools (JSON final response); internal channel = profile memory via zo-memory-system. Not shipped: evaluations/seed.yaml (host spec with host paths), host Qdrant/RAPTOR/GraphRAG/compounding-corpus channels, OpenAI-direct calls, audio overview.",
+      "distributedAs": [
+        "skills/research/deep-research"
+      ],
+      "followUp": "Optional packages/rag channel for an internal document corpus; audio overview on Hermes TTS."
     },
     {
       "name": "design-md-drift-guard",
@@ -468,9 +479,11 @@
       "nameSha256": "a5918803dd0f658deba9519d688b12fd6f34e02cfb593367692d071a0b8cd5e7",
       "trackedAtRevision": true,
       "triage": "adapt/zo-api",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+      "disposition": "adapted",
+      "reason": "MIT upstream (DietrichGebert/ponytail 4.7.0) attribution kept. Provider chain (synthetic.new key, Zo /zo/ask token, host model id) replaced by one governed call through the Hermes profile; still advisory. Host plan-closeout wiring note removed.",
+      "distributedAs": [
+        "skills/software-development/ponytail-review"
+      ]
     },
     {
       "name": "production-ready",
@@ -630,18 +643,23 @@
       "nameSha256": "55952426aa682519689ef6160e85e01a4061564c4e25944b14b71dc78da08b6a",
       "trackedAtRevision": true,
       "triage": "adapt/zo-api",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+      "disposition": "adapted",
+      "reason": "Renamed zo-ask-governor -> ask-governor (provider-agnostic). Governor (concurrency, queue, named budgets, dedupe, circuit breaker, bounded full-jitter retries, redacted telemetry) now invokes integration/ask.ts; in-process by default or an optional 127.0.0.1 service (fail closed); state under ZOUROBOROS_STATE_DIR. Own tests ported (12, offline).",
+      "distributedAs": [
+        "skills/zouroboros/ask-governor"
+      ]
     },
     {
       "name": "zo-ask-retry",
       "nameSha256": "596c3cf8e92fc0b812eb25826ec68dd7700a49242a33f544a1bd180c502cdc29",
       "trackedAtRevision": true,
       "triage": "adapt/zo-api",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+      "disposition": "adapted",
+      "reason": "Renamed zo-ask-retry -> ask-retry (provider-agnostic). Rewritten over integration/ask.ts (profile executor registry, default hermes-vps): bridge exit-status failure classes, backoff + jitter, model-chain rotation, 0/1/2/3 exit contract. No Zo endpoint/token; the Zo SSE stall watchdog and conversation resume do not apply (the bridge returns the final response only). Offline e2e in tests/skills-zoapi.test.ts.",
+      "distributedAs": [
+        "skills/zouroboros/ask-retry"
+      ],
+      "followUp": "If Hermes gains a streaming one-shot mode, add partial-output resume."
     },
     {
       "name": "zo-memory-system",
@@ -659,9 +677,11 @@
       "nameSha256": "8e2482bfcf23791e79fff218afbd2b773e9802fbb700b3437c21e95cc1777a15",
       "trackedAtRevision": true,
       "triage": "adapt/zo-api",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: Zo API rewrite; replace Zo ask/space/ZO_* API use with the Hermes provider/model layer (t4)."
+      "disposition": "adapted",
+      "reason": "Renamed zo-persona-creator -> persona-creator. Wired to packages/personas (generator) and Hermes personalities (agent.personalities in the profile config.yaml; never auto-selected). packages/personas templates made platform-neutral (Zo tool wording, generated skill frontmatter). Not shipped: README/QUICKSTART/MANUAL-SETUP/TROUBLESHOOTING (Zo setup), Zo identity/soul/user/heartbeat templates, MCP vault wrapper, skill template, example write-ups, host interactive/setup/validate/skillsmp scripts (SkillsMP stays in packages/personas).",
+      "distributedAs": [
+        "skills/zouroboros/persona-creator"
+      ]
     },
     {
       "name": "zo-swarm-executors",

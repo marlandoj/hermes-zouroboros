@@ -1,0 +1,59 @@
+{
+  "description": "Example model cost tiers for agent-doctor. Copy to $ZOUROBOROS_CONFIG_DIR/agent-doctor/model-tiers.json and replace the placeholder ids with the model ids your Hermes profile and cron jobs use. Jobs on models not listed here are reported under model-catalog and never auto-downgraded.",
+  "tiers": {
+    "budget": {
+      "maxCostPer1kInput": 0.20,
+      "models": ["example/budget-model"],
+      "labels": ["Example budget model"]
+    },
+    "standard": {
+      "maxCostPer1kInput": 0.50,
+      "models": ["example/standard-model"],
+      "labels": ["Example standard model"]
+    },
+    "premium": {
+      "maxCostPer1kInput": 5.00,
+      "models": ["example/premium-model"],
+      "labels": ["Example premium model"]
+    },
+    "expensive": {
+      "maxCostPer1kInput": 20.00,
+      "models": ["example/expensive-model"],
+      "labels": ["Example expensive model"]
+    }
+  },
+  "downgradeDefaults": {
+    "_note": "Targets for `doctor.ts apply`. A value is a model id or {\"model\": id, \"provider\": name}. Empty values disable the automatic model change.",
+    "bannedModelFallback": "",
+    "byTier": {
+      "budget": "",
+      "standard": "",
+      "premium": "",
+      "expensive": ""
+    }
+  },
+  "bannedAgentModels": {},
+  "safetyExcludeIds": [],
+  "taskComplexity": {
+    "script_executor": {
+      "description": "Runs bash/bun commands and reports output",
+      "recommendedTier": "budget",
+      "signals": ["run this command", "execute this", "bun ", "curl ", "apt-get", "git status", "Log all output"]
+    },
+    "status_reporter": {
+      "description": "Reads files/state and composes a status message",
+      "recommendedTier": "budget",
+      "signals": ["send email", "status update", "check-in", "reminder", "send.*SMS", "progress report"]
+    },
+    "content_generator": {
+      "description": "Generates creative content, social posts, or marketing copy",
+      "recommendedTier": "standard",
+      "signals": ["content calendar", "social media", "generate.*post", "draft.*copy", "creative", "video producer"]
+    },
+    "analyst": {
+      "description": "Performs analysis, synthesis, or security assessment",
+      "recommendedTier": "standard",
+      "signals": ["analyze", "synthesize", "assess", "audit", "security.*assessment", "comprehensive", "evaluate"]
+    }
+  }
+}
