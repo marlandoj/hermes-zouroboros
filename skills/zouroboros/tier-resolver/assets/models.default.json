@@ -1,0 +1,55 @@
+{
+  "version": 3,
+  "lastUpdated": "2026-10-09",
+  "description": "Default hermes-zouroboros catalog: three logical slots and no machine-specific model ids. An empty id means 'use the Hermes profile's configured model'. Copy this file to $ZOUROBOROS_CONFIG_DIR/tier-resolver/models.json and fill in ids (for example provider/model names your Hermes providers accept) to route tiers to different models.",
+  "models": {
+    "fast": {
+      "id": "",
+      "provider": "hermes",
+      "label": "Fast slot (profile default until configured)",
+      "costTier": "low",
+      "traits": ["fast", "cheap"],
+      "agentSafe": true,
+      "structuredOutputSafe": false
+    },
+    "balanced": {
+      "id": "",
+      "provider": "hermes",
+      "label": "Balanced slot (profile default until configured)",
+      "costTier": "medium",
+      "traits": ["balanced", "coding", "analysis"],
+      "agentSafe": true,
+      "structuredOutputSafe": false
+    },
+    "deep": {
+      "id": "",
+      "provider": "hermes",
+      "label": "Deep-reasoning slot (profile default until configured)",
+      "costTier": "high",
+      "traits": ["deep-reasoning", "complex"],
+      "agentSafe": true,
+      "structuredOutputSafe": false
+    }
+  },
+  "defaultFallback": "balanced",
+  "agentFallback": "balanced",
+  "structuredOutputFallback": "balanced",
+  "tierDefaults": {
+    "trivial": "fast",
+    "simple": "fast",
+    "moderate": "balanced",
+    "complex": "deep",
+    "apex": "deep"
+  },
+  "taskOverrides": {
+    "planning": { "complex": "deep", "apex": "deep" },
+    "security": { "simple": "balanced", "moderate": "balanced" }
+  },
+  "personaOverrides": {},
+  "constraintModifiers": {
+    "budget-low": { "moderate": "fast", "complex": "balanced", "apex": "deep" },
+    "latency-low": { "simple": "fast", "moderate": "fast", "complex": "balanced" },
+    "speed-high": { "simple": "fast", "moderate": "fast", "complex": "balanced" },
+    "quality-high": { "simple": "balanced", "moderate": "deep" }
+  }
+}

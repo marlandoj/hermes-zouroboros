@@ -1462,6 +1462,11 @@
       "path": "packages/control-plane/tsconfig.json",
       "reason": "Remove VPS absolute typeRoots; resolve installed workspace types normally.",
       "distributed_sha256": "7e26fc466ba7f1236f0159b769a681786252898700c0397748addc8293deea7e"
+    },
+    {
+      "path": "packages/swarm/src/routing/swarm-decision-gate.ts",
+      "reason": "Synced to the Zouroboros workspace revision b6dff3e5e6c12070f90064f4146f9f08d8612d01 (#850: explicit 'use a/the swarm', 'swarm campaign', 'as a swarm' requests force SWARM) so the tier-resolver and zo-swarm-orchestrator skills wire to the package gate instead of shipping a copy.",
+      "distributed_sha256": "426529a09124e0a8e359cb7a6c570e2abc8403797b72910909d3efb2d6141952"
     }
   ]
 }

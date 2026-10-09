@@ -44,7 +44,14 @@ Refer to a skill's own files as `"${HERMES_SKILL_DIR}/scripts/..."`. Hermes subs
 loads `SKILL.md`. Skills that write runtime state (ledgers, snapshots) write under `ZOUROBOROS_STATE_DIR`, never
 inside the skill tree. `tests/skills-portable.test.ts` checks frontmatter and licences and runs the ported
 skills' own tests. Set `HERMES_AGENT_SRC` to a Hermes checkout to also check for name collisions with bundled
-and optional Hermes skills.
+and optional Hermes skills. Skill TypeScript is part of the root `tsc --noEmit`.
+
+Core runtime skills (`zo-memory-system`, `zo-swarm-orchestrator`, `zo-swarm-executors`, `tier-resolver`,
+`autoloop`) wire to this checkout instead of carrying their own runtime. They import `integration/profile.ts`
+and the workspace packages through `../../../../`, so they only work from a hermes-zouroboros checkout with
+an initialized profile. Hermes `skills_guard` therefore reports `path_traversal` (caution) for them. Memory
+always uses the profile database. Swarm and autoloop execution need `HERMES_ZOUROBOROS_ALLOW_SWARM=1`.
+`tests/skills-core-a.test.ts` exercises all five end to end with a fake `hermes` and no provider credentials.
 
 Skills must stay operator-neutral and portable. Do not include host paths, operator names or
 handles, persona identities, memories, run output, model catalogs or credentials. Read state through

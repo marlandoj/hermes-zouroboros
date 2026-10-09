@@ -158,9 +158,11 @@
       "nameSha256": "c39a199b8e8e22ccdb6a2b4636094a0e081bf4406ca23abcb8c909afdf4389d5",
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+      "disposition": "adapted",
+      "reason": "Real loop shipped (the package zouroboros-autoloop CLI is a simulation): proposals via the profile registry bridge (default hermes-vps), model id from the tier-resolver catalog, opt-in via HERMES_ZOUROBOROS_ALLOW_SWARM=1, host ZCR shadow hook removed. Authored SKILL.md (source has none). Not shipped: host MCP servers (the distribution MCP is the entry point). Offline e2e in tests/skills-core-a.test.ts.",
+      "distributedAs": [
+        "skills/zouroboros/autoloop"
+      ]
     },
     {
       "name": "automation-resilience",
@@ -562,10 +564,11 @@
       "nameSha256": "c1fd44be40619e1c7af1b0565d53b0309b90ed81aa8f3795ceca18f13eaefc1e",
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code.",
-      "followUp": "Ship a fresh default model catalog; never data/feedback.jsonl or the host catalog/weights."
+      "disposition": "adapted",
+      "reason": "Resolver and calibration shipped with portable paths: hand-written default catalog (empty ids = Hermes profile model), operator catalog in ZOUROBOROS_CONFIG_DIR, feedback/tuned weights only in ZOUROBOROS_STATE_DIR. Never shipped: data/feedback.jsonl, data/models.json, data/external-models.json, data/weights.json (built-in reference weights used). Decision gate wired to packages/swarm (synced to the pin). Reviewed synthetic tests/test-suite.jsonl shipped as assets/test-suite.json. Not shipped: Zo/OmniRoute routing scripts (zo-ask-route, catalog-sync, model-route hooks, deprecated resolvers) and model-routing-policy.test.ts (tests the host catalog + Zo route). Own tests + regression floors run in CI.",
+      "distributedAs": [
+        "skills/zouroboros/tier-resolver"
+      ]
     },
     {
       "name": "tradingview-mcp-server",
@@ -646,10 +649,11 @@
       "nameSha256": "ee2039f5dbd6d62507cf21dc2af4b831f5388758b152ebc8eb4acb372544a67f",
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code.",
-      "followUp": "Exclude scripts/.mcp-trust/ manifest history."
+      "disposition": "adapted",
+      "reason": "Wired to the distribution: facts/episodes via the zouroboros-memory package and the zouroboros MCP server, always against the profile DB ($HERMES_ZOUROBOROS_HOME/memory.db; inherited ZO_MEMORY_DB/ZOUROBOROS_MEMORY_DB ignored). Authored zmem.ts replaces the host CLI. Not shipped: host scripts (hosted embeddings, memory gate hook, auto-capture, vault, RAG freshness daemons), .merge-scratch/, scripts/.mcp-trust/ (manifest history), persona example files, reports and assets. Offline e2e test in tests/skills-core-a.test.ts.",
+      "distributedAs": [
+        "skills/zouroboros/zo-memory-system"
+      ]
     },
     {
       "name": "zo-persona-creator",
@@ -665,18 +669,22 @@
       "nameSha256": "0b1fff4f025ff9cd3658d1e07b1bc06493fe5b612fb56e192ad695d42b4d6b8c",
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+      "disposition": "adapted",
+      "reason": "Wired to the profile-generated executor registry and integration/hermes-bridge.sh; list/doctor script, bridge protocol reference and template (host paths removed). Not shipped: host bridges (claude-code, codex, gemini, kimi, opencode, pi), Zo identities, host registry, daemons and hooks. Tests in tests/skills-core-a.test.ts.",
+      "distributedAs": [
+        "skills/zouroboros/zo-swarm-executors"
+      ]
     },
     {
       "name": "zo-swarm-orchestrator",
       "nameSha256": "cd466754a58fa5dfe5fd60f9b5743b11a71ef1ae285885f695b5de86201fc35f",
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
-      "disposition": "pending",
-      "plannedDisposition": "adapted",
-      "reason": "Triage: core runtime; wire to the distribution packages (memory, swarm, selfheal, rag, workflow, personas, core) instead of duplicating code."
+      "disposition": "adapted",
+      "reason": "Wired to the distribution: packages/swarm decision gate, integration/tasks.ts DAG contract, profile campaigns dir and the opt-in integration/cli.ts swarm runner (hermes-vps workers). Not shipped: orchestrate-v4/v5 host scripts, persona registry, host campaigns/examples/evaluations, data/. Offline e2e (fake Hermes through the real orchestrator) in tests/skills-core-a.test.ts.",
+      "distributedAs": [
+        "skills/zouroboros/zo-swarm-orchestrator"
+      ]
     },
     {
       "name": "zo-to-zo-consult",

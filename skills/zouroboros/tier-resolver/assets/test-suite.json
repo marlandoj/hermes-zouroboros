@@ -1,0 +1,352 @@
+[
+ {
+  "id": 1,
+  "task": "Write a function to add two numbers",
+  "expectedTier": "trivial",
+  "expectedType": "coding",
+  "rationale": "Simple coding task, no complexity"
+ },
+ {
+  "id": 2,
+  "task": "Fix the login bug where users can't sign in",
+  "expectedTier": "simple",
+  "expectedType": "debugging",
+  "rationale": "Debugging single issue"
+ },
+ {
+  "id": 3,
+  "task": "Review the PR for the authentication module",
+  "expectedTier": "simple",
+  "expectedType": "review",
+  "rationale": "Code review, single module"
+ },
+ {
+  "id": 4,
+  "task": "Build a React dashboard with charts and real-time data",
+  "expectedTier": "moderate",
+  "expectedType": "coding",
+  "rationale": "Frontend with multiple components, real-time complexity"
+ },
+ {
+  "id": 5,
+  "task": "Analyze the performance bottlenecks in the database queries and suggest optimizations",
+  "expectedTier": "moderate",
+  "expectedType": "analysis",
+  "rationale": "Requires investigation + recommendations"
+ },
+ {
+  "id": 6,
+  "task": "Design a microservices architecture for the e-commerce platform with service mesh, API gateway, and event-driven communication",
+  "expectedTier": "complex",
+  "expectedType": "planning",
+  "rationale": "Multi-component architecture design"
+ },
+ {
+  "id": 7,
+  "task": "Implement OAuth2 authentication with JWT tokens, refresh token rotation, MFA support, and rate limiting. Write comprehensive tests and deployment scripts.",
+  "expectedTier": "complex",
+  "expectedType": "coding",
+  "rationale": "Multi-step security system with testing + deployment"
+ },
+ {
+  "id": 8,
+  "task": "Quick fix for the CSS alignment issue",
+  "expectedTier": "trivial",
+  "expectedType": "coding",
+  "rationale": "Simple fix, 'quick' scope modifier"
+ },
+ {
+  "id": 9,
+  "task": "Thorough security audit of the entire codebase with penetration testing",
+  "expectedTier": "complex",
+  "expectedType": "security",
+  "rationale": "Comprehensive audit, 'thorough' modifier, security domain"
+ },
+ {
+  "id": 10,
+  "task": "Train a neural network model to classify images using PyTorch and deploy it with FastAPI",
+  "expectedTier": "complex",
+  "expectedType": "data_science",
+  "rationale": "ML model + deployment, data science domain"
+ },
+ {
+  "id": 11,
+  "task": "Set up Kubernetes cluster with Terraform, configure ingress, setup monitoring with Prometheus and Grafana",
+  "expectedTier": "complex",
+  "expectedType": "devops",
+  "rationale": "Infrastructure setup, multiple tools"
+ },
+ {
+  "id": 12,
+  "task": "Write a blog post about best practices for React hooks",
+  "expectedTier": "simple",
+  "expectedType": "content",
+  "rationale": "Content creation, single topic"
+ },
+ {
+  "id": 13,
+  "task": "Debug the memory leak in the Node.js application",
+  "expectedTier": "moderate",
+  "expectedType": "debugging",
+  "rationale": "Performance debugging, requires investigation"
+ },
+ {
+  "id": 14,
+  "task": "Refactor the codebase to use TypeScript instead of JavaScript",
+  "expectedTier": "complex",
+  "expectedType": "coding",
+  "rationale": "Large-scale migration across codebase"
+ },
+ {
+  "id": 15,
+  "task": "Create a proof-of-concept for the new search feature",
+  "expectedTier": "simple",
+  "expectedType": "coding",
+  "rationale": "Experimental scope modifier, POC not production"
+ },
+ {
+  "id": 16,
+  "task": "Implement real-time WebSocket chat with message persistence, user presence, typing indicators, and read receipts",
+  "expectedTier": "complex",
+  "expectedType": "coding",
+  "rationale": "Real-time system with multiple features"
+ },
+ {
+  "id": 17,
+  "task": "Document the API endpoints in the README",
+  "expectedTier": "trivial",
+  "expectedType": "documentation",
+  "rationale": "Simple documentation task"
+ },
+ {
+  "id": 18,
+  "task": "Analyze last month's user engagement metrics and create a comprehensive report with visualizations and actionable insights",
+  "expectedTier": "moderate",
+  "expectedType": "analysis",
+  "rationale": "Data analysis + visualization + recommendations"
+ },
+ {
+  "id": 19,
+  "task": "Quick prototype for the mobile app navigation",
+  "expectedTier": "simple",
+  "expectedType": "coding",
+  "rationale": "Quick + prototype modifiers"
+ },
+ {
+  "id": 20,
+  "task": "Build production-ready e-commerce platform with payment integration, inventory management, order processing, admin dashboard, and email notifications",
+  "expectedTier": "complex",
+  "expectedType": "coding",
+  "rationale": "Full system, production-ready, multiple subsystems"
+ },
+ {
+  "id": 21,
+  "task": "Review and compare three different database solutions for our use case",
+  "expectedTier": "moderate",
+  "expectedType": "analysis",
+  "rationale": "Comparative analysis, research required"
+ },
+ {
+  "id": 22,
+  "task": "Fix typo in the documentation",
+  "expectedTier": "simple",
+  "expectedType": "documentation",
+  "rationale": "Minimal effort fix"
+ },
+ {
+  "id": 23,
+  "task": "Implement GDPR compliance checks across all data processing workflows",
+  "expectedTier": "complex",
+  "expectedType": "security",
+  "rationale": "Compliance across entire system"
+ },
+ {
+  "id": 24,
+  "task": "Create a simple landing page with contact form",
+  "expectedTier": "simple",
+  "expectedType": "coding",
+  "rationale": "Single page, basic functionality"
+ },
+ {
+  "id": 25,
+  "task": "Architect and implement a distributed caching layer with Redis cluster, cache invalidation strategies, and monitoring. Make it production-ready.",
+  "expectedTier": "complex",
+  "expectedType": "coding",
+  "rationale": "Distributed system, production requirement, infrastructure"
+ },
+ {
+  "id": 26,
+  "task": "Add a border radius to the submit button in the CSS",
+  "expectedTier": "trivial",
+  "expectedType": "coding",
+  "rationale": "Single property change, no complexity"
+ },
+ {
+  "id": 27,
+  "task": "Fix the spacing on the homepage header",
+  "expectedTier": "moderate",
+  "expectedType": "review",
+  "rationale": "Trivial CSS tweak, quick scope modifier"
+ },
+ {
+  "id": 28,
+  "task": "Update the error message text on the login form",
+  "expectedTier": "simple",
+  "expectedType": "documentation",
+  "rationale": "Simple text change, no technical depth"
+ },
+ {
+  "id": 29,
+  "task": "Add input validation to the contact form email field",
+  "expectedTier": "simple",
+  "expectedType": "coding",
+  "rationale": "Single field, single concern"
+ },
+ {
+  "id": 30,
+  "task": "Refactor the authentication utility functions into a separate module",
+  "expectedTier": "simple",
+  "expectedType": "coding",
+  "rationale": "Code organization across multiple files, architectural decision"
+ },
+ {
+  "id": 31,
+  "task": "Design the REST API endpoints and data models for the new mobile app",
+  "expectedTier": "moderate",
+  "expectedType": "planning",
+  "rationale": "API design requires modeling multiple entities and their relationships"
+ },
+ {
+  "id": 32,
+  "task": "Fix the SQL injection vulnerability in the user search endpoint",
+  "expectedTier": "moderate",
+  "expectedType": "security",
+  "rationale": "Security fix requires understanding the full query context"
+ },
+ {
+  "id": 33,
+  "task": "Update all npm packages to their latest minor versions and verify nothing breaks",
+  "expectedTier": "trivial",
+  "expectedType": "security",
+  "rationale": "Broad dependency update across the entire codebase"
+ },
+ {
+  "id": 34,
+  "task": "Add pagination to the product listing endpoint with cursor-based navigation",
+  "expectedTier": "moderate",
+  "expectedType": "coding",
+  "rationale": "API change with data model and query logic implications"
+ },
+ {
+  "id": 35,
+  "task": "Plan the database schema migration for adding multi-tenancy support",
+  "expectedTier": "moderate",
+  "expectedType": "planning",
+  "rationale": "Schema design requires understanding data access patterns"
+ },
+ {
+  "id": 36,
+  "task": "Investigate and fix the race condition in the concurrent checkout flow",
+  "expectedTier": "complex",
+  "expectedType": "debugging",
+  "rationale": "Concurrency bug in distributed system, requires deep analysis"
+ },
+ {
+  "id": 37,
+  "task": "Scan a single npm dependency for known vulnerabilities",
+  "expectedTier": "simple",
+  "expectedType": "security",
+  "rationale": "Single-tool scan, targeted scope"
+ },
+ {
+  "id": 38,
+  "task": "Implement SOC2 compliance controls across the entire engineering organization including access management, audit logging, and data retention policies",
+  "expectedTier": "complex",
+  "expectedType": "security",
+  "rationale": "Organizational-scale compliance, multiple frameworks, cross-system implementation"
+ },
+ {
+  "id": 39,
+  "task": "Audit the full dependency tree and generate an SBOM with vulnerability prioritization",
+  "expectedTier": "moderate",
+  "expectedType": "security",
+  "rationale": "Comprehensive scan across all dependencies, tooling and reporting"
+ },
+ {
+  "id": 40,
+  "task": "Analyze sales data from the last quarter and create a visualization dashboard in Excel",
+  "expectedTier": "moderate",
+  "expectedType": "analysis",
+  "rationale": "Single dataset, predefined tool, straightforward analysis"
+ },
+ {
+  "id": 41,
+  "task": "Build a recommendation engine that suggests products based on user browsing history and purchase patterns",
+  "expectedTier": "simple",
+  "expectedType": "data_science",
+  "rationale": "ML pipeline with data processing, model training, and serving"
+ },
+ {
+  "id": 42,
+  "task": "Write a Python script to clean and transform customer export CSV data for import",
+  "expectedTier": "simple",
+  "expectedType": "data_science",
+  "rationale": "Single-script data transformation, no model training"
+ },
+ {
+  "id": 43,
+  "task": "Design a CI/CD pipeline with automated testing, staging deployment, and production rollout with rollback capability",
+  "expectedTier": "complex",
+  "expectedType": "devops",
+  "rationale": "Multi-stage pipeline, orchestration logic, safety mechanisms"
+ },
+ {
+  "id": 44,
+  "task": "Set up monitoring dashboards with latency, error rate, and business metric alerts",
+  "expectedTier": "moderate",
+  "expectedType": "devops",
+  "rationale": "Observability stack with multiple signal types and alerting rules"
+ },
+ {
+  "id": 45,
+  "task": "Implement feature flags using a third-party service and integrate with the frontend and backend",
+  "expectedTier": "simple",
+  "expectedType": "general",
+  "rationale": "Service integration on both client and server, feature flag management"
+ },
+ {
+  "id": 46,
+  "task": "Run a simple A/B test on the landing page CTA button color",
+  "expectedTier": "simple",
+  "expectedType": "analysis",
+  "rationale": "Single variable test, established tooling, clear success metric"
+ },
+ {
+  "id": 47,
+  "task": "Configure feature branches, merge strategies, and branch protection rules in GitHub",
+  "expectedTier": "simple",
+  "expectedType": "devops",
+  "rationale": "Git workflow configuration, no infrastructure or code changes"
+ },
+ {
+  "id": 48,
+  "task": "Create a runbook for the on-call engineer covering common production incident scenarios",
+  "expectedTier": "simple",
+  "expectedType": "documentation",
+  "rationale": "Documentation task, well-defined scope"
+ },
+ {
+  "id": 49,
+  "task": "Benchmark query performance after adding database indexes and document the before/after results",
+  "expectedTier": "simple",
+  "expectedType": "analysis",
+  "rationale": "Targeted measurement task, clear scope"
+ },
+ {
+  "id": 50,
+  "task": "Monitor the deployed ML model in production and set up automated retraining triggers based on data drift detection",
+  "expectedTier": "complex",
+  "expectedType": "data_science",
+  "rationale": "Production ML ops: monitoring, drift detection, automated retraining pipeline"
+ }
+]
