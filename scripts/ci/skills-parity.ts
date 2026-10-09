@@ -129,7 +129,7 @@ export function renderParity(manifest: ParityManifest): string {
     '',
     `Pending work: ${planned('portable')} planned portable, ${planned('adapted')} planned adapted.`,
     '',
-    'Dispositions: `portable` ships unchanged apart from recorded hashes; `adapted` ships with recorded changes; `host-only` stays on the VPS; `dropped` is not a skill; `hermes-native` is covered by a bundled Hermes skill; `held-license` awaits a licensing decision; `pending` is not yet ported.',
+    'Dispositions: `portable` ships unchanged apart from recorded hashes; `adapted` ships with recorded changes; `host-only` stays on the VPS; `dropped` is not a skill or is retired at the source; `hermes-native` is covered by a bundled Hermes skill; `held-license` awaits a licensing decision; `pending` is not yet ported.',
     '',
     '| Entry | Triage | Disposition | Planned | Tracked at revision | Distributed as | Reason | Follow-up |',
     '| --- | --- | --- | --- | --- | --- | --- | --- |',

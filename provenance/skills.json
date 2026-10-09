@@ -508,6 +508,15 @@
       "adaptation": "Authored: the source entry has scripts only (no SKILL.md). Documents program.md format, safety model and opt-in run."
     },
     {
+      "path": "skills/zouroboros/autoloop/templates/program.md",
+      "skill": "zouroboros",
+      "sourcePath": "Skills/zouroboros/assets/template.program.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "a6ae8650cc7c251ed63f949325dc3f14f4c30b93b3c3dcc11a2b03bf67b6d9e6",
+      "distributedSha256": "547172727c82948680a72bb921879e66e98e02af1fe5d59468c391521e56f3dc",
+      "adaptation": "From the zouroboros umbrella entry (assets/template.program.md). Constraint and stagnation values rewritten as bare numbers with units in parentheses so autoloop.ts parses them (the source's '5 minutes' parsed as 5 seconds and 'Max cost (USD)' never matched)."
+    },
+    {
       "path": "skills/zouroboros/classifier-fallback/assets/classifier-catalog.json",
       "skill": "classifier-fallback",
       "sourcePath": "Skills/classifier-fallback/assets/classifier-catalog.json",
@@ -634,6 +643,60 @@
       "adaptation": "Rewritten for Hermes: default host-free catalog (fast/balanced/deep, empty ids = profile model), operator catalog in ZOUROBOROS_CONFIG_DIR, feedback/weights only in ZOUROBOROS_STATE_DIR, regression suite; decision gate wired to packages/swarm. Removed host BYOK ids, persona names, OmniRoute/Zo routing and operator handle."
     },
     {
+      "path": "skills/zouroboros/unstuck-lateral/references/architect.md",
+      "skill": "zouroboros",
+      "sourcePath": "Skills/zouroboros/skills/workflow/references/unstuck-lateral/architect.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4b4af6fadd51048463faa919b8212dbe63e3077e6bb9784bf674061b37674dcc",
+      "distributedSha256": "4b4af6fadd51048463faa919b8212dbe63e3077e6bb9784bf674061b37674dcc",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/unstuck-lateral/references/contrarian.md",
+      "skill": "zouroboros",
+      "sourcePath": "Skills/zouroboros/skills/workflow/references/unstuck-lateral/contrarian.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "55496a7e7032c754de0e7aced80c13213fdb0895f4ba2e154aca6608da113806",
+      "distributedSha256": "55496a7e7032c754de0e7aced80c13213fdb0895f4ba2e154aca6608da113806",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/unstuck-lateral/references/hacker.md",
+      "skill": "zouroboros",
+      "sourcePath": "Skills/zouroboros/skills/workflow/references/unstuck-lateral/hacker.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "a70ffa059a40769d79a05648e62587a33d7bcf94ecca566c0f7644512e594a8e",
+      "distributedSha256": "a70ffa059a40769d79a05648e62587a33d7bcf94ecca566c0f7644512e594a8e",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/unstuck-lateral/references/researcher.md",
+      "skill": "zouroboros",
+      "sourcePath": "Skills/zouroboros/skills/workflow/references/unstuck-lateral/researcher.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f3d07039db19c8cfa181020d3dfcd6fcaffa1146c8832077376000f4407b6b09",
+      "distributedSha256": "f3d07039db19c8cfa181020d3dfcd6fcaffa1146c8832077376000f4407b6b09",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/unstuck-lateral/references/simplifier.md",
+      "skill": "zouroboros",
+      "sourcePath": "Skills/zouroboros/skills/workflow/references/unstuck-lateral/simplifier.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "371fb60a1eb29daabb6eec8a43f97cb9b75dc16d4fa6b9d252e1283950dcdbb1",
+      "distributedSha256": "371fb60a1eb29daabb6eec8a43f97cb9b75dc16d4fa6b9d252e1283950dcdbb1",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/unstuck-lateral/SKILL.md",
+      "skill": "zouroboros",
+      "sourcePath": "Skills/zouroboros/skills/workflow/scripts/unstuck-lateral/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2d7f021d4d899644d3af0a8c4ba845d6bc0cf534907b940453d81de0fb28e7e6",
+      "distributedSha256": "cd3c8023f28aadefdaef74c0b95d7540a3ce409ccb9fb9217d09ddc8f587cad1",
+      "adaptation": "From the zouroboros umbrella entry (skills/workflow/scripts/unstuck-lateral). Hermes frontmatter (name, version, MIT licence from Q00/ouroboros, metadata.hermes, origin); Zo persona switching and IDENTITY/ files replaced by adopting references/*.md via skill_view or a delegate_task subagent; added a Limits section (no bypass of security, governance or operator approval)."
+    },
+    {
       "path": "skills/zouroboros/zo-memory-system/scripts/zmem.ts",
       "skill": null,
       "sourcePath": null,
@@ -706,6 +769,123 @@
       "adaptation": "Rewritten for Hermes: decision gate -> bounded task DAG (integration/tasks.ts contract) -> prepare -> operator opt-in run via integration/cli.ts swarm (hermes-vps workers). Removed Zo API executors, persona registry, host campaigns/examples, operator handle."
     },
     {
+      "path": "skills/zouroboros/zouroboros-governance/GOVERNANCE.md",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/GOVERNANCE.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "cb6b440214520b2a081b216b7807182f13a4c2ff2be73575692d1730b036dcb3",
+      "distributedSha256": "6139857c268fc1743685c088987a716326198236f9ef9a89b69f3505f4949837",
+      "adaptation": "Audit log, anchor and key paths moved to $ZOUROBOROS_STATE_DIR/$ZOUROBOROS_CONFIG_DIR; out-of-scope list updated for Hermes (no tool interception, promotion fails closed)."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/references/CONSTITUTION.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "1a11c02c6a232dd12a89262efd004424f8d69314e0f690af5afffdf23f1a0ea1",
+      "adaptation": "Verbatim copy of the workspace-root CONSTITUTION.md at source revision b6dff3e5e6c12070f90064f4146f9f08d8612d01 (source sha256 1a11c02c6a232dd12a89262efd004424f8d69314e0f690af5afffdf23f1a0ea1); outside Skills/ so recorded as distribution-shipped. Canonical governing document checked by constitution-gate verify-docs."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/references/ZOUROBOROS.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "7a2bcfddea5aa055d1e7d137640c8bf26040886a722d3def235e02723f843adb",
+      "adaptation": "Verbatim copy of the workspace-root ZOUROBOROS.md (manifesto) at source revision b6dff3e5e6c12070f90064f4146f9f08d8612d01 (source sha256 7a2bcfddea5aa055d1e7d137640c8bf26040886a722d3def235e02723f843adb); outside Skills/ so recorded as distribution-shipped. Canonical governing document checked by constitution-gate verify-docs."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/scripts/autonomy-authorization.ts",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/scripts/autonomy-authorization.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "0e24bcd8a532fdd5f967a9102dcbc08d58e9be0f0923b0faaab279a4246ae3ca",
+      "distributedSha256": "cdd5f55473d488d5d7fe17dca4d557e52cda1df92e577ae5671629f73c9347a3",
+      "adaptation": "Approval authority registry default moved to $ZOUROBOROS_CONFIG_DIR/governance/approval-authorities.json (ZOUROBOROS_APPROVAL_KEYS_PATH override unchanged)."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/scripts/capability-ethics.ts",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/scripts/capability-ethics.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c0405b3514be62ef861db4cb4756b10b28d4e1c9ec29fe7db637650ecf43ed73",
+      "distributedSha256": "8b6b63bef42edb3ed73d1585f534d63f6db4bf5dd2c3f57c59eba7a7a659d082",
+      "adaptation": "Default scan root is this distribution's skills/ tree; scans category directories one level deep (skills/<category>/<skill>); host path removed."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/scripts/constitution-gate.test.ts",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/scripts/constitution-gate.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "324d150a0ce0ced568d8dda4284467ccda43767cc902ee3fad930b0562253cfd",
+      "distributedSha256": "933d8cf0b1006f568151edd4dd95578cad9c5b63828d00071d8aa715c6ae6c9e",
+      "adaptation": "Kept the document and preflight tests unchanged; promotion tests that need the non-distributed attestation stack replaced by fail-closed promotion tests; added shipped-document, unconfigured-mirror, missing-document, article-count, unavailable-docs and malformed-input tests."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/scripts/constitution-gate.ts",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/scripts/constitution-gate.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4109239c2a8f4816abd7b51d6e0c5b17682099e4d697d640a0ad41d0917515a0",
+      "distributedSha256": "5a0ff0661e58636bcc3d8ff715dece56c6df6776a275aae065609cd91bf33983",
+      "adaptation": "Canonical root defaults to the shipped references/ (or ZOUROBOROS_GOVERNANCE_DOCS_DIR); workspace mirror check only when configured (mirrorMode not-configured otherwise); host workspace defaults removed. Promotion phase fails closed with IX-PROMOTION-AUTHORITY-UNAVAILABLE because the persona-attestation, operator-approval, provider-native issuer and authorization-ledger modules are not distributed; their imports and evidence helpers removed. Preflight articles I-X unchanged."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/scripts/governance-ledger.ts",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/scripts/governance-ledger.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5c789f33dea0542f7975965993a9293e004fc954dcb14db507c1b60d4720a231",
+      "distributedSha256": "c3da384b71aa64a4bb00390465669bd39cf14e93274c65b8d18a05b362331f23",
+      "adaptation": "Default audit/anchor paths under $ZOUROBOROS_STATE_DIR/governance and anchor key under $ZOUROBOROS_CONFIG_DIR/governance (profile-derived fallback via governance-paths.ts) instead of HOME dotfiles; env overrides unchanged."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/scripts/governance-paths.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "084f9b5a60857cc5101f9ccc88c2df699044017b94eee5dc8191c7e78c5f2103",
+      "adaptation": "Portable state/config locations for the governance skill, mirroring integration/profile.ts runtimeEnv() without importing it."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/scripts/governance.ts",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/scripts/governance.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "bbf50964bc720198e917ec54a053966bc17694d80ca8b86f85d5c71140d28aa9",
+      "distributedSha256": "f67b34658a69dedaa287a554a490132c395b402968a163acb7b6f4100ebde7a9",
+      "adaptation": "BLOCKED_TOOLS replaced with Hermes Agent mutating tool names (Zo tool names removed); header comments no longer name host callers or project plans; self-test guards write_file."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/scripts/operator-authorization.test.ts",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/scripts/operator-authorization.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "636bfc465253ded33a406278fcc48a27f54c848fec16c5133d8df143532c92e9",
+      "distributedSha256": "33b9602da6ccfec06e7d6d51669a45c0a46e4e23f4b66b88fa615e3bcd918e82",
+      "adaptation": "Operator handle in the authority id and a host path in the resource replaced with generic values; assertions unchanged."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/scripts/operator-authorization.ts",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/scripts/operator-authorization.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5e4674e3c6cfce482a9add876c3844ce9d5ff542373334879875707c02497480",
+      "distributedSha256": "34e059344187e409db56bb276118a5faf29e8cb6d23130f86fea14e761779bca",
+      "adaptation": "Zo host detection (host marker directories) replaced: generate/sign refuse inside a Hermes agent session or next to a hermes-zouroboros profile; enroll refuses inside an agent session (operator-only trust change)."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-governance/SKILL.md",
+      "skill": "zouroboros-governance",
+      "sourcePath": "Skills/zouroboros-governance/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b59241a3bb71f5d9aef93143f75409f8610515815e925e8be05c3ff6c16e5af0",
+      "distributedSha256": "34e2a234ee6e40c67f5d0e29f67d9379eacd8a458a36a2ed50a4ba80ad3f0ef9",
+      "adaptation": "Rewritten for Hermes: ${HERMES_SKILL_DIR} commands; documents shipped in references/; portable state/config paths; preflight gate, audit log, operator-only bypass and capability-ethics; promotion documented as fail-closed (issuer/attestation stack not distributed); Zo email/zo.space surfaces, operator handle and host project paths removed."
+    },
+    {
       "path": "skills/zouroboros/zouroboros-observatory/assets/install.prompt.md",
       "skill": "zouroboros-observatory",
       "sourcePath": "Skills/zouroboros-observatory/assets/install.prompt.md",
@@ -722,6 +902,24 @@
       "sourceSha256": "4c2c68f5146130423fecc1b5c052863c132f53813c3721e22f202c6b82241415",
       "distributedSha256": "b122d537864f6d945add74ff9761848c55ea71e42638bea1019ca2fb6caf1505",
       "adaptation": "Rewritten for Hermes hosts: run the published zouroboros-observatory@0.1.0 via bunx; Zo Site deploy replaced by private remote-access guidance (token, private network, approval); env var list matches packages/observatory/src/config.ts; Hermes frontmatter added; operator author handle removed."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros/scripts/zouroboros.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "ff4c59f54b8fd19350cc4ccbe045488b999bb2f832f96bc8699356c0cb3a7648",
+      "adaptation": "Replaces the host install.ts/doctor.ts: skill index, read-only doctor (integration/cli.ts doctor + governance verify-docs + skill tree) and operator shortcuts resolved with zouroboros-core resolveOperatorShortcut against distribution commands."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros/SKILL.md",
+      "skill": "zouroboros",
+      "sourcePath": "Skills/zouroboros/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "62a9b0e216ad067dd669cc3c412f86aabfd5a01db7470c843dda0299927cffdd",
+      "distributedSha256": "5d71d5ed5bf9aab2950d1934b74faef577d99d7e6caa7be60e4bbffbe0522dea",
+      "adaptation": "Rewritten for Hermes: index of the distribution's Zouroboros skills, setup via scripts/setup.sh and integration/cli.ts init (replaces install.ts), read-only doctor, exact-phrase operator shortcuts mapped to distribution commands; Zo, OpenAI-key and host-path content removed."
     }
   ]
 }

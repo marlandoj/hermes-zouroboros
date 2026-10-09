@@ -53,6 +53,21 @@ an initialized profile. Hermes `skills_guard` therefore reports `path_traversal`
 always uses the profile database. Swarm and autoloop execution need `HERMES_ZOUROBOROS_ALLOW_SWARM=1`.
 `tests/skills-core-a.test.ts` exercises all five end to end with a fake `hermes` and no provider credentials.
 
+The `zouroboros` umbrella skill uses the same wiring. It provides the skill index, a read-only `doctor`, and the
+exact-phrase operator shortcuts. The shortcuts are resolved by `zouroboros-core`'s `resolveOperatorShortcut`
+and mapped to distribution commands.
+
+`zouroboros-governance` is self-contained. It ships the canonical `ZOUROBOROS.md` and `CONSTITUTION.md` in
+`references/`, and `verify-docs` checks those by default. A workspace mirror is checked only when
+`ZOUROBOROS_GOVERNANCE_MIRROR_DIR` is set.
+
+The governance audit log, anchor and approval registry live under `ZOUROBOROS_STATE_DIR` and
+`ZOUROBOROS_CONFIG_DIR`. If those variables are unset, they fall back to `state/` and `config/` in the profile.
+
+The preflight gate enforces Articles I-X. The promotion phase always fails closed
+(`IX-PROMOTION-AUTHORITY-UNAVAILABLE`), because no promotion issuer or attestation authority is distributed.
+`tests/skills-core-b.test.ts` covers both skills, `unstuck-lateral` and the autoloop program template offline.
+
 Skills must stay operator-neutral and portable. Do not include host paths, operator names or
 handles, persona identities, memories, run output, model catalogs or credentials. Read state through
 the variables the distribution already sets (`HERMES_ZOUROBOROS_HOME`, `ZOUROBOROS_DATA_DIR`,
