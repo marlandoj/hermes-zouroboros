@@ -41,7 +41,7 @@ if [[ "${1:-}" == "--acp" ]]; then
 fi
 
 PROMPT="${1:?Usage: kimi-bridge.sh \"prompt\" [workdir]}"
-WORKDIR="${2:-/opt/zouroboros/repo}"
+WORKDIR="${2:-${ZOUROBOROS_WORKSPACE:-$PWD}}"
 TIMEOUT="${KIMI_TIMEOUT:-600}"
 
 cd "$WORKDIR"

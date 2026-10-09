@@ -412,7 +412,7 @@
         "gate_run_id": "cg-1721239800000-abc123",
         "decision": "accepted",
         "actor": {
-          "id": "marlandoj",
+          "id": "operator",
           "source": "linear-operator-token",
           "authorization": "owner"
         },
@@ -501,7 +501,7 @@
         "gate_run_ids": ["cg-1721239900000-def456"],
         "decision": "overridden",
         "actor": {
-          "id": "marlandoj",
+          "id": "operator",
           "source": "linear-operator-token",
           "authorization": "owner"
         },
@@ -556,7 +556,7 @@
         "gate_run_ids": ["cg-1721239700000-aaa111"],
         "decision": "passed",
         "actor": {
-          "id": "marlandoj",
+          "id": "operator",
           "source": "linear-operator-token",
           "authorization": "owner"
         },
@@ -605,7 +605,7 @@
           "gate_run_ids": ["cg-1721240000000-bbb222"],
           "decision": "passed",
           "actor": {
-            "id": "marlandoj",
+            "id": "operator",
             "source": "linear-operator-token",
             "authorization": "owner"
           },
@@ -620,7 +620,7 @@
           "gate_run_ids": ["cg-1721240000000-bbb222"],
           "decision": "passed",
           "actor": {
-            "id": "marlandoj",
+            "id": "operator",
             "source": "linear-operator-token",
             "authorization": "owner"
           },
@@ -637,7 +637,7 @@
           "gate_run_ids": ["cg-1721240000000-bbb222"],
           "decision": "passed",
           "actor": {
-            "id": "marlandoj",
+            "id": "operator",
             "source": "linear-operator-token",
             "authorization": "owner"
           },

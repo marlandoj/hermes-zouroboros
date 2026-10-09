@@ -694,7 +694,7 @@
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "345d220238aadcc0f62323352aad186bac03c503aff0c9386cc125abfb5375a9",
       "distributedSha256": "2764d3fc3c5d60474f368e5cda4653efc0dad36d5577e239d61c35b2bcd3da6f",
-      "adaptation": "Hermes frontmatter added (metadata.hermes tags/homepage/related_skills, author, MIT licence, platforms, optional HEYGEN_API_KEY) and a Hermes note on connecting the official HeyGen MCP server (mcp_servers + hermes mcp login) and mcp_heygen_<tool> naming; CLI install advice changed from curl|bash to download-review-run (Hermes skills_guard curl_pipe_shell); update-check path uses ${HERMES_SKILL_DIR}; removed the host-local Client Templates section (operator-specific JHF template, not upstream). Upstream body otherwise unchanged."
+      "adaptation": "Hermes frontmatter added (metadata.hermes tags/homepage/related_skills, author, MIT licence, platforms, optional HEYGEN_API_KEY) and a Hermes note on connecting the official HeyGen MCP server (mcp_servers + hermes mcp login) and mcp_heygen_<tool> naming; CLI install advice changed from curl|bash to download-review-run (Hermes skills_guard curl_pipe_shell); update-check path uses ${HERMES_SKILL_DIR}; removed the host-local Client Templates section (operator-specific brand template, not upstream). Upstream body otherwise unchanged."
     },
     {
       "path": "skills/media/smart-money/SKILL.md",

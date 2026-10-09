@@ -11,10 +11,14 @@ import {
   type SwarmShadowInput,
 } from "./shadow-adapters.js";
 
-export const DEFAULT_SHADOW_STATE_DIR = "/home/workspace/.zouroboros/zcr-shadow";
+/** ZCR_SHADOW_STATE_DIR, else <ZOUROBOROS_STATE_DIR>/zcr-shadow, else <workspace>/.zouroboros/zcr-shadow. */
+export function defaultShadowStateDir(env: Readonly<Record<string, string | undefined>> = process.env): string {
+  if (env.ZOUROBOROS_STATE_DIR) return join(env.ZOUROBOROS_STATE_DIR, "zcr-shadow");
+  return join(env.ZOUROBOROS_WORKSPACE ?? env.ZO_WORKSPACE ?? process.cwd(), ".zouroboros/zcr-shadow");
+}
 
 export function resolveStateDir(env: Readonly<Record<string, string | undefined>> = process.env): string {
-  return env.ZCR_SHADOW_STATE_DIR ?? DEFAULT_SHADOW_STATE_DIR;
+  return env.ZCR_SHADOW_STATE_DIR ?? defaultShadowStateDir(env);
 }
 
 /**

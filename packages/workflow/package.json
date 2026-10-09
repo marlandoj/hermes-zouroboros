@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/marlandoj/zouroboros.git",
+    "url": "https://github.com/zouroboros-ai/zouroboros.git",
     "directory": "packages/workflow"
   },
   "bin": {
@@ -52,6 +52,5 @@
     "autoloop",
     "zouroboros"
   ],
-  "license": "MIT",
-  "author": "marlandoj.zo.computer"
+  "license": "MIT"
 }

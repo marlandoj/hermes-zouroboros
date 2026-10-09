@@ -17,6 +17,7 @@ import {
   type CandidateHeldOutQuery,
   type CandidateHeldOutQuerySet,
 } from './candidate-collection.js';
+import { approvedCandidateRepository } from './candidate-policy.js';
 import {
   RAG_CHUNK_CHARS,
   RAG_CHUNK_OVERLAP,
@@ -35,7 +36,8 @@ export interface CandidateCorpusBuildOptions {
   createdAt: string;
   licenseSha256: string;
   sources: readonly CandidateCorpusBuildSource[];
-  repository?: 'https://github.com/marlandoj/zouroboros';
+  /** Defaults to, and must equal, ZOUROBOROS_CANDIDATE_REPOSITORY. */
+  repository?: string;
 }
 
 export interface CandidateCorpusArtifacts {
@@ -98,12 +100,14 @@ export function buildCandidateCorpusManifest(options: CandidateCorpusBuildOption
   if (sources.length < MODAL_RAG_CORPUS_MINIMUMS.sourceDocuments || chunks.length < MODAL_RAG_CORPUS_MINIMUMS.chunks) {
     throw new Error(`Candidate corpus minimums not met: ${sources.length} sources, ${chunks.length} chunks`);
   }
+  const repository = approvedCandidateRepository();
+  if (options.repository !== undefined && options.repository !== repository) throw new Error('Candidate corpus repository is not approved');
   const corpusId = `zouroboros-public-${options.sourceCommit.slice(0, 12)}`;
   const unsigned = {
     schemaVersion: 1 as const,
     corpusId,
     classification: 'public' as const,
-    repository: options.repository ?? 'https://github.com/marlandoj/zouroboros' as const,
+    repository,
     sourceCommit: options.sourceCommit,
     createdAt: options.createdAt,
     collection: {

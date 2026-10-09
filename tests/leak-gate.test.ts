@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, expect, test } from 'bun:test';
+import { execFileSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { runGate } from '../scripts/ci/leak-gate.ts';
-import { sha256 } from '../scripts/lib/leak-rules.ts';
+import { loadConfig, personalHashes, scanText, sha256 } from '../scripts/lib/leak-rules.ts';
 
 // Fixtures are generated at runtime and assembled from fragments so this source file never holds
 // a host path, secret-shaped value or denylisted token that the gate would (rightly) flag.
@@ -110,6 +111,99 @@ test('baseline grandfathers existing package occurrences by count but never skil
   expect(runGate({ root, gitleaks: false }).findings.map((finding) => finding.rule)).toEqual(['host-path:host-workspace', 'host-path:host-workspace']);
   write('provenance/leak-gate-baseline.json', JSON.stringify({ schema: 'hermes-zouroboros/leak-gate-baseline/v1', note: '', entries: [{ file: 'skills/testing/demo-skill/SKILL.md', rule: 'host-path:host-workspace', count: 1 }] }));
   expect(() => runGate({ root, gitleaks: false })).toThrow('may not grandfather');
+});
+
+// --- Identity, brand and private-network rules (f2) --------------------------------------------
+// No denylisted token or private address appears in this file. Real-data checks read the 0.1.0
+// release from Git history (CI checks out with fetch-depth 0); fixtures use injected hashes or
+// addresses assembled from fragments.
+const RELEASE_0_1_0 = 'e8c2b2d';
+const atRelease = (path: string) => {
+  try { return execFileSync('git', ['-C', repo, 'show', `${RELEASE_0_1_0}:${path}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return undefined; }
+};
+const historyAvailable = atRelease('LICENSE') !== undefined;
+if (!historyAvailable && process.env.CI) throw new Error('leak-gate tests need full Git history in CI (fetch-depth: 0)');
+const realConfig = () => loadConfig(join(repo, 'provenance/leak-gate.json'));
+const ruleIds = (text: string, config = realConfig()) => [...new Set(scanText('fixture.txt', text, config).map((finding) => finding.rule))].sort();
+
+test('identity rules are stored as salted hashes, one per persona name and brand', () => {
+  const config = realConfig();
+  const labels = config.identityData!.hashes.map((entry) => entry.label).sort();
+  expect(labels).toEqual(['brand-1', 'brand-2', 'brand-3', 'persona-name-1', 'persona-name-2']);
+  for (const entry of config.identityData!.hashes) expect(entry.sha256).toMatch(/^[0-9a-f]{64}$/);
+  expect(new Set(config.identityData!.hashes.map((entry) => entry.sha256)).size).toBe(5);
+  // The rule file must not flag itself: it holds no plaintext token.
+  expect(ruleIds(readFileSync(join(repo, 'provenance/leak-gate.json'), 'utf8'))).toEqual([]);
+});
+
+test.skipIf(!historyAvailable)('the 0.1.0 persona-name default is flagged by persona-name-1', () => {
+  expect(ruleIds(atRelease('packages/swarm/src/client/executor-client.ts')!)).toContain('personal-data:persona-name-1');
+  expect(ruleIds(atRelease('packages/memory/src/eval-heldout-recall.ts')!)).toContain('personal-data:persona-name-1');
+});
+
+test('a recorded source entry name carrying the brand is flagged outside provenance (brand-1)', () => {
+  const config = realConfig();
+  const brand = new Set(config.identityData!.hashes.filter((entry) => entry.label === 'brand-1').map((entry) => entry.sha256));
+  const parity = JSON.parse(readFileSync(join(repo, 'provenance/skills-parity.json'), 'utf8')) as { entries: { name: string }[] };
+  const branded = parity.entries.map((entry) => entry.name).filter((name) => personalHashes(name, config.personalData.salt).some((hash) => brand.has(hash)));
+  expect(branded.length).toBeGreaterThan(0);
+  for (const name of branded) expect(ruleIds(`See the ${name} skill.`)).toEqual(['personal-data:brand-1']);
+});
+
+test('injected identity hashes flag both persona and brand labels', () => {
+  const config = realConfig();
+  config.identityData = { hashes: [
+    { label: 'persona-name-9', sha256: sha256(`${config.personalData.salt}zzfixturepersona`) },
+    { label: 'brand-9', sha256: sha256(`${config.personalData.salt}zzfixturebrand`) },
+  ] };
+  expect(ruleIds('Ask Zzfixturepersona about the zzfixturebrand screener.', config)).toEqual(['personal-data:brand-9', 'personal-data:persona-name-9']);
+  expect(ruleIds('Ask the default persona.', config)).toEqual([]);
+});
+
+test('private, CGNAT/tailnet and tailnet IPv6 addresses are flagged; documentation ranges are not', () => {
+  const ip = (...parts: (string | number)[]) => parts.join('.');
+  const cases: [string, string][] = [
+    [ip(10, 20, 30, 40), 'private-network:rfc1918-ipv4'],
+    [`${ip(172, 16, 0, 0)}/12`, 'private-network:rfc1918-ipv4'],
+    [ip(172, 31, 255, 254), 'private-network:rfc1918-ipv4'],
+    [`http://${ip(192, 168, 1, 10)}:8080`, 'private-network:rfc1918-ipv4'],
+    [`QDRANT_URL=http://${ip(100, 64, 0, 1)}:6333`, 'private-network:cgnat-tailnet-ipv4'],
+    [ip(100, 127, 255, 255), 'private-network:cgnat-tailnet-ipv4'],
+    [['fd7a', '115c', 'a1e0', '', '53'].join(':'), 'private-network:tailnet-ipv6'],
+    [['FD7A', '115C', 'A1E0', 'ab12', '1'].join(':'), 'private-network:tailnet-ipv6'],
+  ];
+  for (const [text, rule] of cases) expect(`${text} -> ${ruleIds(text).join(',')}`).toBe(`${text} -> ${rule}`);
+  // Reserved documentation ranges (RFC 5737, RFC 3849) and public or loopback addresses pass.
+  for (const text of [ip(192, 0, 2, 10), ip(198, 51, 100, 7), ip(203, 0, 113, 10), '2001:db8::1', ip(127, 0, 0, 1), ip(100, 128, 0, 1),
+    ip(172, 32, 0, 1), ip(8, 8, 8, 8), 'v' + ip(10, 1, 2, 3), ip(1, 10, 1, 2, 3), 'fd7b:115c:a1e0::1']) {
+    expect(`${text} -> ${ruleIds(text).join(',')}`).toBe(`${text} -> `);
+  }
+});
+
+test.skipIf(!historyAvailable)('the 0.1.0 tailnet Qdrant default is flagged by cgnat-tailnet-ipv4', () => {
+  expect(ruleIds(atRelease('packages/swarm/src/rag/enrichment.ts')!)).toContain('private-network:cgnat-tailnet-ipv4');
+});
+
+test('private-network findings are blocking and cannot be grandfathered by the baseline', () => {
+  write('packages/legacy/config.ts', `export const url = 'http://${[192, 168, 0, 5].join('.')}';\n`);
+  expect(rules()).toEqual(['private-network:rfc1918-ipv4 packages/legacy/config.ts']);
+  write('provenance/leak-gate-baseline.json', JSON.stringify({ schema: 'hermes-zouroboros/leak-gate-baseline/v1', note: '', entries: [{ file: 'packages/legacy/config.ts', rule: 'private-network:rfc1918-ipv4', count: 1 }] }));
+  expect(() => runGate({ root, gitleaks: false })).toThrow('may not grandfather');
+});
+
+test('context allowances mask only the recorded context, only in the listed files', () => {
+  const config = JSON.parse(readFileSync(join(root, 'provenance/leak-gate.json'), 'utf8'));
+  config.personalData.hashes.push({ label: 'operator-name-2', sha256: sha256(`${config.personalData.salt}zzfixtureowner`) });
+  config.identityData.hashes.push({ label: 'brand-1', sha256: sha256(`${config.personalData.salt}zzbrand`) });
+  write('provenance/leak-gate.json', JSON.stringify(config));
+  write('provenance/skills-parity.json', JSON.stringify({ entries: [{ name: 'zzbrand-daily-report' }] }));
+  write('README.md', 'Badge: https://github.com/zzfixtureowner/hermes-zouroboros/actions\n');
+  write('docs/SKILLS-PARITY.md', '| `zzbrand-daily-report` | renamed |\n');
+  expect(rules()).toEqual([]);
+  write('README.md', 'Badge: https://github.com/zzfixtureowner/hermes-zouroboros/actions\nMaintained by zzfixtureowner.\n');
+  write('docs/SKILLS-PARITY.md', '| `zzbrand-daily-report` | the zzbrand template |\n');
+  write('docs/other.md', 'Source entry zzbrand-daily-report.\n');
+  expect(rules().sort()).toEqual(['personal-data:brand-1 docs/SKILLS-PARITY.md', 'personal-data:brand-1 docs/other.md', 'personal-data:operator-name-2 README.md']);
 });
 
 // Scanning the whole tree takes several seconds and grows with every ported skill; bun's 5 s

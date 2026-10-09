@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-MODEL_CATALOG_PATH="${SWARM_MODEL_CATALOG_PATH:-/var/lib/zouroboros/model-routing/swarm/current.json}"
+MODEL_CATALOG_PATH="${SWARM_MODEL_CATALOG_PATH:-${ZOUROBOROS_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/zouroboros}/model-routing/swarm/current.json}"
 
 catalog_tier() {
   case "$1" in

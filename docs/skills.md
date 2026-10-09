@@ -288,22 +288,39 @@ bash scripts/install-git-hooks.sh              # optional pre-push hook running 
 | Blocked paths | `*.jsonl`, `*.ndjson`, `*.db`, `*.sqlite*`, `*.duckdb`, `*.log`, key/keystore files, `.env*`, credential files, symlinks, and any `data/`, `logs/`, `reports/`, `card-snapshots/`, `.mcp-trust/`, `memories/`, `sessions/` or `.zo/` path segment |
 | Host paths | The source host's workspace, home, repository, state and Zo directories, and hardcoded shared-memory (`/dev/shm`) paths |
 | Personal data | Salted-hash denylist of operator identifiers and restricted organisations, email addresses outside example/no-reply domains, and phone numbers |
+| Identity | Salted-hash denylist of the source host's persona names and the operator's business brands (`identityData`; rule IDs `personal-data:persona-name-N` and `personal-data:brand-N`) |
+| Private networks | RFC 1918 IPv4, CGNAT/Tailscale IPv4 (100.64/10) and the Tailscale IPv6 ULA prefix (`networkPatterns`). Use the documentation ranges (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24, 2001:db8::/32) in examples and tests, and build any private-range test fixture from fragments at runtime. Never grandfathered. |
 | Secrets | Pinned gitleaks (directory scan, plus commit history in `--diff` mode) and custom high-signal patterns (private keys, cloud/GitHub/Slack/model-provider tokens, literal credential assignments) |
 | Provenance | Every file under `skills/` has a `provenance/skills.json` entry with a matching SHA-256, and no entry is stale |
 
 The gate prints rule IDs and locations, never matched values. Configuration is in `provenance/leak-gate.json`.
-The personal-data denylist there contains only hashes. Add an identifier as
-`sha256(salt + normalized token)`, and never add it in plain text.
+The personal-data and identity denylists there contain only hashes. Add an identifier as
+`sha256(salt + normalized token)`, and never add it in plain text. Short tokens can be recovered
+from their hashes by brute force, so the hashes keep identifiers out of plain sight. They are not
+a secret.
+
+**Context allowances.** A `contextAllowances` entry names files, rules, a context and a reason. In
+those files, a finding for those rules is dropped only when it disappears after the context is
+masked on that line. Two kinds exist:
+
+- **`sourceEntryNames`:** the source skill names recorded in `provenance/skills-parity.json`. Two
+  finance entries there carry the brand prefix.
+- **A regex:** for example, this repository's own GitHub URL, or the recorded upstream repository.
+
+A free-standing token in the same file still fails.
 
 **Reviewed exceptions.** A synthetic fixture or an empty `.env.template` can ship only through a
 `reviewedExceptions` entry in `provenance/leak-gate.json`. That entry lists the path, the exact
 file SHA-256, the rules it waives and a reason. Any edit to the file invalidates the exception.
 
 **0.1.0 baseline.** `provenance/leak-gate-baseline.json` grandfathers host-path and
-personal-data occurrences already present in the 0.1.0 package import. Those include default
-fallback paths and the repository owner's handle in package metadata. They are counted per file and
-rule. A count may fall but not rise. Secrets, blocked paths and anything under `skills/` cannot be
-grandfathered.
+personal-data occurrences already present in the 0.1.0 package import. They are counted per file and
+rule. A count may fall but not rise. Secrets, blocked paths, private-network addresses and anything
+under `skills/` cannot be grandfathered. After the f2 forward fix, only two entries remain:
+
+- the copyright line in `LICENSE`, which is legally required;
+- two mentions of a source-host directory in the 0.1.0 build log `PROGRESS.md`, which is a
+  historical record.
 
 ## Parity check
 

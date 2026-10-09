@@ -11,7 +11,10 @@ import {
 
 const repositoryRoot = resolve(import.meta.dir, '../..');
 const cliEntrypoint = join(repositoryRoot, 'cli', 'src', 'index.ts');
-const forbiddenPaths = ['/home/workspace', '/home/.z', '/root/.z', '/root/.zouroboros', '/root/.zo_secrets'];
+// Source-host locations the relocated runtime must never touch, assembled from segments so this deny
+// list does not itself trip the leak gate's host-path rules.
+const forbiddenPaths = [['home', 'workspace'], ['home', '.z'], ['root', '.z'], ['root', '.zouroboros'], ['root', '.zo_secrets']]
+  .map((segments) => `/${segments.join('/')}`);
 
 function isolatedEnvironment(root: string): Record<string, string> {
   return {

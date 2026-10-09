@@ -8,6 +8,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { getWorkspaceRoot } from 'zouroboros-core';
 import {
   hashPlanArtifact,
   parsePlanArtifactInput,
@@ -68,7 +69,7 @@ export interface LegacyConsensusOptions {
 }
 
 function workspaceRoot(explicit?: string): string {
-  return explicit ?? process.env.ZO_WORKSPACE ?? '/home/workspace';
+  return explicit ?? getWorkspaceRoot();
 }
 
 function defaultStatePath(root: string): string {

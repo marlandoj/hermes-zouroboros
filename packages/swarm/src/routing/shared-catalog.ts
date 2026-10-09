@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { modelRoutingDir } from '../host-roots.js';
 
 // 'consensus' remains readable for historical evidence, but is never an active consumer.
 export type Consumer = 'swarm' | 'chat' | 'automation' | 'consensus' | 'factory';
@@ -20,7 +21,7 @@ export interface SharedCatalog {
   version: 1; generatedAt: string; routes: Route[]; sources: Record<string,{at:string;count:number;error?:string}>;
   nominations: unknown[]; sha256: string;
 }
-export const sharedPath = () => process.env.ZOUROBOROS_MODEL_CATALOG_PATH || '/var/lib/zouroboros/model-routing/current.json';
+export const sharedPath = () => process.env.ZOUROBOROS_MODEL_CATALOG_PATH || join(modelRoutingDir(), 'current.json');
 export function digest(c: Omit<SharedCatalog,'sha256'>|SharedCatalog): string {
   const {sha256: _, ...body}=c as SharedCatalog;
   return createHash('sha256').update(JSON.stringify(body)).digest('hex');

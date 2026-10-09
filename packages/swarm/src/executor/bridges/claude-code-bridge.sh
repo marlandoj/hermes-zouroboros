@@ -18,7 +18,7 @@
 set -euo pipefail
 
 PROMPT="${1:?Usage: claude-code-bridge.sh \"prompt\" [workdir]}"
-WORKDIR="${2:-/opt/zouroboros/repo}"
+WORKDIR="${2:-${ZOUROBOROS_WORKSPACE:-$PWD}}"
 
 # --- Dynamic shared model resolution ---
 # Priority: SWARM_RESOLVED_MODEL → CLAUDE_CODE_MODEL → qualified catalog tier → floor

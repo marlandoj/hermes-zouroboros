@@ -14,3 +14,26 @@
 - `integration/qdrant-corpus.ts` is distribution-authored: Qdrant URL/headers, OpenAI-compatible embeddings (`OPENAI_API_KEY`, optional `OPENAI_BASE_URL`/`CORPUS_EMBEDDING_MODEL`) and the hashed-BM25 sparse vector reproduced from the source workspace's RAG pipeline, for the gaming corpus skills. It replaces their imports of the host `zo-memory-system` model client and RAG pipeline, and reads no secrets file.
 - `packages/swarm/src/rag/enrichment.ts` defaults `QDRANT_URL` to `http://127.0.0.1:6333`, as `packages/rag` and `integration/qdrant-corpus.ts` do, instead of a source-host private network address. `packages/swarm/src/api/server.ts` has no default CORS origin, so cross-origin requests are refused until `SWARM_API_CORS_ORIGINS` is set, instead of allowing the source operator's site. `workspace.json` records the distributed hashes, and the leak-gate baseline allowance for `server.ts` is removed.
 - `skills/zouroboros/graphrag-relational` carries a skill-local third-party dependency, approved by the operator on 2026-10-09: `falkordblite` 0.3.0 and `@falkordblite/linux-x64` (both MIT), installed by `bun install` in that directory only, with lifecycle scripts left untrusted. On first use, its runtime downloads the pinned Redis 8.2.3 source, checks its SHA-256, and compiles `redis-server` into `ZOUROBOROS_CACHE_DIR/falkordblite`. Nothing is built at install time or in CI, where the build is refused. No Redis source or binary is vendored.
+- **0.1.0 identifiers forward-fixed in f2.** History is not rewritten.
+  - **Persona and actor defaults are neutral:**
+    - the executor seat defaults to `ZOUROBOROS_DEFAULT_PERSONA`, else `default`;
+    - memory eval fixtures use a `researcher` persona;
+    - newly generated shadow envelopes record `ZCR_SHADOW_ACTOR`/`ZCR_SHADOW_REPOSITORY` (defaults `operator` and `local/zouroboros`);
+    - the plan-gate regression fixtures use actor `operator`.
+  - **The RAG candidate corpus is configured, not hard-coded:**
+    - the approved repository comes from `ZOUROBOROS_CANDIDATE_REPOSITORY` and fails closed when it is unset;
+    - the employer mail-domain literal in its redaction regex is replaced by `ZOUROBOROS_RESTRICTED_EMAIL_DOMAINS` (subdomains included). Set it to keep redacting those addresses.
+  - **Host-path defaults resolve under the portable roots:**
+    - in `packages/swarm`, through `src/host-roots.ts`: bridges, registry, routing catalogs, telemetry, the Gemini daemon log, plan-gate preflight, and the Factory containment namespaces (`FACTORY_SOURCE_ROOT`, `FACTORY_EXTERNAL_ROOT`; IPC under `SWARM_EXEC_IPC_DIR`, else the OS temp dir);
+    - in `packages/selfheal` and the capability-runtime shadow state, likewise.
+  - **A host that keeps the old layout** sets `ZOUROBOROS_WORKSPACE`, `ZOUROBOROS_STATE_DIR`, `FACTORY_EXTERNAL_ROOT`, `ZOUROBOROS_OPERATOR_HOME` and `WAYFINDER_DIR`/`WAYFINDER_SKILLS_ROOTS`.
+  - **Package metadata:** the source-host author address is dropped, and repository URLs match `packages/core`.
+  - **Kept, with reasons:**
+    - the `LICENSE` copyright line (legal attribution);
+    - this repository's own GitHub URL (README badge and clone, CI receipts);
+    - the recorded upstream repository and source skill entry names in provenance, through narrow `contextAllowances`;
+    - two source-host directory mentions in the 0.1.0 build log `PROGRESS.md` (historical record).
+- **The leak gate gained identity and private-network rules.**
+  - Persona names and brands are salted hashes in `identityData`.
+  - `networkPatterns` covers RFC 1918, CGNAT/Tailscale IPv4 and the Tailscale IPv6 ULA prefix. These findings cannot be grandfathered.
+  - `contextAllowances` are reasoned, file-scoped masks. The baseline fell from 53 entries (105 occurrences) to 2 entries (3).

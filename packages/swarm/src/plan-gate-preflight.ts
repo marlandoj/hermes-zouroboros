@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { workspaceRoot } from './host-roots.js';
 import {
   PlanGateLedger,
   evaluatePlanGatePreflight,
@@ -222,7 +224,7 @@ function evaluateConstitution(
     failClosed: true,
   };
   const gatePath = process.env.ZOUROBOROS_CONSTITUTION_GATE
-    || '/home/workspace/Skills/zouroboros-governance/scripts/constitution-gate.ts';
+    || join(workspaceRoot(), 'Skills/zouroboros-governance/scripts/constitution-gate.ts');
   const args = [gatePath, 'check', '--phase', 'preflight', '--input', JSON.stringify(input)];
   if (config.audit === false) args.push('--skip-audit');
 

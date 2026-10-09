@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// Leak gate: blocks data files, host paths, operator personal data, secrets and unprovenanced skill files.
+// Leak gate: blocks data files, host paths, operator personal data and identity tokens, private network
+// addresses, secrets and unprovenanced skill files.
 // Run before every push (full tree and diff) and in CI. Output names rules and locations only, never matched values.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -7,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
-  blockedPathRule, exceptionFor, isBinary, listFiles, loadConfig, readFile, repoRoot, scanText,
+  blockedPathRule, contextMasks, exceptionFor, isBinary, listFiles, loadConfig, readFile, repoRoot, scanText,
   type Finding, type LeakGateConfig,
 } from '../lib/leak-rules.ts';
 import { checkSkillProvenance, loadSkillsManifest } from '../lib/skill-provenance.ts';
@@ -51,6 +52,10 @@ export function runGate(options: GateOptions = {}): GateResult {
     return content !== undefined && exceptionFor(finding.file, content, finding.rule, config) !== undefined;
   };
 
+  const parityPath = join(root, 'provenance/skills-parity.json');
+  const sourceEntryNames = existsSync(parityPath)
+    ? (JSON.parse(readFileSync(parityPath, 'utf8')) as { entries?: { name: string }[] }).entries?.map((entry) => entry.name) ?? []
+    : [];
   for (const file of files) {
     const stat = lstatSync(join(root, file));
     if (stat.isSymbolicLink()) { raw.push({ kind: 'blocked-path', rule: 'blocked-path:symlink', file }); continue; }
@@ -58,7 +63,7 @@ export function runGate(options: GateOptions = {}): GateResult {
     if (pathRule) raw.push({ kind: 'blocked-path', rule: pathRule, file });
     const content = read(file);
     if (!content || isBinary(content)) continue;
-    raw.push(...scanText(file, content.toString('utf8'), config));
+    raw.push(...scanText(file, content.toString('utf8'), config, contextMasks(file, config, sourceEntryNames)));
   }
   const manifestPath = options.manifestPath ?? join(root, 'provenance/skills.json');
   if (existsSync(manifestPath)) raw.push(...checkSkillProvenance(allFiles, read, loadSkillsManifest(manifestPath)));

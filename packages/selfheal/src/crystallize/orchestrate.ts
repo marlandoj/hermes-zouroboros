@@ -62,7 +62,7 @@ export interface OrchestrateInputs {
   sendEmail: EmailSender;
   /** Optional capacity ceiling override (tests). */
   capacityCeiling?: number;
-  /** Project root passed to mechanical eval's grep-validate (typically /home/workspace). */
+  /** Project root passed to mechanical eval's grep-validate (typically the workspace root). */
   projectRoot: string;
   /** Known MCP tools (passed through to grep-validate). */
   knownMcpTools: Set<string>;

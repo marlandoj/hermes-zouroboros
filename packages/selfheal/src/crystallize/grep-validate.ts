@@ -8,7 +8,7 @@
  *
  * Reference forms recognized:
  *   - Backtick-quoted relative paths:  `packages/foo/bar.ts`
- *   - Backtick-quoted absolute paths:  `/home/workspace/...`
+ *   - Backtick-quoted absolute paths:  `/srv/project/...`
  *   - MCP tool refs:                   `mcp__zo__send_email_to_user`
  *
  * Tool refs (mcp__*) are validated against an allowlist supplied by the

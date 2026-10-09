@@ -23,7 +23,7 @@ import type { ExecutorTransport, SessionUpdate } from '../transport/types.js';
 import type { ExecutorRegistryEntry, Task, TaskResult } from '../types.js';
 
 export interface ExecutorClientOptions {
-  /** Persona identity for this call (seat-keyed). Default: 'alaric' (back-compat). */
+  /** Persona identity for this call (seat-keyed). Default: ZOUROBOROS_DEFAULT_PERSONA, else 'default'. */
   persona?: string;
   /** Model the harness should run. Execution metadata, passed to Task.model. */
   model?: string;
@@ -151,7 +151,8 @@ export class ExecutorClient {
   async run(prompt: string, opts: ExecutorClientOptions = {}): Promise<RunResult> {
     const start = Date.now();
     const taskId = randomUUID();
-    const persona = opts.persona ?? 'alaric';
+    // Neutral default seat; ZOUROBOROS_DEFAULT_PERSONA names a profile persona instead.
+    const persona = opts.persona ?? (process.env.ZOUROBOROS_DEFAULT_PERSONA || 'default');
     const seatDispatch = {
       enabled: Boolean(opts.seat),
       bindings: [{ seat: opts.seat ?? persona, harness: this.executorId, ...(opts.model ? { modelId: opts.model } : {}) }],

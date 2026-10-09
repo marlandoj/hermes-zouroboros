@@ -9,7 +9,7 @@
  * fails closed on protected endpoints without it, unless started with
  * --insecure). Capture failures are logged to stderr but never thrown.
  *
- * Wire via opencode.json: "plugin": ["/opt/zouroboros/repo/packages/memory/hooks/opencode-observer.ts"]
+ * Wire via opencode.json: "plugin": ["<checkout>/packages/memory/hooks/opencode-observer.ts"]
  */
 import type { Plugin } from "@opencode-ai/plugin";
 

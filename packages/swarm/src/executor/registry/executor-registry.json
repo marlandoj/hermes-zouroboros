@@ -56,13 +56,7 @@
         "wayfinder": {
           "enabled": true,
           "mode": "shadow",
-          "engineDir": "/home/workspace/Projects/wayfinder",
           "harness": "factory",
-          "home": "/home/workspace/.wayfinder",
-          "skillsRoots": [
-            "/home/workspace/Skills",
-            "/home/workspace/.agents/skills"
-          ],
           "timeoutMs": 15000
         }
       },
@@ -159,7 +153,7 @@
         "defaultTimeout": 300,
         "model": "swarm-failover",
         "envVars": {
-          "HERMES_PROJECT_DIR": "Path to hermes-agent project (default: /home/zouroboros/hermes-agent)",
+          "HERMES_PROJECT_DIR": "Path to hermes-agent project (default: $ZOUROBOROS_OPERATOR_HOME/hermes-agent, else $HOME/hermes-agent)",
           "HERMES_VENV": "Path to venv activate script (default: $HERMES_PROJECT_DIR/.venv/bin/activate)",
           "HERMES_TIMEOUT": "Timeout in seconds (default: 300)",
           "HERMES_PROVIDER": "Optional provider override; defaults to the Hermes config",
@@ -208,13 +202,7 @@
         "wayfinder": {
           "enabled": true,
           "mode": "shadow",
-          "engineDir": "/home/workspace/Projects/wayfinder",
           "harness": "factory",
-          "home": "/home/workspace/.wayfinder",
-          "skillsRoots": [
-            "/home/workspace/Skills",
-            "/home/workspace/.agents/skills"
-          ],
           "timeoutMs": 15000
         }
       },
@@ -315,7 +303,7 @@
         "script": "Skills/zo-swarm-executors/scripts/gemini-daemon.ts",
         "socket": "/tmp/gemini-daemon.sock",
         "pidFile": "/tmp/gemini-daemon.pid",
-        "logFile": "/dev/shm/gemini-daemon.log",
+        "logFile": "$ZOUROBOROS_LOG_DIR/gemini-daemon.log",
         "maxConcurrent": 4,
         "idleTimeout": "30min",
         "description": "Persistent HTTP daemon on Unix socket. Bridge auto-detects and routes through daemon. Falls back to direct CLI if daemon is down."
@@ -357,13 +345,7 @@
         "wayfinder": {
           "enabled": true,
           "mode": "shadow",
-          "engineDir": "/home/workspace/Projects/wayfinder",
           "harness": "factory",
-          "home": "/home/workspace/.wayfinder",
-          "skillsRoots": [
-            "/home/workspace/Skills",
-            "/home/workspace/.agents/skills"
-          ],
           "timeoutMs": 15000
         }
       },
@@ -479,13 +461,7 @@
         "wayfinder": {
           "enabled": true,
           "mode": "shadow",
-          "engineDir": "/home/workspace/Projects/wayfinder",
           "harness": "factory",
-          "home": "/home/workspace/.wayfinder",
-          "skillsRoots": [
-            "/home/workspace/Skills",
-            "/home/workspace/.agents/skills"
-          ],
           "timeoutMs": 15000
         }
       },
@@ -655,13 +631,7 @@
         "wayfinder": {
           "enabled": true,
           "mode": "shadow",
-          "engineDir": "/home/workspace/Projects/wayfinder",
           "harness": "factory",
-          "home": "/home/workspace/.wayfinder",
-          "skillsRoots": [
-            "/home/workspace/Skills",
-            "/home/workspace/.agents/skills"
-          ],
           "timeoutMs": 15000
         }
       },
@@ -791,13 +761,7 @@
         "wayfinder": {
           "enabled": true,
           "mode": "shadow",
-          "engineDir": "/home/workspace/Projects/wayfinder",
           "harness": "factory",
-          "home": "/home/workspace/.wayfinder",
-          "skillsRoots": [
-            "/home/workspace/Skills",
-            "/home/workspace/.agents/skills"
-          ],
           "timeoutMs": 15000
         }
       },
