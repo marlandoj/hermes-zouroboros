@@ -300,16 +300,39 @@ bash scripts/install-git-hooks.sh              # optional pre-push hook running 
 | Blocked paths | `*.jsonl`, `*.ndjson`, `*.db`, `*.sqlite*`, `*.duckdb`, `*.log`, key/keystore files, `.env*`, credential files, symlinks, and any `data/`, `logs/`, `reports/`, `card-snapshots/`, `.mcp-trust/`, `memories/`, `sessions/` or `.zo/` path segment |
 | Host paths | The source host's workspace, home, repository, state and Zo directories, and hardcoded shared-memory (`/dev/shm`) paths |
 | Personal data | Salted-hash denylist of operator identifiers and restricted organisations, email addresses outside example/no-reply domains, and phone numbers |
-| Identity | Salted-hash denylist of the source host's persona names and the operator's business brands (`identityData`; rule IDs `personal-data:persona-name-N` and `personal-data:brand-N`) |
+| Identity | Secret-keyed hash denylist of the source host's persona names and the operator's business brands (`identityData`; rule IDs `personal-data:persona-name-N` and `personal-data:brand-N`). Needs the secret salt; skips with a notice without it |
 | Private networks | RFC 1918 IPv4, CGNAT/Tailscale IPv4 (100.64/10) and the Tailscale IPv6 ULA prefix (`networkPatterns`). Use the documentation ranges (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24, 2001:db8::/32) in examples and tests, and build any private-range test fixture from fragments at runtime. Never grandfathered. |
 | Secrets | Pinned gitleaks (directory scan, plus commit history in `--diff` mode) and custom high-signal patterns (private keys, cloud/GitHub/Slack/model-provider tokens, literal credential assignments) |
 | Provenance | Every file under `skills/` has a `provenance/skills.json` entry with a matching SHA-256, and no entry is stale |
 
 The gate prints rule IDs and locations, never matched values. Configuration is in `provenance/leak-gate.json`.
-The personal-data and identity denylists there contain only hashes. Add an identifier as
-`sha256(salt + normalized token)`, and never add it in plain text. Short tokens can be recovered
-from their hashes by brute force, so the hashes keep identifiers out of plain sight. They are not
-a secret.
+The personal-data and identity denylists there contain only hashes, never plain text.
+
+- **Personal data** uses the public salt in the file: add an identifier as
+  `sha256(salt + normalized token)`. Short tokens can be recovered from these hashes by brute
+  force, so they keep identifiers out of plain sight but are not a secret.
+- **Identity** (persona names and brands) uses `HMAC-SHA256(secret salt, normalized token)`
+  (`scheme: hmac-sha256/secret-salt/v1`). The secret salt is never committed, so these hashes
+  cannot be brute-forced from the repository. The gate looks for it in this order:
+  1. `LEAK_GATE_SALT` (CI reads it from the repository secret of the same name);
+  2. the file named by `LEAK_GATE_SALT_FILE`;
+  3. `~/.config/hermes-zouroboros/leak-gate-salt`, outside the repository. It must be mode 0600;
+     a file readable by group or others is refused.
+
+  Without a salt (forks, fresh clones, fork PRs) the identity rules skip, the gate prints a
+  `NOTICE identity rules ... skipped` line, and every other rule still runs. CI in this
+  repository sets `LEAK_GATE_REQUIRE_SALT=1`, which turns a missing salt into an error. To run
+  the identity rules locally, a maintainer copies the salt from a trusted channel:
+
+  ```bash
+  install -d -m 0700 ~/.config/hermes-zouroboros
+  (umask 077; cat > ~/.config/hermes-zouroboros/leak-gate-salt)   # paste the salt, then Ctrl-D
+  ```
+
+  To add an identity token, compute `printf %s '<normalized token>' | openssl dgst -sha256 -hmac "$(cat ~/.config/hermes-zouroboros/leak-gate-salt)"`
+  locally and add only the hex digest with the next free label. Never print, log or commit the
+  salt. Rotating it means re-hashing every identity entry in one reviewed PR and updating the
+  repository secret (`gh secret set LEAK_GATE_SALT`, value on stdin).
 
 **Context allowances.** A `contextAllowances` entry names files, rules, a context and a reason. In
 those files, a finding for those rules is dropped only when it disappears after the context is

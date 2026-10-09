@@ -4,7 +4,8 @@ import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSy
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { runGate } from '../scripts/ci/leak-gate.ts';
-import { loadConfig, personalHashes, scanText, sha256 } from '../scripts/lib/leak-rules.ts';
+import { chmodSync } from 'node:fs';
+import { identityHash, identityHashes, identitySalt, loadConfig, scanText, sha256 } from '../scripts/lib/leak-rules.ts';
 
 // Fixtures are generated at runtime and assembled from fragments so this source file never holds
 // a host path, secret-shaped value or denylisted token that the gate would (rightly) flag.
@@ -23,7 +24,7 @@ function provenance(paths: string[]) {
     distributedSha256: sha256(readFileSync(join(root, path))), adaptation: 'Test fixture.' }));
   write('provenance/skills.json', JSON.stringify({ schema: 'hermes-zouroboros/skill-provenance/v1', source: 'test', sourceRevision: 'test', files }));
 }
-const gate = () => runGate({ root, gitleaks: false, baselinePath: false });
+const gate = () => runGate({ root, gitleaks: false, baselinePath: false, identitySalt: false });
 const rules = () => gate().findings.map((finding) => `${finding.rule} ${finding.file}`);
 
 beforeEach(() => {
@@ -123,41 +124,83 @@ const atRelease = (path: string) => {
 };
 const historyAvailable = atRelease('LICENSE') !== undefined;
 if (!historyAvailable && process.env.CI) throw new Error('leak-gate tests need full Git history in CI (fetch-depth: 0)');
+// The identity salt is secret (CI secret LEAK_GATE_SALT, or the local 0600 salt file). Tests that
+// check the real persona/brand hashes need it and skip without it; fixture tests inject their own.
+const realSalt = identitySalt();
 const realConfig = () => loadConfig(join(repo, 'provenance/leak-gate.json'));
 const ruleIds = (text: string, config = realConfig()) => [...new Set(scanText('fixture.txt', text, config).map((finding) => finding.rule))].sort();
+const fixtureSalt = 'f'.repeat(64);
+const withFixtureIdentity = () => {
+  const config = loadConfig(join(repo, 'provenance/leak-gate.json'), fixtureSalt);
+  config.identityData = { scheme: config.identityData!.scheme, hashes: [
+    { label: 'persona-name-9', sha256: identityHash('zzfixturepersona', fixtureSalt) },
+    { label: 'brand-9', sha256: identityHash('zzfixturebrand', fixtureSalt) },
+  ] };
+  return config;
+};
 
-test('identity rules are stored as salted hashes, one per persona name and brand', () => {
-  const config = realConfig();
-  const labels = config.identityData!.hashes.map((entry) => entry.label).sort();
+test('identity rules are stored as secret-keyed hashes, one per persona name and brand', () => {
+  const raw = JSON.parse(readFileSync(join(repo, 'provenance/leak-gate.json'), 'utf8'));
+  expect(raw.identityData.scheme).toBe('hmac-sha256/secret-salt/v1');
+  expect(raw.identitySalt).toBeUndefined();
+  const labels = raw.identityData.hashes.map((entry: { label: string }) => entry.label).sort();
   expect(labels).toEqual(['brand-1', 'brand-2', 'brand-3', 'persona-name-1', 'persona-name-2']);
-  for (const entry of config.identityData!.hashes) expect(entry.sha256).toMatch(/^[0-9a-f]{64}$/);
-  expect(new Set(config.identityData!.hashes.map((entry) => entry.sha256)).size).toBe(5);
+  for (const entry of raw.identityData.hashes) expect(entry.sha256).toMatch(/^[0-9a-f]{64}$/);
+  expect(new Set(raw.identityData.hashes.map((entry: { sha256: string }) => entry.sha256)).size).toBe(5);
+  // No identity hash is recoverable with the public personal-data salt.
+  const publicSalted = new Set(['persona', 'brand', 'operator'].map((word) => sha256(raw.personalData.salt + word)));
+  for (const entry of raw.identityData.hashes) expect(publicSalted.has(entry.sha256)).toBe(false);
   // The rule file must not flag itself: it holds no plaintext token.
   expect(ruleIds(readFileSync(join(repo, 'provenance/leak-gate.json'), 'utf8'))).toEqual([]);
 });
 
-test.skipIf(!historyAvailable)('the 0.1.0 persona-name default is flagged by persona-name-1', () => {
+test('identity rules fire with the salt and skip cleanly without it; other rules still run', () => {
+  const config = withFixtureIdentity();
+  const text = `Ask Zzfixturepersona about the zzfixturebrand screener. Mail ${'someone'}@${'mailbox.test'}.`;
+  expect(ruleIds(text, config)).toEqual(['personal-data:brand-9', 'personal-data:email-address', 'personal-data:persona-name-9']);
+  delete config.identitySalt;
+  expect(ruleIds(text, config)).toEqual(['personal-data:email-address']);
+  // A wrong salt matches nothing.
+  config.identitySalt = 'e'.repeat(64);
+  expect(ruleIds(text, config)).toEqual(['personal-data:email-address']);
+  expect(ruleIds('Ask the default persona.', withFixtureIdentity())).toEqual([]);
+});
+
+test('runGate reports identity ran or skipped and the CLI prints a notice when skipped', () => {
+  write('docs/a.md', 'Plain text.\n');
+  expect(runGate({ root, gitleaks: false, baselinePath: false, identitySalt: false }).identity).toBe('skipped');
+  expect(runGate({ root, gitleaks: false, baselinePath: false, identitySalt: fixtureSalt }).identity).toBe('ran');
+  const env = { ...process.env, LEAK_GATE_SALT: '', LEAK_GATE_SALT_FILE: join(root, 'absent-salt'), LEAK_GATE_REQUIRE_SALT: '' };
+  const run = (extra: Record<string, string>) => Bun.spawnSync(['bun', join(repo, 'scripts/ci/leak-gate.ts'), '--root', root, '--skip-gitleaks'], { env: { ...env, CI: '', ...extra } });
+  const skipped = run({});
+  expect(skipped.stderr.toString()).toContain('NOTICE identity rules (persona names, brands) skipped');
+  expect(skipped.stdout.toString()).toContain('identity rules skipped');
+  expect(skipped.exitCode).toBe(0);
+  expect(run({ LEAK_GATE_REQUIRE_SALT: '1' }).exitCode).toBe(2);
+  const saltFile = join(root, 'salt');
+  writeFileSync(saltFile, fixtureSalt + '\n');
+  chmodSync(saltFile, 0o600);
+  const ran = run({ LEAK_GATE_SALT_FILE: saltFile });
+  expect(ran.stdout.toString()).toContain('identity rules ran');
+  expect(ran.stderr.toString()).not.toContain('NOTICE identity');
+  expect(ran.stdout.toString() + ran.stderr.toString()).not.toContain(fixtureSalt);
+  chmodSync(saltFile, 0o644);
+  expect(run({ LEAK_GATE_SALT_FILE: saltFile }).exitCode).toBe(2);
+});
+
+test.skipIf(!realSalt)('the 0.1.0 persona-name default is flagged by persona-name-1 (needs the salt)', () => {
+  if (!historyAvailable) return;
   expect(ruleIds(atRelease('packages/swarm/src/client/executor-client.ts')!)).toContain('personal-data:persona-name-1');
   expect(ruleIds(atRelease('packages/memory/src/eval-heldout-recall.ts')!)).toContain('personal-data:persona-name-1');
 });
 
-test('a recorded source entry name carrying the brand is flagged outside provenance (brand-1)', () => {
+test.skipIf(!realSalt)('a recorded source entry name carrying the brand is flagged outside provenance (brand-1, needs the salt)', () => {
   const config = realConfig();
   const brand = new Set(config.identityData!.hashes.filter((entry) => entry.label === 'brand-1').map((entry) => entry.sha256));
   const parity = JSON.parse(readFileSync(join(repo, 'provenance/skills-parity.json'), 'utf8')) as { entries: { name: string }[] };
-  const branded = parity.entries.map((entry) => entry.name).filter((name) => personalHashes(name, config.personalData.salt).some((hash) => brand.has(hash)));
+  const branded = parity.entries.map((entry) => entry.name).filter((name) => identityHashes(name, config.identitySalt!).some((hash) => brand.has(hash)));
   expect(branded.length).toBeGreaterThan(0);
   for (const name of branded) expect(ruleIds(`See the ${name} skill.`)).toEqual(['personal-data:brand-1']);
-});
-
-test('injected identity hashes flag both persona and brand labels', () => {
-  const config = realConfig();
-  config.identityData = { hashes: [
-    { label: 'persona-name-9', sha256: sha256(`${config.personalData.salt}zzfixturepersona`) },
-    { label: 'brand-9', sha256: sha256(`${config.personalData.salt}zzfixturebrand`) },
-  ] };
-  expect(ruleIds('Ask Zzfixturepersona about the zzfixturebrand screener.', config)).toEqual(['personal-data:brand-9', 'personal-data:persona-name-9']);
-  expect(ruleIds('Ask the default persona.', config)).toEqual([]);
 });
 
 test('private, CGNAT/tailnet and tailnet IPv6 addresses are flagged; documentation ranges are not', () => {
@@ -194,8 +237,9 @@ test('private-network findings are blocking and cannot be grandfathered by the b
 test('context allowances mask only the recorded context, only in the listed files', () => {
   const config = JSON.parse(readFileSync(join(root, 'provenance/leak-gate.json'), 'utf8'));
   config.personalData.hashes.push({ label: 'operator-name-2', sha256: sha256(`${config.personalData.salt}zzfixtureowner`) });
-  config.identityData.hashes.push({ label: 'brand-1', sha256: sha256(`${config.personalData.salt}zzbrand`) });
+  config.identityData.hashes.push({ label: 'brand-1', sha256: identityHash('zzbrand', fixtureSalt) });
   write('provenance/leak-gate.json', JSON.stringify(config));
+  const rules = () => runGate({ root, gitleaks: false, baselinePath: false, identitySalt: fixtureSalt }).findings.map((finding) => `${finding.rule} ${finding.file}`);
   write('provenance/skills-parity.json', JSON.stringify({ entries: [{ name: 'zzbrand-daily-report' }] }));
   write('README.md', 'Badge: https://github.com/zzfixtureowner/hermes-zouroboros/actions\n');
   write('docs/SKILLS-PARITY.md', '| `zzbrand-daily-report` | renamed |\n');

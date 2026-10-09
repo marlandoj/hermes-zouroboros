@@ -1,8 +1,9 @@
 // Shared rules for the leak gate, skill importer and parity check.
 // Findings never carry matched secret or personal-data text; callers print rule IDs and locations.
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync, lstatSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { join, relative, resolve, sep } from 'node:path';
 
 export const repoRoot = resolve(import.meta.dir, '../..');
@@ -33,8 +34,13 @@ export interface LeakGateConfig {
     emailAllowLocalParts: string[];
     phoneRegex: string;
   };
-  /** Source-host persona names and the operator's business brands: salted hashes, same normalization. */
-  identityData?: { hashes: { label: string; sha256: string }[] };
+  /**
+   * Source-host persona names and the operator's business brands: HMAC-SHA256 keyed with a secret
+   * salt (never committed), same normalization. Without the salt these rules skip; see identitySalt().
+   */
+  identityData?: { scheme?: string; hashes: { label: string; sha256: string }[] };
+  /** Runtime only, never stored in the config file: the secret identity salt, if one was found. */
+  identitySalt?: string;
   /** Private, CGNAT/tailnet and tailnet IPv6 address ranges. */
   networkPatterns?: PatternRule[];
   secretPatterns: PatternRule[];
@@ -52,11 +58,35 @@ export function sha256(data: string | Buffer): string {
   return createHash('sha256').update(data).digest('hex');
 }
 
-export function loadConfig(path = defaultConfigPath): LeakGateConfig {
+/** Default location of the local identity salt, outside the repository. */
+export const defaultIdentitySaltPath = () => join(homedir(), '.config/hermes-zouroboros/leak-gate-salt');
+export const IDENTITY_SCHEME = 'hmac-sha256/secret-salt/v1';
+
+/**
+ * The secret identity salt: LEAK_GATE_SALT, else the file named by LEAK_GATE_SALT_FILE, else
+ * ~/.config/hermes-zouroboros/leak-gate-salt. Returns undefined when none exists (forks, fresh
+ * clones). A salt file readable by group or others is refused rather than used.
+ */
+export function identitySalt(env: NodeJS.ProcessEnv = process.env): string | undefined {
+  const fromEnv = env.LEAK_GATE_SALT?.trim();
+  if (fromEnv) return fromEnv;
+  const path = env.LEAK_GATE_SALT_FILE || defaultIdentitySaltPath();
+  if (!existsSync(path)) return undefined;
+  if ((statSync(path).mode & 0o077) !== 0) throw new Error(`identity salt file ${path} must be mode 0600 (chmod 600 it)`);
+  return readFileSync(path, 'utf8').trim() || undefined;
+}
+
+export function loadConfig(path = defaultConfigPath, salt: string | undefined | false = undefined): LeakGateConfig {
   const config = JSON.parse(readFileSync(path, 'utf8')) as LeakGateConfig;
   if (config.schema !== 'hermes-zouroboros/leak-gate/v1') throw new Error(`Unsupported leak-gate config schema in ${path}`);
+  if (config.identityData && config.identityData.scheme !== IDENTITY_SCHEME) throw new Error(`identityData in ${path} must use scheme ${IDENTITY_SCHEME}`);
+  const resolved = salt === false ? undefined : salt ?? identitySalt();
+  if (resolved) config.identitySalt = resolved;
   return config;
 }
+
+/** True when identity rules can run: there are identity hashes and a secret salt to check them with. */
+export const identityRulesActive = (config: LeakGateConfig) => Boolean(config.identitySalt && config.identityData?.hashes.length);
 
 /** Path-only rule: returns the blocking rule ID for a repo-relative path, or undefined. */
 export function blockedPathRule(path: string, config: LeakGateConfig): string | undefined {
@@ -81,10 +111,19 @@ export function tokens(text: string): string[] {
 }
 
 export function personalHashes(text: string, salt: string): string[] {
-  const words = tokens(text);
-  const grams = [...words, ...words.slice(1).map((word, index) => `${words[index]} ${word}`)];
-  return grams.map((gram) => sha256(salt + gram));
+  return grams(text).map((gram) => sha256(salt + gram));
 }
+
+function grams(text: string): string[] {
+  const words = tokens(text);
+  return [...words, ...words.slice(1).map((word, index) => `${words[index]} ${word}`)];
+}
+
+/** Identity hashes: HMAC-SHA256 of each normalized unigram and bigram, keyed with the secret salt. */
+export function identityHashes(text: string, secret: string): string[] {
+  return grams(text).map((gram) => identityHash(gram, secret));
+}
+export const identityHash = (normalizedToken: string, secret: string) => createHmac('sha256', secret).update(normalizedToken).digest('hex');
 
 const emailPattern = /[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)+[A-Za-z]{2,}/g;
 
@@ -104,10 +143,14 @@ export function contextMasks(file: string, config: LeakGateConfig, sourceEntryNa
 /** Content rules for one text file. Each finding records only rule ID and line number. */
 export function scanText(path: string, text: string, config: LeakGateConfig, masks: ContextMask[] = []): Finding[] {
   const findings: Finding[] = [];
-  const denied = new Map([...config.personalData.hashes, ...(config.identityData?.hashes ?? [])].map((entry) => [entry.sha256, entry.label]));
+  const denied = new Map(config.personalData.hashes.map((entry) => [entry.sha256, entry.label]));
+  const identity = identityRulesActive(config) ? new Map(config.identityData!.hashes.map((entry) => [entry.sha256, entry.label])) : undefined;
   const hostRules = config.hostPathPatterns.map((rule) => ({ id: rule.id, regex: new RegExp(rule.regex) }));
   const networkRules = (config.networkPatterns ?? []).map((rule) => ({ id: rule.id, regex: new RegExp(rule.regex) }));
-  const labelsOf = (line: string) => new Set(personalHashes(line, config.personalData.salt).map((hash) => denied.get(hash)).filter((label): label is string => Boolean(label)));
+  const labelsOf = (line: string) => new Set([
+    ...personalHashes(line, config.personalData.salt).map((hash) => denied.get(hash)),
+    ...(identity ? identityHashes(line, config.identitySalt!).map((hash) => identity.get(hash)) : []),
+  ].filter((label): label is string => Boolean(label)));
   const secretRules = config.secretPatterns.map((rule) => ({ id: rule.id, regex: new RegExp(rule.regex) }));
   const phone = new RegExp(config.personalData.phoneRegex);
   const lines = text.split('\n');

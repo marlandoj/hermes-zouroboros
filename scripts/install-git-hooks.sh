@@ -27,3 +27,6 @@ done
 HOOK
 chmod 0755 "$HOOK"
 printf 'Installed %s\n' "$HOOK"
+if [ -z "${LEAK_GATE_SALT:-}" ] && [ ! -f "${LEAK_GATE_SALT_FILE:-$HOME/.config/hermes-zouroboros/leak-gate-salt}" ]; then
+  printf 'Note: no identity salt at ~/.config/hermes-zouroboros/leak-gate-salt; persona-name and brand rules will skip. See docs/skills.md.\n'
+fi

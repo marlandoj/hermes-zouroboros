@@ -82,26 +82,28 @@
     "phoneRegex": "(?<![\\w.+/-])(\\+?1[-. ])?\\(?[2-9]\\d{2}\\)?[-. ][2-9]\\d{2}[-. ]\\d{4}(?![\\w-])"
   },
   "identityData": {
+    "scheme": "hmac-sha256/secret-salt/v1",
+    "note": "HMAC-SHA256(key = secret salt, message = normalized token), same normalization as personalData. The salt is never committed: CI reads the LEAK_GATE_SALT repository secret, local runs read ~/.config/hermes-zouroboros/leak-gate-salt (mode 0600). Without it these rules skip with a notice.",
     "hashes": [
       {
         "label": "persona-name-1",
-        "sha256": "9715a5f8ca797534fc2490f847e09d21b8502388d50b798474e90b943665a2ce"
+        "sha256": "acf684af00ecd7193a0ea3220f2a40582c60acb1eff2b36ffeb6287ae9f74e70"
       },
       {
         "label": "persona-name-2",
-        "sha256": "af9c067594f259586d4a4af8c29e2abb1e1030cad6a3b84ce836f2b59049dfc6"
+        "sha256": "1fda83c807112c3307c4430806fa558b6cb4ef8e58539206aeb1dcf89f0d3c03"
       },
       {
         "label": "brand-1",
-        "sha256": "f004fc531c37e0b62806f4696034c7e744d5e3d073c7c77ccd6abe722aa2b405"
+        "sha256": "b412cbb25c7328a76840abc3f80b19994e0091c59d8a0d6024170035b5af8d86"
       },
       {
         "label": "brand-2",
-        "sha256": "739e9ebc72f5be75fbb70e002a6a618fbcc741d85384038e5cbb930a98c95a23"
+        "sha256": "5b7e9b18728fea45c7df7591b8c120a22f9159ef80b928e4ac61a00da1059287"
       },
       {
         "label": "brand-3",
-        "sha256": "00d51b99bb82ab99f709f4be0eccfd6a2b4738da2caed7aaeb85050c2babbc9a"
+        "sha256": "e0f121bad1e8fadb0924688ab47127c0adef15733b199475df499b318ba5f2ee"
       }
     ]
   },
