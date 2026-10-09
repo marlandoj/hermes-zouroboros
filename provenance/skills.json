@@ -22,6 +22,24 @@
       "adaptation": "Re-authored as an optional, local-only systemd user service with data under the Zouroboros data dir; Zo managed-service/public URL/dev-shm log instructions removed."
     },
     {
+      "path": "skills/devops/repo-drift-autofix/scripts/autofix.ts",
+      "skill": "repo-drift-autofix",
+      "sourcePath": "Skills/repo-drift-autofix/scripts/autofix.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "255fdaf07da315e8d950c0c27536e4b16270f7f68008183e0ce023d773bd4f0c",
+      "distributedSha256": "bdd9dcc9965fecf643cff28a1c82b011758e850d9e8587a64a04c694c1429d24",
+      "adaptation": "--repo defaults to cwd; side-effect-free --help; audit log under REPO_DRIFT_AUTOFIX_LOG / ZOUROBOROS_LOG_DIR instead of a host path; locally installed tsc only (no download); GitHub write kill switch; argument-vector git/gh calls."
+    },
+    {
+      "path": "skills/devops/repo-drift-autofix/SKILL.md",
+      "skill": "repo-drift-autofix",
+      "sourcePath": "Skills/repo-drift-autofix/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "425970129877dfca605101debfa841d3b5dcea29e78d5527e9ed7ca53ea8880b",
+      "distributedSha256": "3d1994181eb55ca6fb7af24369cb0402d03bd702cf58177ce31bec0fd795c9c2",
+      "adaptation": "Hermes frontmatter; ${HERMES_SKILL_DIR} paths; audit log under ZOUROBOROS_LOG_DIR; host notification and scheduler wiring removed; kill switch documented."
+    },
+    {
       "path": "skills/email/agent-email-patterns/LICENSE",
       "skill": null,
       "sourcePath": null,
@@ -931,6 +949,42 @@
       "adaptation": "Hermes frontmatter; host Software Factory supervised-runtime section replaced by guidance for a project-supplied supervised runner."
     },
     {
+      "path": "skills/software-development/plan-closeout/scripts/closeout-verify-hook.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "b0c3dd18226b6bdbd29142dd5b01e59ba1776e0e5567af2d988d596b7fc1e333",
+      "adaptation": "Distribution-authored Hermes pre_verify hook replacing the Claude Code Stop and plan-arm hooks: nudges once per turn when a plan is armed for a touched repository; fails open."
+    },
+    {
+      "path": "skills/software-development/plan-closeout/scripts/closeout.py",
+      "skill": "plan-closeout",
+      "sourcePath": "Skills/plan-closeout/scripts/closeout.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2ea8eefc513421249ba0367e21382a73a7c8e65b02ea5a426cd44cf35559be5d",
+      "distributedSha256": "a57522ab47f9a5675a7bdb0abf45625b95bfaa3f502e01da366c39dcfbab3e3c",
+      "adaptation": "Repository root from git top level or ZOUROBOROS_WORKSPACE (--cwd); PLAN_ACTIVE sentinel per repository under ZOUROBOROS_STATE_DIR; consensus gate optional via --consensus-gate; ponytail-review resolved as a sibling skill (--complexity-review override); --status added."
+    },
+    {
+      "path": "skills/software-development/plan-closeout/scripts/test-closeout.py",
+      "skill": "plan-closeout",
+      "sourcePath": "Skills/plan-closeout/scripts/test-closeout.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c261fff73cd9cd1872793a988392609241c98f7128d814b0c874e0fd7d0480d7",
+      "distributedSha256": "3b34baa06d9c2a5894529e4c7f9e6e8ff68b3270467fd21c9da6a55f1dae471c",
+      "adaptation": "Tests run against temporary repositories and state dirs; cover the pre_verify hook, optional consensus gate and per-repository sentinel instead of the Claude Code hooks."
+    },
+    {
+      "path": "skills/software-development/plan-closeout/SKILL.md",
+      "skill": "plan-closeout",
+      "sourcePath": "Skills/plan-closeout/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e04ec9552ab0a16d10a71e482d4d82e78c9c356838e4f58071a93ce523bffd3b",
+      "distributedSha256": "70c0ff368635888d2f7c0d25c796f489870b9bc8671d8fe1793e9ea42acc924d",
+      "adaptation": "Hermes frontmatter; ${HERMES_SKILL_DIR} paths; consensus phase is an optional external reviewer (--consensus-gate PATH), off by default, because the source consensus-gate is retired; Claude Code Stop/plan-arm hooks replaced by a Hermes pre_verify hook; sentinel state under ZOUROBOROS_STATE_DIR."
+    },
+    {
       "path": "skills/software-development/ponytail-audit/SKILL.md",
       "skill": "ponytail-audit",
       "sourcePath": "Skills/ponytail-audit/SKILL.md",
@@ -985,6 +1039,636 @@
       "adaptation": "Hermes frontmatter (MIT, upstream DietrichGebert/ponytail 4.7.0 kept); mechanized section rewritten: one governed call through the Hermes profile; host plan-closeout/consensus wiring and Zo provider chain removed."
     },
     {
+      "path": "skills/software-development/production-ready/audit.config.json",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/audit.config.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b568ffb30f76c05ea16e77c4b2bf85223aec6b521592f811f2fac53ccd45b94a",
+      "distributedSha256": "b568ffb30f76c05ea16e77c4b2bf85223aec6b521592f811f2fac53ccd45b94a",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/references/ai-failure-modes.md",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/references/ai-failure-modes.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f3f5692bbf09fcd87d59333842f54d90ccfa36b28b769a1079e824712beb0290",
+      "distributedSha256": "f3f5692bbf09fcd87d59333842f54d90ccfa36b28b769a1079e824712beb0290",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/references/audit-config-schema.md",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/references/audit-config-schema.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "086ba45ceda488eb4c30fcee5d1d7523c759d6a3bc6a8496a51f95b0621f4c37",
+      "distributedSha256": "086ba45ceda488eb4c30fcee5d1d7523c759d6a3bc6a8496a51f95b0621f4c37",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/references/compliance.md",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/references/compliance.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "3b5f2fe5cdc48b7539dd74cfe262aead66420013ecbb0389ad9d25cf2b12936f",
+      "distributedSha256": "3b5f2fe5cdc48b7539dd74cfe262aead66420013ecbb0389ad9d25cf2b12936f",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/references/owasp-top-10.md",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/references/owasp-top-10.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "72793f34771bd7b5b644a33f0a86765e82b80d4343a7c8227f0e3c1d17b7a275",
+      "distributedSha256": "72793f34771bd7b5b644a33f0a86765e82b80d4343a7c8227f0e3c1d17b7a275",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/references/production-checklist.md",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/references/production-checklist.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "708f06a82380742a216b0f0276714847becd3868d6f0734491286b617368ff2d",
+      "distributedSha256": "708f06a82380742a216b0f0276714847becd3868d6f0734491286b617368ff2d",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/references/tool-reference.md",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/references/tool-reference.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e7598119fd01540667912a261615efc542e799d641653867aee81f1beb22be90",
+      "distributedSha256": "e7598119fd01540667912a261615efc542e799d641653867aee81f1beb22be90",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/__tests__/audit-calibration.test.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/__tests__/audit-calibration.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c8590c79ce0e62c132c57dcd74976348544cfbc715a570b3355f243fd1317508",
+      "distributedSha256": "c8590c79ce0e62c132c57dcd74976348544cfbc715a570b3355f243fd1317508",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/__tests__/coverage.test.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/__tests__/coverage.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "1ea32d710c25ebd7450effcaa22c7f33aee5deeb24d7d8932b91b44da7e6999a",
+      "distributedSha256": "1ea32d710c25ebd7450effcaa22c7f33aee5deeb24d7d8932b91b44da7e6999a",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/__tests__/fixtures.e2e.test.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/__tests__/fixtures.e2e.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9d633322b5846746b3fdf87231ab0fabbc84b72e83a0db14405de73690c8c4fc",
+      "distributedSha256": "9d633322b5846746b3fdf87231ab0fabbc84b72e83a0db14405de73690c8c4fc",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/__tests__/policy.test.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/__tests__/policy.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "1a258db90966c96759b779d7c7ca8bc4961061409e72e390040fac9358fc954f",
+      "distributedSha256": "1a258db90966c96759b779d7c7ca8bc4961061409e72e390040fac9358fc954f",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/__tests__/verdict.test.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/__tests__/verdict.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4d8b076449541ed4bd302c6ccd6e2ae55e685ab78b11545f00773dd911ab51e3",
+      "distributedSha256": "4d8b076449541ed4bd302c6ccd6e2ae55e685ab78b11545f00773dd911ab51e3",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/audit.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/audit.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9bd8772a407fa1ff0c30ae6b3e7163e7142e621481e32a9cca93c88e568645e5",
+      "distributedSha256": "4d77529f16df91d147477ed648eed7d2cac983139a4d1e49701285a95955d332",
+      "adaptation": "Default --out is a timestamped dir under ZOUROBOROS_STATE_DIR (refuses an --out inside the skill tree); skill root resolved from the script location."
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/01-legal.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/01-legal.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "0479124bac1ed36065de69c5b052cedc003db8c5cc5525b5a8507d57a88303a8",
+      "distributedSha256": "0479124bac1ed36065de69c5b052cedc003db8c5cc5525b5a8507d57a88303a8",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/02-secrets.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/02-secrets.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8ae69ad021af3a5454ff41ee163e66bd723e1a76a0f89aaa46e1125ed1613f86",
+      "distributedSha256": "8ae69ad021af3a5454ff41ee163e66bd723e1a76a0f89aaa46e1125ed1613f86",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/03-authentication.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/03-authentication.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "a2538dbce3efbdbbf4d11e81136a4a11d7b58e6b5a1cc44c6dd7e7d956d4b797",
+      "distributedSha256": "a2538dbce3efbdbbf4d11e81136a4a11d7b58e6b5a1cc44c6dd7e7d956d4b797",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/04-api-safety.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/04-api-safety.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "3b9aa3fb0d330e351bb1bead8e686f33db64a0fa9894ff7ce924470e1d6be477",
+      "distributedSha256": "3b9aa3fb0d330e351bb1bead8e686f33db64a0fa9894ff7ce924470e1d6be477",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/05-owasp.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/05-owasp.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5e979e97bc6a1bdcb1836f58e2dc2361f1c7d6b91dd00ab401b2313cd8b9cdc9",
+      "distributedSha256": "5e979e97bc6a1bdcb1836f58e2dc2361f1c7d6b91dd00ab401b2313cd8b9cdc9",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/06-abuse-rate.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/06-abuse-rate.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2349971fb50b25ee8445ce346985f86ee393e888067203a63fe14949c79b33f0",
+      "distributedSha256": "2349971fb50b25ee8445ce346985f86ee393e888067203a63fe14949c79b33f0",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/07-frontend.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/07-frontend.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c5a4ac04fb0fa6ab66063839604dc7cae2dd6d7eb185eb8e742e7a788384d2a2",
+      "distributedSha256": "c5a4ac04fb0fa6ab66063839604dc7cae2dd6d7eb185eb8e742e7a788384d2a2",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/08-logging.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/08-logging.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "18ad286b6a776a7f3f92782c244cb8ef4ce664d827f17efefc00248782c899f1",
+      "distributedSha256": "18ad286b6a776a7f3f92782c244cb8ef4ce664d827f17efefc00248782c899f1",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/09-accessibility.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/09-accessibility.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ce37d1e47f70a0928b88c206377af91f67c1330c43c6b1a3b1be55939b2a8851",
+      "distributedSha256": "ce37d1e47f70a0928b88c206377af91f67c1330c43c6b1a3b1be55939b2a8851",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/10-performance.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/10-performance.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "0d77f757554d84733f68c292670298072216882d039f37fc6342ec27e3be912b",
+      "distributedSha256": "0d77f757554d84733f68c292670298072216882d039f37fc6342ec27e3be912b",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/11-payments.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/11-payments.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "cc6567ad11c0494df6bc479807ed3fba13adcbe6d9e687d6bc653f87f4f47955",
+      "distributedSha256": "cc6567ad11c0494df6bc479807ed3fba13adcbe6d9e687d6bc653f87f4f47955",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/12-file-uploads.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/12-file-uploads.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8e4e3467403814a32fc9af9dbd01c6e6a6ab10588b1773580618b3650b347e2d",
+      "distributedSha256": "8e4e3467403814a32fc9af9dbd01c6e6a6ab10588b1773580618b3650b347e2d",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/13-database.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/13-database.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6e70b939fe540d15b1fb7f015c58ce729932b52fa33021150c4f3791af125a5b",
+      "distributedSha256": "6e70b939fe540d15b1fb7f015c58ce729932b52fa33021150c4f3791af125a5b",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/14-ai-code.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/14-ai-code.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c52ec1c62794c0116bde38b4cd6d76386c4c7764841eb5c075dcdc3e05531955",
+      "distributedSha256": "c52ec1c62794c0116bde38b4cd6d76386c4c7764841eb5c075dcdc3e05531955",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/15-browser-test.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/15-browser-test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "aeea5114aa30d0e40d0df3cc31ade9e1fc3925190c23484ef3ee808dc3f2f18a",
+      "distributedSha256": "aeea5114aa30d0e40d0df3cc31ade9e1fc3925190c23484ef3ee808dc3f2f18a",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/16-concurrency.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/16-concurrency.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c700f29f602da3f8fba8f15428a925c6a3e9ac7b665b00bb7a9019c8a2d2669f",
+      "distributedSha256": "c700f29f602da3f8fba8f15428a925c6a3e9ac7b665b00bb7a9019c8a2d2669f",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/17-visual-consistency.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/17-visual-consistency.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2c22fec2f561a0fccbbe52a2f1617bdeb52cffb2e790ec6b77b7ca8b18796b1b",
+      "distributedSha256": "2c22fec2f561a0fccbbe52a2f1617bdeb52cffb2e790ec6b77b7ca8b18796b1b",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/checks/18-seo-aeo.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/checks/18-seo-aeo.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "52eae8da1318f3706b7cb556bb8be73266f129e1db9820e82456e1f87b26e67e",
+      "distributedSha256": "ee91b0a3c66d8ac9491ff0b52f02635d8472e848bb6272b8ca43edba1f6b9686",
+      "adaptation": "Host vendor ownership notes made generic; user agent no longer names the source platform."
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/lib/coverage.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/lib/coverage.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "77b640a381305661a0b6fb880a64259c2f5fee2d36adbfea556489d1e713a46e",
+      "distributedSha256": "77b640a381305661a0b6fb880a64259c2f5fee2d36adbfea556489d1e713a46e",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/lib/policy.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/lib/policy.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b171a2d1fba32e1ccab5486e76dabc695ab7db9c50efc86a28a10ae9188be2b2",
+      "distributedSha256": "b171a2d1fba32e1ccab5486e76dabc695ab7db9c50efc86a28a10ae9188be2b2",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/lib/prompts.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/lib/prompts.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "50a27009c0ee047850d92146eba837984ad57e032e4c8da683b9b70371e33e6f",
+      "distributedSha256": "50a27009c0ee047850d92146eba837984ad57e032e4c8da683b9b70371e33e6f",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/lib/report.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/lib/report.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "065e2c32018fc62c7e1d9c8faba0cb346be79b4a2850a7132cb8c7391cd2a567",
+      "distributedSha256": "065e2c32018fc62c7e1d9c8faba0cb346be79b4a2850a7132cb8c7391cd2a567",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/lib/runners.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/lib/runners.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b977dd3d7e01037f6c2104cd07b97d7dfb3182a0906f5b8f2eca025e489f4172",
+      "distributedSha256": "b977dd3d7e01037f6c2104cd07b97d7dfb3182a0906f5b8f2eca025e489f4172",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/lib/triage.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/lib/triage.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "cf1d4da48b72604875dad921667bee4822c41c5a277ca5f24923ed19c3323d7e",
+      "distributedSha256": "bf8caf506118d8419d24a19f22c7c4357a58e39adce48abcd9756e5ade4b4633",
+      "adaptation": "Consensus votes go through the ask-governor skill (Hermes model layer) over PRODUCTION_READY_TRIAGE_MODELS with an injectable transport; no vendor keys or endpoints; fewer than two responses keeps severity."
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/lib/types.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/lib/types.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6e5af8307e6ef5b629fd7b823659afca09e62a4e0c9101dee43d45d7f7223547",
+      "distributedSha256": "6e5af8307e6ef5b629fd7b823659afca09e62a4e0c9101dee43d45d7f7223547",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/lib/verdict.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/lib/verdict.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4f41d8b74c1d8ff16bd48e22f45752dd2b066c51b12e389ab88d88d1f67385c6",
+      "distributedSha256": "4f41d8b74c1d8ff16bd48e22f45752dd2b066c51b12e389ab88d88d1f67385c6",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/prompts.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/prompts.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9001841f34ce5c409fb6341efa4638e822ea0469e993546202a010640ca7ac8e",
+      "distributedSha256": "9001841f34ce5c409fb6341efa4638e822ea0469e993546202a010640ca7ac8e",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/scripts/verdict.ts",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/scripts/verdict.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "44d259460483ee149e8ebfb8c13f21918145d718542a19132e3e5fc88e9cfeb4",
+      "distributedSha256": "44d259460483ee149e8ebfb8c13f21918145d718542a19132e3e5fc88e9cfeb4",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/production-ready/SKILL.md",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "55cb0db59bc0ee4e5f8732afc63e8b36a3419590d601d2e77de33d7b7feb7747",
+      "distributedSha256": "635f24a8016e01a57ae4994edc64830e67bd237f6714630883f1b5fdfb9968ed",
+      "adaptation": "Hermes frontmatter; ${HERMES_SKILL_DIR} paths; outputs default under ZOUROBOROS_STATE_DIR; triage consensus re-pointed from vendor API keys / synthetic.new to governed ask-governor calls over PRODUCTION_READY_TRIAGE_MODELS; CI template path; zo.pub and host references removed."
+    },
+    {
+      "path": "skills/software-development/production-ready/templates/audit.yml",
+      "skill": "production-ready",
+      "sourcePath": "Skills/production-ready/.github/workflows/audit.yml",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7c0acbf1df8954073def04d918036bdc808ad3306cc30b6ebf9678bdb2ed38cb",
+      "distributedSha256": "92b72a80993f6b2e27a6a5dd2ec1bbafcdeb4cd617f28df230cfb7727d3de1f4",
+      "adaptation": "Moved from .github/workflows/audit.yml to templates/ (a skill must not ship an active workflow); vendored-skill AUDIT_DIR, actions pinned to commit SHAs, runs the skill tests, never --consensus."
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/fixtures/lifecycle/adversarial-cases.json",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/fixtures/lifecycle/adversarial-cases.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b5028c51cfaf1d2c6141dcec27b8243747d507f5060ebfd1a97a18385c86b14b",
+      "distributedSha256": "b5028c51cfaf1d2c6141dcec27b8243747d507f5060ebfd1a97a18385c86b14b",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/fixtures/lifecycle/path-cases.json",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/fixtures/lifecycle/path-cases.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5682f73eefa4a928c6e05fa19685b7964d7b436b7c40791cd6a0cccfa4162f10",
+      "distributedSha256": "5682f73eefa4a928c6e05fa19685b7964d7b436b7c40791cd6a0cccfa4162f10",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/mcp-policy.json",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/mcp-policy.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "20b7f0ba6f554913f273f59c57936b57b3bd31af486b0df1388607a3f9308462",
+      "distributedSha256": "055617818d9d0656bf0d5183d7a398a5d120403967b6c1b8f5c1093ddaa94c0c",
+      "adaptation": "Host MCP server decisions removed; ships an empty default policy with illustrative _examples; operator decisions live in ZOUROBOROS_CONFIG_DIR."
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/adoption-hook.test.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "c0baef09340d4560d58b7422084d0885326ec5a824308154b9133f0fc3e533e1",
+      "adaptation": "Distribution-authored tests for the adoption hook (classification, blocking, modes, fail-open)."
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/adoption-hook.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "4ec3876f0441a56c4980fd005a4b314b885706f98178f0c0343644e7f53f2d2f",
+      "adaptation": "Distribution-authored optional Hermes pre_tool_call hook (terminal) that gates skill adoption into a skills directory outside hermes skills install; offline deterministic checks; off by default; fails open."
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/gate.sh",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/gate.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ebb6392565465fc6c667a7adda113f64a9c2344b490a298020e2490da42ce1b3",
+      "distributedSha256": "ff89abf3c9c6864f71df024d96f0137ec5c5b7a03f5c10175469404ad5a3fbad",
+      "adaptation": "No hardcoded tool bin or workspace paths: --skills [DIR] defaults to the checkout skills/, --hermes-skills scans $HERMES_HOME/skills; reports under SKILL_SECURITY_GATE_SCAN_DIR / ZOUROBOROS_STATE_DIR; install guidance without host paths; --help."
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/lifecycle/canonical.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/lifecycle/canonical.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7e05df62c94b40e283e6dd1f1488bf478a95863a317d9e65adaf4f116bd90d8f",
+      "distributedSha256": "7e05df62c94b40e283e6dd1f1488bf478a95863a317d9e65adaf4f116bd90d8f",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/lifecycle/gate.test.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/lifecycle/gate.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d2f7e08d867f3a884db78b4f12b50132c9a45bef15d333b76459d06c40d9d4db",
+      "distributedSha256": "d2f7e08d867f3a884db78b4f12b50132c9a45bef15d333b76459d06c40d9d4db",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/lifecycle/gate.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/lifecycle/gate.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d92a7336e8657986f5e723f019357b21a1427f7fe568aafcb34037c20cc7c8e3",
+      "distributedSha256": "d92a7336e8657986f5e723f019357b21a1427f7fe568aafcb34037c20cc7c8e3",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/lifecycle/types.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/lifecycle/types.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9fcdc3a9aea85cf110a8d793c3e24da146e1636d33b5499b5bc4eb379cce6b66",
+      "distributedSha256": "9fcdc3a9aea85cf110a8d793c3e24da146e1636d33b5499b5bc4eb379cce6b66",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/action-pin-audit.test.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/action-pin-audit.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "37c8396eed33a7328bce5ffeeef1410a091771e317760df034d1e9dea6ef0a00",
+      "distributedSha256": "37c8396eed33a7328bce5ffeeef1410a091771e317760df034d1e9dea6ef0a00",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/action-pin-audit.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/action-pin-audit.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6a07be2613b54fd16ca0f86064090bd3edc9a55e83190859991911f725224236",
+      "distributedSha256": "6a07be2613b54fd16ca0f86064090bd3edc9a55e83190859991911f725224236",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/attestation.test.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/attestation.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e2089ef1884a2b2c13dd628916a509474e97282f7a4431efef469433279b1dee",
+      "distributedSha256": "e2089ef1884a2b2c13dd628916a509474e97282f7a4431efef469433279b1dee",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/attestation.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/attestation.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e4edc9808893b09dfe0a665fa7ea89da18e0f6c57fe5acf99b96798e7a467244",
+      "distributedSha256": "e4edc9808893b09dfe0a665fa7ea89da18e0f6c57fe5acf99b96798e7a467244",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/gate.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/gate.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "87fa2ad3d9fbe83c57aead7e501c2a86259789a3f3a17cb5862e4d971a44cdbb",
+      "distributedSha256": "e514d5193288b7f4d7e49efa62a001dd1d2381bd6392a61c942141f43e8e2ad7",
+      "adaptation": "Scan root from --root / SUPPLY_CHAIN_ROOT / git top level / ZOUROBOROS_WORKSPACE (exit 2 otherwise, no host default); policy from ZOUROBOROS_CONFIG_DIR or the shipped default; reports under ZOUROBOROS_STATE_DIR; --hermes-config inventories mcp_servers from the Hermes config.yaml; --help."
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/mcp-inject-scan.test.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/mcp-inject-scan.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "86324ed1bf7cdad9086a8932f2d1d2ba8df08eee86451abc7cb3126367724c06",
+      "distributedSha256": "86324ed1bf7cdad9086a8932f2d1d2ba8df08eee86451abc7cb3126367724c06",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/mcp-inject-scan.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/mcp-inject-scan.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "1b807b0a9d99bd7c07d6fa6fb0faf85c74ae192f853d5456435b44c05d835cd8",
+      "distributedSha256": "1b807b0a9d99bd7c07d6fa6fb0faf85c74ae192f853d5456435b44c05d835cd8",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/mcp-inventory.test.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/mcp-inventory.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "e8739db390a8be316a87983bc39d4fede4858a06e6fae5f14cf5a7d3b1b54ab1",
+      "distributedSha256": "f9921f98fabb1008cf8d4e387c04f3526835a3fd23f5b78d38775ec1934bf04b",
+      "adaptation": "Host paths in fixtures replaced by neutral example paths."
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/mcp-inventory.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/mcp-inventory.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5d96e6aed9d7687578c6d457c1ee7082308f97bd040b207138d56e0aa2646e28",
+      "distributedSha256": "5d96e6aed9d7687578c6d457c1ee7082308f97bd040b207138d56e0aa2646e28",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/report.test.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/report.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "60247eaa5adbf835ee4b8f2e41abbee97ef49acf1333a635348fea7c5dd85cb6",
+      "distributedSha256": "60247eaa5adbf835ee4b8f2e41abbee97ef49acf1333a635348fea7c5dd85cb6",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/report.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/report.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b12beb6d91ef868133ccd90856468cc8fd5148a514fa0cfde116d55a4cad1609",
+      "distributedSha256": "b12beb6d91ef868133ccd90856468cc8fd5148a514fa0cfde116d55a4cad1609",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/scripts/supply-chain/types.ts",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/scripts/supply-chain/types.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c30bc9ce97ddcda8b351538fda03c5a5af4fc2b51f69dba6e8e356a3bc2e8f67",
+      "distributedSha256": "c30bc9ce97ddcda8b351538fda03c5a5af4fc2b51f69dba6e8e356a3bc2e8f67",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/skill-security-gate/SKILL.md",
+      "skill": "skill-security-gate",
+      "sourcePath": "Skills/skill-security-gate/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "fddfbbabd47f4a32ada31630194319236e31aba57f5ed1865bf6f34679caeb0c",
+      "distributedSha256": "dff454b39bee75b3012e60e44ecc64eceaeae34a3cf7070129d62902db327ea5",
+      "adaptation": "Hermes frontmatter; skill-relative paths; SkillSpector documented as an operator-installed external tool (not vendored); reports under ZOUROBOROS_STATE_DIR; operator MCP policy under ZOUROBOROS_CONFIG_DIR; Hermes skills dir baseline; optional pre_tool_call adoption hook; host server names and paths removed."
+    },
+    {
+      "path": "skills/software-development/spec-first-interview/references/ontologist.md",
+      "skill": "spec-first-interview",
+      "sourcePath": "Skills/spec-first-interview/references/ontologist.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5627b11cfdf423de3e7c2c228bb1b2af21aa7ecb6571a920d9437257144ecb72",
+      "distributedSha256": "5627b11cfdf423de3e7c2c228bb1b2af21aa7ecb6571a920d9437257144ecb72",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/spec-first-interview/references/seed-architect.md",
+      "skill": "spec-first-interview",
+      "sourcePath": "Skills/spec-first-interview/references/seed-architect.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2733665ebca127ff805b9f5448fee27669360b91a44f897e75089ef352351bba",
+      "distributedSha256": "2733665ebca127ff805b9f5448fee27669360b91a44f897e75089ef352351bba",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/spec-first-interview/references/socratic-interviewer.md",
+      "skill": "spec-first-interview",
+      "sourcePath": "Skills/spec-first-interview/references/socratic-interviewer.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d0ca7397cde5755c6bb89d6d585623ba2ebabf00f0666dce7d5ef178239661c2",
+      "distributedSha256": "d0ca7397cde5755c6bb89d6d585623ba2ebabf00f0666dce7d5ef178239661c2",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/software-development/spec-first-interview/SKILL.md",
+      "skill": "spec-first-interview",
+      "sourcePath": "Skills/spec-first-interview/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "991fdfc1ef0ff4794f200f77335f753f77c0cfc1ffdd0926cc0321fcaeb01730",
+      "distributedSha256": "555c77637f0465f7a3616d6268c3498a450ffd7760abd42bce8294f974a76ed8",
+      "adaptation": "Hermes frontmatter with Q00/ouroboros attribution; Quick Start for a non-existent interview.ts replaced by instruction-driven usage; /dev/shm sentinel guidance replaced by ZOUROBOROS_STATE_DIR; Zo workflow integrations replaced by distribution skills; dated host origin note made generic."
+    },
+    {
       "path": "skills/software-development/three-stage-eval/references/evaluator.md",
       "skill": "three-stage-eval",
       "sourcePath": "Skills/three-stage-eval/references/evaluator.md",
@@ -1010,6 +1694,150 @@
       "sourceSha256": "e4af2dcaaccbfbd88109be0a0ae3aca232a691acc852bb9164faea2afdd0c96d",
       "distributedSha256": "637b6aec3a34d98d5964a54fe4c6373c58461435be822aa6de062d56cf127af3",
       "adaptation": "Hermes frontmatter (Q00/ouroboros MIT origin kept) replaces Zo fields; Quick Start for the never-tracked scripts/evaluate.ts replaced by an agent-run procedure; zo.space checks generalised to web routes; /zo/ask consensus replaced by Hermes delegate_task or separate model invocations; references to unshipped ontologist.md/unstuck-lateral replaced by inline guidance."
+    },
+    {
+      "path": "skills/software-development/verity/scripts/adapter.mjs",
+      "skill": "verity",
+      "sourcePath": "Skills/verity/scripts/adapter.mjs",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "3c986372259468bfb0fda7fc8732341bfaec74746851384051e687f2261a0f77",
+      "distributedSha256": "855a12dcd5baaea095a5f63d86cedf05420a04261e4e4100b91c0a1af596757a",
+      "adaptation": "Adds the Hermes shell-hook protocol (events in, pre_tool_call/pre_verify decisions out) beside Kimi and Gemini."
+    },
+    {
+      "path": "skills/software-development/verity/scripts/install.sh",
+      "skill": "verity",
+      "sourcePath": "Skills/verity/scripts/install.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f4ec683ec0215e5b1b9edb310f248951390cb69996bd08e9ac049c6d61b279bf",
+      "distributedSha256": "72ed99c81018c9fb674d9945af708b0dc58c4538105489c5c17deef64c12053f",
+      "adaptation": "Default harness hermes (prints a config.yaml hooks snippet only); Canny cloned under ZOUROBOROS_DATA_DIR at the pin; backups under VERITY_HOME; host-only canny-shadow migration removed."
+    },
+    {
+      "path": "skills/software-development/verity/scripts/report.sh",
+      "skill": "verity",
+      "sourcePath": "Skills/verity/scripts/report.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "94e1d66070bfdbd0564627d97e2b8681d512545fa4acdb397d5d289021f091b4",
+      "distributedSha256": "9f6600f80db27a2f7995f8f4747573ee3049fb5aa9fe26347fff2350d884c3f3",
+      "adaptation": "VERITY_HOME defaults to ZOUROBOROS_STATE_DIR/verity."
+    },
+    {
+      "path": "skills/software-development/verity/scripts/verity-hook.sh",
+      "skill": "verity",
+      "sourcePath": "Skills/verity/scripts/verity-hook.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c2aad81677f308bde26c1b9184b1eb57008e8e8a714f7170cca2c56de90ec553",
+      "distributedSha256": "d769feca7912544bc64496f6c2629db42707b45d27052de450b2597f51e69eba",
+      "adaptation": "Canny and VERITY_HOME paths from the profile data/state dirs instead of host paths; hermes harness and pre_verify fail-closed shape; adoption-date notes made generic."
+    },
+    {
+      "path": "skills/software-development/verity/scripts/verity.sh",
+      "skill": "verity",
+      "sourcePath": "Skills/verity/scripts/verity.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7ac37c21e97fa608f413d4bb96f2c3b6e8e767e4d18ed7fe7b5cd629819dbb7f",
+      "distributedSha256": "094571ff13489803c043f19a32fc750ba5e9c8505a6929175f1d57e622f725a0",
+      "adaptation": "hermes harness added; VERITY_HOME defaults to ZOUROBOROS_STATE_DIR/verity."
+    },
+    {
+      "path": "skills/software-development/verity/SKILL.md",
+      "skill": "verity",
+      "sourcePath": "Skills/verity/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6b19abb2b17f4c832620fd9273edd975a9d05f0a11f8c649280175dfab86b755",
+      "distributedSha256": "f64f93fa246ad1b87b70f306675187502e06343ac498983dc66d2d7b0a67760f",
+      "adaptation": "Rewritten for the distribution: Hermes frontmatter; install.sh prints a Hermes hooks snippet (never writes a profile); state under ZOUROBOROS_STATE_DIR; host wiring table, private repo, backups and tracking ids removed; Canny (MIT) credit kept."
+    },
+    {
+      "path": "skills/software-development/verity/test/run.sh",
+      "skill": "verity",
+      "sourcePath": "Skills/verity/test/run.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f028ac9f694fa82ca80233dc3df6176909b16d170a098e9b9bc01448084e2e86",
+      "distributedSha256": "de72e81a47e61143dc388a85f7d55bd3fcd1600712e0d16a4d0b63a2fa281cb4",
+      "adaptation": "Hermetic: unsets profile env and uses a temporary HOME; adds Hermes adapter and installer checks."
+    },
+    {
+      "path": "skills/software-development/visual-verifier/references/post-flight-wiring.md",
+      "skill": "visual-verifier",
+      "sourcePath": "Skills/visual-verifier/references/post-flight-wiring.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "79e181b2878d94ecfb1db218030905a13b0ac58c7ab0f7b6f105d423a013fb07",
+      "distributedSha256": "005bc77deb8be4f1a45a8ab3caa229269c0920621cb8dd2a98bfbf0a3438fb80",
+      "adaptation": "zo.space and internal ticket references removed."
+    },
+    {
+      "path": "skills/software-development/visual-verifier/scripts/capture.ts",
+      "skill": "visual-verifier",
+      "sourcePath": "Skills/visual-verifier/scripts/capture.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4af87bf3095fe4e43b9517f96c844a539e37cdecb3fcfc1fe1369c9d9d34d812",
+      "distributedSha256": "d608e1d74882c58fd6db5372cf5f684516a172366f1626e4a3128a4d506927c4",
+      "adaptation": "Internal ticket ids removed; output path and hydrate wait configurable; --help."
+    },
+    {
+      "path": "skills/software-development/visual-verifier/scripts/independence.test.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "d8a46687c3c79656a37da93f695a5201b36c45f34e67f68d3300b63109309106",
+      "adaptation": "Distribution-authored tests: author exclusion, refusal, disabled station and missing-key failure (offline)."
+    },
+    {
+      "path": "skills/software-development/visual-verifier/scripts/independence.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "7f8a6a95e006e1ed51881730a31aa3ebf2959d4fc2057509a01cc6dffddf9753",
+      "adaptation": "Distribution-authored minimal re-implementation of the verifier-is-not-author check from the retired consensus gate."
+    },
+    {
+      "path": "skills/software-development/visual-verifier/scripts/station.ts",
+      "skill": "visual-verifier",
+      "sourcePath": "Skills/visual-verifier/scripts/station.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9f3e0b092d6bde90ed698be929f8f591225b0a7a6220c5a3cebb013cff7ef832",
+      "distributedSha256": "eb524b2ea980bba867ada3b5112ecbf602d151b91b99c09c236e9a217fe4c87f",
+      "adaptation": "Internal ticket ids removed; artifacts under ZOUROBOROS_STATE_DIR; VISUAL_VERIFIER=0 kill switch; --help."
+    },
+    {
+      "path": "skills/software-development/visual-verifier/scripts/verify.ts",
+      "skill": "visual-verifier",
+      "sourcePath": "Skills/visual-verifier/scripts/verify.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "ef189e1fac8305d53b3c0437ace35e7d38797792e3a1a9401f8510c5a0f56fd6",
+      "distributedSha256": "8f19ea2c8f8b2e18125c243b55c79c7f947d51d229beca024d66fe02b9dbba76",
+      "adaptation": "Imports the local independence.ts instead of the retired consensus gate library; key/base URL/model from VISUAL_VERIFIER_* or OPENAI_* env only; panel and fallback models configurable; --help."
+    },
+    {
+      "path": "skills/software-development/visual-verifier/SKILL.md",
+      "skill": "visual-verifier",
+      "sourcePath": "Skills/visual-verifier/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "db65f6b3159a75cccba1f7f9fd13e5f9888db77c6d79aa02d967f79c0fd55ee2",
+      "distributedSha256": "982f62aa33f6285ccecb2da9790bfbdc76b524083f8410b44d82b5c51aebce18",
+      "adaptation": "Hermes frontmatter; ${HERMES_SKILL_DIR} paths; vision call via an OpenAI-compatible endpoint from the profile environment (no key files); author exclusion via local independence.ts (consensus gate retired); artifacts under ZOUROBOROS_STATE_DIR; Hermes browser fallback."
+    },
+    {
+      "path": "skills/software-development/workspace-search/scripts/workspace-search.ts",
+      "skill": "workspace-search",
+      "sourcePath": "Skills/workspace-search/scripts/workspace-search.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "7511e6cb30380ddc86427e354f6c343d364a59d6fb79df0ec24b5fabcabbc0da",
+      "distributedSha256": "fc2abd5ac696bd6847ed93654d8e1ca57d99202585a1537836967da333ad1b65",
+      "adaptation": "Hardcoded workspace root, .ignore and /dev/shm log replaced by a configurable allowed root (realpath containment) and a log under ZOUROBOROS_LOG_DIR (--log-file / --no-log); process-group helper typed as ChildProcess so tsc --noEmit passes."
+    },
+    {
+      "path": "skills/software-development/workspace-search/SKILL.md",
+      "skill": "workspace-search",
+      "sourcePath": "Skills/workspace-search/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "400136e3917fe9a923f4e3057fbe297fb6a70fe2963d73ac547c26264cc22cc1",
+      "distributedSha256": "35a7550fbd829869e900da8d3def755b93329a02e0e53760ced62fe0bf3e86e4",
+      "adaptation": "Hermes frontmatter; configurable allowed root (--allowed-root / WORKSPACE_SEARCH_ROOT / ZOUROBOROS_WORKSPACE, refuses to run without one); telemetry under ZOUROBOROS_LOG_DIR."
     },
     {
       "path": "skills/zouroboros/agent-doctor/assets/model-tiers.example.json",
@@ -1489,6 +2317,51 @@
       "adaptation": "Rewritten for Hermes: portable defaults (profile data/state/config), Hermes cron delivery instead of a Zo email agent, Modal summarizer removed, host paths removed; documents the fail-closed missing-ledger case."
     },
     {
+      "path": "skills/zouroboros/persona-consult/assets/persona-associations.example.json",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "c5442da03522d4b6e7434f48c03e4337140dca773e6ad00cb61c3ac54c406540",
+      "adaptation": "Distribution-authored example registry with generic template references and specialist roles (no host personas or ids)."
+    },
+    {
+      "path": "skills/zouroboros/persona-consult/scripts/persona-consult.test.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "73574ef6361681b138ab8685399e066f0576ec43335406f5468a2a4b1f7611b4",
+      "adaptation": "Distribution-authored offline tests: registry, capability opt-in, personality directory, reviewer pool, injected invoker and CLI shadow mode."
+    },
+    {
+      "path": "skills/zouroboros/persona-consult/scripts/persona-consult.ts",
+      "skill": "persona-consult",
+      "sourcePath": "Skills/persona-consult/scripts/persona-consult.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "33969fa75c1f61a8ee60899d787b3309e455539e4eb43f9a64410b5a88cf0207",
+      "distributedSha256": "02feb3cdde37dab0a3472a98f28adfe74ec576a557ff6db5f689de06f896d697",
+      "adaptation": "Imports the distribution packages/swarm specialist-consult and the local registry.ts instead of the host software-template-library; injects the Hermes personality directory and invoker; reviewer pool from flags or PERSONA_CONSULT_REVIEWER_MODELS; --registry and --list-templates."
+    },
+    {
+      "path": "skills/zouroboros/persona-consult/scripts/registry.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "5ec3d9b702e2cc1895c7d809f9996832d2d1017c22e72718e44a711f960a00d4",
+      "adaptation": "Distribution-authored generic association registry loader/resolver, Hermes agent.personalities directory (native-persona-directory/v1) and invoker over integration/ask.ts."
+    },
+    {
+      "path": "skills/zouroboros/persona-consult/SKILL.md",
+      "skill": "persona-consult",
+      "sourcePath": "Skills/persona-consult/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "6a6c313060a666c4f7dc5cbed8994dc73e77036cbb7d0ae760ea209c8fdf7dc4",
+      "distributedSha256": "a7c19b98243d92a86852e8e32160816942d91c9c9101924f9911c236c160912e",
+      "adaptation": "Re-authored: generic association registry (bundled example, PERSONA_CONSULT_REGISTRY or ZOUROBOROS_CONFIG_DIR) and Hermes agent.personalities as specialist personas; model calls via integration/ask.ts; no compiled BYOK reviewer pool."
+    },
+    {
       "path": "skills/zouroboros/persona-creator/scripts/persona.ts",
       "skill": null,
       "sourcePath": null,
@@ -1523,6 +2396,33 @@
       "sourceSha256": "c09e12d2b76f97cfbb3f29019dc1ee08516000ef03b64ff746600fa488e5d3c8",
       "distributedSha256": "a426ddba7e6d30182d0d0c2695984d9f577ee2ecfba54e777fdcb4335102caa4",
       "adaptation": "Moved from assets/; Zo create_rule reference replaced with a platform-neutral comment."
+    },
+    {
+      "path": "skills/zouroboros/rag-telemetry/scripts/telemetry.test.ts",
+      "skill": "rag-telemetry",
+      "sourcePath": "Skills/rag-telemetry/scripts/telemetry.test.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "b32164fedb8e996955cd2c40149c872c28e18cbfcddd5f9d2e0ee66d4deadae3",
+      "distributedSha256": "286ddb0c97d97cdcbe849aaabef0ec9c7db9d040217eac84f1acd098cbb8da19",
+      "adaptation": "Covers the portable default sink resolution."
+    },
+    {
+      "path": "skills/zouroboros/rag-telemetry/scripts/telemetry.ts",
+      "skill": "rag-telemetry",
+      "sourcePath": "Skills/rag-telemetry/scripts/telemetry.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4f7e9dc5fea787145185899dc4d625c0334f8fc0cb8feda637bbcf4de3319662",
+      "distributedSha256": "9e6129de326946186ccec742b1aeb74032422550eb9e35087adb94360cd49b69",
+      "adaptation": "Default sink RAG_TELEMETRY_PATH, else ZOUROBOROS_LOG_DIR/rag-telemetry.jsonl, else the profile logs dir (was /dev/shm)."
+    },
+    {
+      "path": "skills/zouroboros/rag-telemetry/SKILL.md",
+      "skill": "rag-telemetry",
+      "sourcePath": "Skills/rag-telemetry/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "57706c0caa57f5ef503941796f9b3f2084079bad88a54c401a6b78cba88faf51",
+      "distributedSha256": "c79a056acbb7de284eae3cdaafaa3e703bd64274f51bb2544a52d0e7d94bc168",
+      "adaptation": "Hermes frontmatter; documented as a library; sink under ZOUROBOROS_LOG_DIR instead of /dev/shm."
     },
     {
       "path": "skills/zouroboros/tier-resolver/assets/models.default.json",
@@ -1649,6 +2549,231 @@
       "sourceSha256": "2d7f021d4d899644d3af0a8c4ba845d6bc0cf534907b940453d81de0fb28e7e6",
       "distributedSha256": "cd3c8023f28aadefdaef74c0b95d7540a3ce409ccb9fb9217d09ddc8f587cad1",
       "adaptation": "From the zouroboros umbrella entry (skills/workflow/scripts/unstuck-lateral). Hermes frontmatter (name, version, MIT licence from Q00/ouroboros, metadata.hermes, origin); Zo persona switching and IDENTITY/ files replaced by adopting references/*.md via skill_view or a delegate_task subagent; added a Limits section (no bypass of security, governance or operator approval)."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/docs/validation.md",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/docs/validation.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c4810af957d2caa6058d3b96927869499f8aa8b308461e52e140638a99b9ad34",
+      "distributedSha256": "88e1407176fc519d98f73d9b448941292402de2221dbb29aac05309580a6bde0",
+      "adaptation": "Host harness session evidence removed; keeps the reproducible mechanical checks."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/docs/workflows.md",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/docs/workflows.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "83a0b14ecaf011ffe9f069122749c2cb3906505b7ac4b88010714c1c42fbab92",
+      "distributedSha256": "83a0b14ecaf011ffe9f069122749c2cb3906505b7ac4b88010714c1c42fbab92",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/engine/adapters.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/engine/adapters.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d5882ecc9d12df4ad12d156240afa7c86995f245973d7b69ba77c88debedc92d",
+      "distributedSha256": "d5882ecc9d12df4ad12d156240afa7c86995f245973d7b69ba77c88debedc92d",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/engine/catalog.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/engine/catalog.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "9868ee3efe7e33c446439be6efe0d7f5b3e1229a73f240890caf4869c4ea36be",
+      "distributedSha256": "c2161cfa7247eac059a7d2ad4783db2aecdf13ede3d9a7ac100bfbf05984fa04",
+      "adaptation": "Default catalog root is the checkout skills/ tree (or ~/.agents/skills); WAYFINDER_SKILLS_ROOTS overrides."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/engine/dag.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/engine/dag.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "03f3725747d95719d5b5078bdfef11d652eb2e1fb496590f6bbad79c8534eba6",
+      "distributedSha256": "03f3725747d95719d5b5078bdfef11d652eb2e1fb496590f6bbad79c8534eba6",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/engine/local_rank.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/engine/local_rank.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "090f3b6c8374ab57aad7f739b7358ab90440ebf4308156609ef3111f695b7d09",
+      "distributedSha256": "d6fd2cb179828d33cbea5884260932914593f1677e59d85e71576f682c9cb0cf",
+      "adaptation": "Host-only jev-skill-advisor coupling and dated notes removed; ranking unchanged."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/engine/run.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/engine/run.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "dbefa8e4870c9065f4a3a6e0d6e99aac5498324aa66bbdbdd6802d521b9e5082",
+      "distributedSha256": "73722999c825c72adeedb9d0054627dc4d2d48149192d0191a64799377bc8c69",
+      "adaptation": "State dir WAYFINDER_HOME, else ZOUROBOROS_STATE_DIR/wayfinder, else ~/.wayfinder."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/plugins/hermes/wayfinder/__init__.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/plugins/hermes/wayfinder/__init__.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "94f53cfc8c292952a1463a44a32f5eeaae8899401dedc997e0abeee185bad538",
+      "distributedSha256": "94f53cfc8c292952a1463a44a32f5eeaae8899401dedc997e0abeee185bad538",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/plugins/hermes/wayfinder/plugin.yaml",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/plugins/hermes/wayfinder/plugin.yaml",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "4f4317363f8d8fe13a2e4ce4f29a8c34ce7922fedf64970a0e84659962cc0a97",
+      "distributedSha256": "c73ef513ca6898546b00a2a14a9e92c33116b5cb954f12107c5951aa2dd1a89f",
+      "adaptation": "Author set to the project instead of a person."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/plugins/opencode/wayfinder.js",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/plugins/opencode/wayfinder.js",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "da436848d8dc43706507bf0348b112d7e4468231bd1a122fcf6e05e70741532d",
+      "distributedSha256": "da436848d8dc43706507bf0348b112d7e4468231bd1a122fcf6e05e70741532d",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/plugins/pi/wayfinder.ts",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/plugins/pi/wayfinder.ts",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "3e22d0d1d00beddc5d15798e46deaf38a117092ea9ef7e2b00c52930c4552db1",
+      "distributedSha256": "3e22d0d1d00beddc5d15798e46deaf38a117092ea9ef7e2b00c52930c4552db1",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/README.md",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/README.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "afdbb5b27572b25057327f463948275cdcef51963a85371d77e69daf75ebfa3c",
+      "distributedSha256": "b51393fa400e50e294718370d8b30be5b25050a951ab1fc03822dfa84bb5535a",
+      "adaptation": "Rewritten for the distribution: Hermes first-class path, explicit-profile installer, state under ZOUROBOROS_STATE_DIR; host harness evidence and image asset removed."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/requirements.txt",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/requirements.txt",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "917e5ab9db09742fc03eb741bef6d8289c3d73868aff5c2fb45e62f4f1332fef",
+      "distributedSha256": "917e5ab9db09742fc03eb741bef6d8289c3d73868aff5c2fb45e62f4f1332fef",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/scripts/hermes_enable.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/scripts/hermes_enable.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "f1d65b0033d006327938f3b14325a4a108043ca72c45ccd943f2d4c17eb70eda",
+      "distributedSha256": "2a0fdc8d86f133b24fe225451cc7afd56f740c4d6eea990a3b45fdef46eb1efc",
+      "adaptation": "No default profile: the target Hermes profile is always named by the caller; prints, never writes."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/scripts/install.sh",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/scripts/install.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "5aefbc49d34cc289ff2fc3a1fdd6e4592fbe9846d2f5c61e608aa6f58010cf20",
+      "distributedSha256": "b758110030c58480351f4c51ea7117fb2f9719717ef8c5729591ac84998bcfc6",
+      "adaptation": "Hermes default harness; --hermes-home / --zouroboros-profile required to touch a profile; backups; host-only jev-skill-advisor migration removed."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/scripts/setup_model.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/scripts/setup_model.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "fafe9c4a51fe2d583cf444af3aab14e93968dee9ad924eb4f3554d20597a50b0",
+      "distributedSha256": "26ae21cfa180e5bbd26945a2f6644b858b8509a8e5cc47b4f540988baf83b53b",
+      "adaptation": "Model cache FLASHRANK_CACHE_DIR, else ZOUROBOROS_CACHE_DIR/wayfinder, else ~/.cache/wayfinder."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/scripts/shadow-report.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/scripts/shadow-report.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "2af8ff1a400392d3223e0bf9eda641158c8a4b66c7c72939c24e4ebe6f0da35f",
+      "distributedSha256": "4b87c30fdbc878753fc472232d83f9a42b09c846085c1116338ad64d729c601a",
+      "adaptation": "Cases name skills shipped in the distribution; catalog from the engine roots."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/scripts/wayfinder-hook.sh",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/scripts/wayfinder-hook.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "c1664c03da07b5633b9fab814daec6ebf06eae00e4aee81be528febf93d79154",
+      "distributedSha256": "c64fad1d31cf2fc75df0d69bf47b58fc4aacb096d921d669690d9e99ad1fbf0d",
+      "adaptation": "State dir from ZOUROBOROS_STATE_DIR; --help."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/scripts/wayfinder.sh",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/scripts/wayfinder.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "144f22ba97b43f4e832044f7bf03b85afe54a9aec5e02884cbedcd4bb6d7cafd",
+      "distributedSha256": "b34fc4cda186ecbd6dbd7de7c6d27cd9c12ec5a27af9dcb4f1317fd8b287597b",
+      "adaptation": "State dir from ZOUROBOROS_STATE_DIR; where command; wording made host-neutral."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/SKILL.md",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/SKILL.md",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "70d09a5d69f0c6432b8a239af8001a3ee8dc10ddc3e02cad4fc048d190c5bf31",
+      "distributedSha256": "c91f2fcd7e43dd31d96bd6c91243e4f9f9dc8bd00bcabd539be3e74d79c0b5e0",
+      "adaptation": "Hermes frontmatter; Hermes plugin install into an explicitly named profile; ${HERMES_SKILL_DIR} paths; host-only jev-skill-advisor references removed."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/test/dag.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/test/dag.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "8aab9af02b62dfb26381b7680b30084dc21f5ef438d5b77f9c0eb1dae62db6b2",
+      "distributedSha256": "8aab9af02b62dfb26381b7680b30084dc21f5ef438d5b77f9c0eb1dae62db6b2",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/test/regression.py",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/test/regression.py",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "a84307698a4ce87abd1d62434add8df3ccf5fa242305a7267a94c0685791d1b1",
+      "distributedSha256": "bbf6e8f6bcaa217780e8a11f3e27cdea600597f3b27c5ba9c6b67033f1872454",
+      "adaptation": "No bytecode or writes in the skill tree; flashrank-dependent checks skipped when absent."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/test/run.sh",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/test/run.sh",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "38ad76a01055e3b09044a22e65911be07a4818778ec99f99178b5341ed91059e",
+      "distributedSha256": "1238052020c1b89bf8ad44a67731184f5efffbee3f326b3d9c5da7d4603d7799",
+      "adaptation": "Throwaway HOME, never writes in the skill tree; real-engine checks only with an already cached model."
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/workflows/adoption.dag.json",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/workflows/adoption.dag.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "93d51c03de6d0ffc795a52a7235b6d4abcd6df8dff2756a5a22c9040de126bcc",
+      "distributedSha256": "93d51c03de6d0ffc795a52a7235b6d4abcd6df8dff2756a5a22c9040de126bcc",
+      "adaptation": "verbatim"
+    },
+    {
+      "path": "skills/zouroboros/wayfinder/workflows/routing.dag.json",
+      "skill": "wayfinder",
+      "sourcePath": "Skills/wayfinder/workflows/routing.dag.json",
+      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
+      "sourceSha256": "d03f2211e30a60e6d633f52f4ca6427be0b1e50cccf730838c345dd4bd9e5295",
+      "distributedSha256": "a0137146e9e610a528e90860a120f018bf06516751095453fd2ffd247754b388",
+      "adaptation": "Steps point at the distribution tier-resolver skill and packages/swarm swarm-decision-gate instead of host scripts."
     },
     {
       "path": "skills/zouroboros/zo-memory-system/scripts/zmem.ts",

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "associationVersion": "1.0.0",
+  "capabilities": ["accessibility", "api-design", "data", "mobile", "payments", "security"],
+  "templates": {
+    "web-app@1.0.0": {
+      "description": "Browser application with a backend API",
+      "roles": [
+        { "roleId": "frontend", "persona": "Frontend Developer", "phases": ["advise", "review"], "required": true },
+        { "roleId": "backend", "persona": "Backend Architect", "phases": ["advise", "review"], "required": false },
+        { "roleId": "mobile", "persona": "Mobile App Builder", "phases": ["advise", "review"], "required": false, "whenCapability": "mobile" },
+        { "roleId": "accessibility", "persona": "Accessibility Auditor", "phases": ["review"], "required": false, "whenCapability": "accessibility" },
+        { "roleId": "security", "persona": "Security Engineer", "phases": ["review"], "required": false, "whenCapability": "security" }
+      ]
+    },
+    "api-service@1.0.0": {
+      "description": "HTTP or RPC service without a user interface",
+      "roles": [
+        { "roleId": "backend", "persona": "Backend Architect", "phases": ["advise", "review"], "required": true },
+        { "roleId": "api", "persona": "API Designer", "phases": ["advise"], "required": false, "whenCapability": "api-design" },
+        { "roleId": "data", "persona": "Database Engineer", "phases": ["advise", "review"], "required": false, "whenCapability": "data" },
+        { "roleId": "security", "persona": "Security Engineer", "phases": ["review"], "required": false, "whenCapability": "security" }
+      ]
+    },
+    "game@1.0.0": {
+      "description": "Interactive game; pick the engine with --selector engine=<name>",
+      "roles": [
+        { "roleId": "design", "persona": "Game Designer", "phases": ["advise"], "required": true },
+        { "roleId": "unity", "persona": "Unity Developer", "phases": ["advise", "review"], "required": false, "whenSelectors": { "engine": "unity" } },
+        { "roleId": "godot", "persona": "Godot Developer", "phases": ["advise", "review"], "required": false, "whenSelectors": { "engine": "godot" } }
+      ]
+    }
+  }
+}

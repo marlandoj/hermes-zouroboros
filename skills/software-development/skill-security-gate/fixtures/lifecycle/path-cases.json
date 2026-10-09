@@ -1,0 +1,9 @@
+[
+  { "input": "scripts/check.ts", "normalized": "scripts/check.ts" },
+  { "input": "scripts\\check.ts", "normalized": "scripts/check.ts" },
+  { "input": "./scripts//check.ts", "normalized": "scripts/check.ts" },
+  { "input": "../outside", "error": "traversal" },
+  { "input": "nested/../../outside", "error": "traversal" },
+  { "input": "/absolute/path", "error": "absolute" },
+  { "input": "C:\\absolute\\path", "error": "absolute" }
+]

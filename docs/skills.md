@@ -177,6 +177,30 @@ Not shipped in t6:
 - `graphrag-relational` is pending. It depends on `rag-telemetry` and on a native dependency that
   builds Redis from source, which needs an operator decision.
 
+### Path skills B (t7)
+
+- **`plan-closeout`, `verity`, `skill-security-gate`, `wayfinder`:** hook-based skills on the Hermes
+  shell-hook protocol. plan-closeout's `pre_verify` hook sends the agent back once to close out an
+  armed plan. Verity's installer and Wayfinder's installer never write a Hermes profile unless one
+  is named explicitly (Verity only prints the `hooks:` snippet). The skill-security-gate adoption
+  hook (`pre_tool_call`, off by default) covers terminal clones and copies into a skills directory.
+  External engines (SkillSpector, Canny, FlashRank) are installed by the operator, not vendored.
+- **`production-ready`, `visual-verifier`:** model calls go through `ask-governor` or an
+  OpenAI-compatible endpoint from the profile environment. Neither reads a key from a file.
+- **`workspace-search`, `repo-drift-autofix`, `rag-telemetry`, `spec-first-interview`:** state and
+  logs live under the portable roots. workspace-search refuses to run without an allowed root.
+- **`persona-consult`:** a generic association registry maps templates to specialist roles, and the
+  specialists are the profile's `agent.personalities`. There are no compiled reviewer models.
+
+`tests/skills-paths-b.test.ts` runs the skills' own suites and offline smoke checks.
+
+Not shipped in t7:
+
+- `ux-laws` is `held-license`. Its source text is based on CC BY-NC-ND 4.0 material, which conflicts
+  with this repository's MIT licence.
+- `threejs-game-production` is dropped. It has no SKILL.md and ingests a private, paid course.
+- `graphrag-relational`, `notebooklm-skill` and `reporeel` stay pending until the operator decides.
+
 Skills must stay operator-neutral and portable. Do not include host paths, operator names or
 handles, persona identities, memories, run output, model catalogs or credentials. Read state through
 the variables the distribution already sets (`HERMES_ZOUROBOROS_HOME`, `ZOUROBOROS_DATA_DIR`,

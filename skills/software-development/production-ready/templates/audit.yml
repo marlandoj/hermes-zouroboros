@@ -1,0 +1,157 @@
+# production-ready audit — GitHub Actions template.
+#
+# Copy the production-ready skill into your repo (default: tools/production-ready/) and this
+# file to .github/workflows/production-ready.yml. Set AUDIT_DIR below if you vendor the skill
+# elsewhere. To keep the vendored skill's own rule definitions out of the audit, add its path to
+# "ignore.filePatterns" in your repo's audit.config.json (for example "tools/production-ready/**").
+# Third-party actions are pinned to full commit SHAs; the trailing comment names the release.
+name: production-ready audit
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  AUDIT_DIR: tools/production-ready
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Resolve skill dir
+        id: skill
+        run: |
+          # Where audit.ts lives: AUDIT_DIR (default tools/production-ready), else the repo root.
+          DIR="${AUDIT_DIR:-tools/production-ready}"
+          if [ ! -f "$DIR/scripts/audit.ts" ] && [ -f scripts/audit.ts ]; then DIR="."; fi
+          if [ ! -f "$DIR/scripts/audit.ts" ]; then
+            echo "::error::Could not find scripts/audit.ts under '$DIR'. Set AUDIT_DIR to the production-ready skill path."
+            exit 1
+          fi
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Run regression tests
+        working-directory: ${{ steps.skill.outputs.dir }}
+        run: bun test scripts/__tests__
+
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0  # gitleaks needs full history
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Install scanners
+        run: |
+          # gitleaks
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | tar -xz -C /usr/local/bin gitleaks
+          # osv-scanner
+          curl -sSL https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 -o /usr/local/bin/osv-scanner
+          chmod +x /usr/local/bin/osv-scanner
+          # semgrep
+          python3 -m pip install --user semgrep
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Resolve skill dir
+        id: skill
+        run: |
+          DIR="${AUDIT_DIR:-tools/production-ready}"
+          if [ ! -f "$DIR/scripts/audit.ts" ] && [ -f scripts/audit.ts ]; then DIR="."; fi
+          if [ ! -f "$DIR/scripts/audit.ts" ]; then
+            echo "::error::Could not find scripts/audit.ts under '$DIR'. Set AUDIT_DIR to the production-ready skill path."
+            exit 1
+          fi
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Run audit
+        id: audit
+        run: |
+          bun "${{ steps.skill.outputs.dir }}/scripts/audit.ts" \
+            --repo . \
+            --out ./production-ready-audit \
+            --format all
+        continue-on-error: true
+
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: production-ready-audit
+          path: production-ready-audit/
+          retention-days: 30
+
+      - name: Comment PR with verdict
+        if: github.event_name == 'pull_request' && always()
+        continue-on-error: true # fork PRs get a read-only token; the comment is best-effort
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'production-ready-audit/verdict.json';
+            if (!fs.existsSync(path)) return;
+            const verdict = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const cov = verdict.coverage || {};
+            const body = [
+              `## ${verdict.emoji} production-ready verdict — ${verdict.label}`,
+              ``,
+              `> ${verdict.reason}`,
+              ``,
+              `| Severity | Count |`,
+              `|----------|-------|`,
+              `| 🔴 Critical | ${verdict.scores.critical} |`,
+              `| 🟠 High     | ${verdict.scores.high} |`,
+              `| 🟡 Medium   | ${verdict.scores.medium} |`,
+              `| 🔵 Low      | ${verdict.scores.low} |`,
+              ``,
+              cov.incomplete
+                ? `### 🔍 Coverage incomplete\n\nFindings alone: \`${verdict.findingsVerdict}\` · capped at \`${verdict.coverageCeiling}\`.\n\n` +
+                  (cov.gaps || []).map(g => `- ${g.severity === 'blocking' ? '🚧' : '•'} ${g.detail}`).join('\n')
+                : '✅ Coverage complete',
+              ``,
+              verdict.hardBlockerIds?.length
+                ? `### 🚨 Hard blockers\n\n` + verdict.hardBlockerIds.map(id => `- \`${id}\``).join('\n')
+                : '✅ No hard blockers',
+              ``,
+              `_Full report attached as workflow artifact._`,
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail on Do Not Launch
+        if: steps.audit.outcome == 'failure'
+        run: |
+          if [ -f production-ready-audit/verdict.json ]; then
+            verdict=$(jq -r .verdict production-ready-audit/verdict.json)
+            if [ "$verdict" = "do-not-launch" ]; then
+              echo "::error::Audit verdict: Do Not Launch — see artifact for details."
+              exit 1
+            fi
+          fi

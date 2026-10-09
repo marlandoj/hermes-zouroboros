@@ -1,0 +1,72 @@
+[
+  {
+    "id": "missing-model-evidence",
+    "prepare": "base",
+    "mutation": "delete-model-evidence",
+    "expectedDecision": "HOLD",
+    "expectedCode": "MISSING_MODEL_EVIDENCE"
+  },
+  {
+    "id": "stale-deterministic-evidence",
+    "prepare": "base",
+    "mutation": "expire-skillspector",
+    "expectedDecision": "DENY",
+    "expectedCode": "STALE_EVIDENCE"
+  },
+  {
+    "id": "mismatched-evidence-subject",
+    "prepare": "base",
+    "mutation": "replace-model-subject",
+    "expectedDecision": "DENY",
+    "expectedCode": "EVIDENCE_SUBJECT_MISMATCH"
+  },
+  {
+    "id": "forged-human-override",
+    "prepare": "one-override",
+    "mutation": "change-override-actor",
+    "expectedDecision": "DENY",
+    "expectedCode": "FORGED_OVERRIDE"
+  },
+  {
+    "id": "broken-human-override-chain",
+    "prepare": "two-overrides",
+    "mutation": "replace-override-predecessor",
+    "expectedDecision": "DENY",
+    "expectedCode": "BROKEN_OVERRIDE_CHAIN"
+  },
+  {
+    "id": "unknown-lifecycle-state",
+    "prepare": "base",
+    "mutation": "replace-state",
+    "expectedDecision": "DENY",
+    "expectedCode": "UNKNOWN_STATE"
+  },
+  {
+    "id": "credential-value-smuggling",
+    "prepare": "base",
+    "mutation": "add-credential-value",
+    "expectedDecision": "DENY",
+    "expectedCode": "CREDENTIAL_VALUE_FORBIDDEN"
+  },
+  {
+    "id": "dependency-manifest-drift",
+    "prepare": "base",
+    "mutation": "replace-dependency-integrity",
+    "expectedDecision": "DENY",
+    "expectedCode": "DEPENDENCY_HASH_MISMATCH"
+  },
+  {
+    "id": "missing-production-parity",
+    "prepare": "base",
+    "mutation": "delete-parity",
+    "expectedDecision": "HOLD",
+    "expectedCode": "MISSING_PARITY"
+  },
+  {
+    "id": "mismatched-production-parity",
+    "prepare": "base",
+    "mutation": "replace-production-contract",
+    "expectedDecision": "DENY",
+    "expectedCode": "PARITY_MISMATCH"
+  }
+]
