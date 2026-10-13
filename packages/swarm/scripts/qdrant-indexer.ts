@@ -28,6 +28,7 @@ import { join, relative, extname, basename, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Database } from "bun:sqlite";
 import { chunkText } from "zouroboros-rag";
+import { workspaceRoot, stateRoot, runtimeRoot } from '../src/host-roots.js';
 
 // Self-heal: source zouroboros.env if OPENAI_API_KEY is missing (e.g. scheduled agent
 // invoked us under `env -i`). Mirrors the pattern in packages/swarm/src/rag/enrichment.ts.
@@ -49,7 +50,7 @@ const FORCE_RECREATE = process.argv.includes("--force-recreate");
 // Repo root defaults to the monorepo checkout this script lives in.
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ZOUROBOROS_ROOT = process.env.ZOUROBOROS_REPO || resolve(SCRIPT_DIR, "../../..", "packages");
-const MEMORY_DB = process.env.ZOUROBOROS_MEMORY_DB || process.env.ZO_MEMORY_DB || "/var/lib/zouroboros/memory/shared-facts.db";
+const MEMORY_DB = process.env.ZOUROBOROS_MEMORY_DB || process.env.ZO_MEMORY_DB || join(stateRoot(), 'memory', 'shared-facts.db');
 
 function qHeaders(): Record<string, string> {
   const h: Record<string, string> = { "Content-Type": "application/json" };

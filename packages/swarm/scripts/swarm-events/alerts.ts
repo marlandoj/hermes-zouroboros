@@ -16,6 +16,7 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
+import { runtimeRoot } from '../../src/host-roots.js';
 
 export type AlertType =
   | "swarm_failure"
@@ -160,7 +161,7 @@ export async function sendServiceCriticalAlert(
 ): Promise<{ sent: boolean; reason?: string }> {
   return sendAlert(
     "service_critical",
-    `Service "${serviceName}" crashed ${crashCount}x — check /dev/shm/${serviceName}_err.log`
+    `Service "${serviceName}" crashed ${crashCount}x — check ${join(process.env.SWARM_RUNTIME_DIR ?? runtimeRoot(), `${serviceName}_err.log`)}`
   );
 }
 

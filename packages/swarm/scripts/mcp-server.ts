@@ -24,6 +24,7 @@ import { runMcpCampaign } from "./run-mcp-campaign";
 import { existsSync, readFileSync, readdirSync } from "fs";
 import { join } from "path";
 import { resolveTraceId } from "../src/standalone/trace-bridge";
+import { runtimeRoot } from '../src/host-roots.js';
 
 // --- Config ---
 const SWARM_SCRIPTS_DIR = import.meta.dir;
@@ -151,7 +152,7 @@ function toolSwarmStatus(args: {
   swarmId: string;
 }): string {
   const resultsPath = join(RESULTS_DIR, `${args.swarmId}.json`);
-  const lockPath = `/dev/shm/${args.swarmId}.lock`;
+  const lockPath = join(process.env.SWARM_RUNTIME_DIR ?? runtimeRoot(), `${args.swarmId}.lock`);
   
   const isRunning = existsSync(lockPath);
   

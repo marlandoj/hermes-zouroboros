@@ -41,9 +41,9 @@ function installMockFetch(handlers: Record<string, (req: { url: string; init?: R
 }
 
 beforeEach(() => {
-  process.env.OPENAI_API_KEY = 'test-key';
+  process.env.OPENAI_API_KEY = 'dummy-openai-key-for-tests';
   process.env.QDRANT_URL = 'http://qdrant.test';
-  process.env.QDRANT_API_KEY = 'test-qdrant-key';
+  process.env.QDRANT_API_KEY = 'dummy-qdrant-key-for-tests';
   process.env.RAG_TELEMETRY_DISABLED = '1';
   delete process.env.RAG_COLLECTIONS;
 });

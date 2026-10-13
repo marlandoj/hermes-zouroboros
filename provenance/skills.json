@@ -720,8 +720,8 @@
       "sourcePath": "Skills/deep-research/scripts/research.ts",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "f568ec270f15ec64e6dd85edf856c55aa52d92debd8ad4324efde6049871b3da",
-      "distributedSha256": "e1395424895c76d5381dfc9675fef3d410552bba92ae46dc59ca83145601b4fc",
-      "adaptation": "Rewritten conductor keeping the plan/gather/fuse/synthesize/claim-check/report/persist DAG, artifacts, idempotency and fail-loud behaviour; model calls via ask-governor (budgets kept); no fetch, Zo self-dispatch, file sentinels, OpenAI key self-heal, Qdrant, shared-facts.db or audio; run dir under the profile workspace; persist via zmem.ts. Internal memory search also uses the question's own keywords (f3 live smoke test: verbose planner sub-questions crowded out the subject)."
+      "distributedSha256": "b96525a91dd535196b38344720734613e6e1b7dc766782f08b613f4943bd8c0b",
+      "adaptation": "Decay vocabulary unification (7f92dc8): long/medium/short -> stable/active; reviewed 2026-10-13"
     },
     {
       "path": "skills/research/deep-research/scripts/wiring.test.ts",
@@ -2952,8 +2952,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "31998a48287c84e005456b8c6b1ba084c5f5e2ecea26cf0edfe802e55967be9d",
-      "adaptation": "Distribution-authored CLI over zouroboros-memory (facts, episodes, stats) bound to the profile DB from integration/profile.ts; ignores inherited ZO_MEMORY_DB/ZOUROBOROS_MEMORY_DB. Replaces the source scripts/memory.ts host CLI."
+      "distributedSha256": "abadeae4f1046a9bc0596cd29c5fecf4cabc8e5e3a7630fcdbc35e0955752628",
+      "adaptation": "Decay vocabulary unification (7f92dc8): long/medium/short -> stable/active; reviewed 2026-10-13"
     },
     {
       "path": "skills/zouroboros/zo-memory-system/SKILL.md",
@@ -2961,8 +2961,8 @@
       "sourcePath": "Skills/zo-memory-system/SKILL.md",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "086fa98b9b42d610644c6c2d8d4997ea2d0cf7d480c8ee3ba09b2281808e78e4",
-      "distributedSha256": "394d0b4b751590dcf409f4f9e44856c19f32298d226f5be9f9889aa86677795f",
-      "adaptation": "Rewritten for Hermes: Hermes frontmatter; memory lives only in the distribution profile DB ($HERMES_ZOUROBOROS_HOME/memory.db) shared with the zouroboros MCP server; documents MCP tools + scripts/zmem.ts. Removed Zo/persona/host paths, hosted-embedding/HyDE/gate-hook/auto-capture/vault/RAG-daemon sections (not in the distribution), operator author handle and deprecation banner."
+      "distributedSha256": "5a8958818cedb48864ae33e9c1f7b4965e205c54bffd4827fb4b35478cf223f9",
+      "adaptation": "Decay vocabulary unification (7f92dc8): long/medium/short -> stable/active; reviewed 2026-10-13"
     },
     {
       "path": "skills/zouroboros/zo-swarm-executors/references/bridge-protocol.md",

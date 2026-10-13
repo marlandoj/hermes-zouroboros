@@ -20,6 +20,7 @@ import { Database } from "bun:sqlite";
 import { randomUUID } from "crypto";
 import { resolveExecutorRegistryPath } from "../src/registry/loader";
 import { getWorkspaceRoot } from "zouroboros-core";
+import { workspaceRoot, stateRoot, runtimeRoot } from '../src/host-roots.js';
 
 // ============================================================================
 // PATHS & CONFIG
@@ -33,7 +34,7 @@ const BENCH_DATASETS = join(BENCH_DIR, "datasets");
 const BENCH_RESULTS = join(BENCH_DIR, "results");
 const BENCH_LEADERBOARD = join(BENCH_DIR, "leaderboard.json");
 const REGISTRY = resolveExecutorRegistryPath();
-const TOOL_EVALS_DB = process.env.ZOUROBOROS_MEMORY_DB || "/home/workspace/.zo/memory/shared-facts.db";
+const TOOL_EVALS_DB = process.env.ZOUROBOROS_MEMORY_DB || join(workspaceRoot(), '.zo', 'memory', 'shared-facts.db');
 
 function recordBenchToolEval(row: {
   toolName: string;

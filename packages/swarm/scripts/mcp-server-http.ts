@@ -23,6 +23,7 @@ import { runMcpCampaign } from "./run-mcp-campaign";
 import { randomUUID } from "crypto";
 import { existsSync, readFileSync, readdirSync } from "fs";
 import { join } from "path";
+import { runtimeRoot } from '../src/host-roots.js';
 
 // --- Config ---
 const PORT = parseInt(process.env.PORT || "48401");
@@ -123,7 +124,7 @@ async function toolSwarmExecute(args: {
 
 function toolSwarmStatus(args: { swarmId: string }): string {
   const resultsPath = join(RESULTS_DIR, `${args.swarmId}.json`);
-  const lockPath = `/dev/shm/${args.swarmId}.lock`;
+  const lockPath = join(process.env.SWARM_RUNTIME_DIR ?? runtimeRoot(), `${args.swarmId}.lock`);
   const isRunning = existsSync(lockPath);
   
   if (!existsSync(resultsPath)) {

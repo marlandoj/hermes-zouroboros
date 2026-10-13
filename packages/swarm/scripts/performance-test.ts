@@ -19,6 +19,7 @@
 import { join } from "path";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { getMemoryDbPath, getWorkspaceRoot } from "zouroboros-core";
+import { workspaceRoot, stateRoot, runtimeRoot } from '../src/host-roots.js';
 
 // ============================================================================
 // CONFIGURATION
@@ -26,7 +27,7 @@ import { getMemoryDbPath, getWorkspaceRoot } from "zouroboros-core";
 
 // Local executor bridge path — uses claude-code by default
 const EXECUTOR_BRIDGE = process.env.SWARM_PERF_BRIDGE || join(
-  process.env.HOME || "/home/workspace",
+  workspaceRoot(),
   "Skills", "zo-swarm-executors", "bridges", "claude-code-bridge.sh"
 );
 

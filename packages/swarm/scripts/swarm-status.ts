@@ -6,8 +6,10 @@
 
 import { readFile } from "fs/promises";
 import { existsSync } from "fs";
+import { join } from "path";
+import { runtimeRoot } from '../src/host-roots.js';
 
-const LOG_FILE = "/dev/shm/swarm-orchestrator.log";
+const LOG_FILE = join(process.env.SWARM_RUNTIME_DIR ?? runtimeRoot(), "swarm-orchestrator.log");
 
 interface SwarmRun {
   timestamp: string;
