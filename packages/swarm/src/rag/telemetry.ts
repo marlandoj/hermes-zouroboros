@@ -34,17 +34,6 @@ export interface RAGTelemetryRecord {
   errorMsg?: string;
   runId?: string;
   condition?: string;
-  candidateShadowEnabled: boolean;
-  candidateShadowAttempted: boolean;
-  candidateInputClassification?: 'public' | 'private' | 'unknown';
-  candidateCollection?: string;
-  candidateStatus?: string;
-  candidateLatencyMs: number;
-  candidateBudgetMs: number;
-  candidateHits: number;
-  candidateResultConsumed: false;
-  candidateCleanupComplete: boolean;
-  candidateError?: string;
 }
 
 const TELEMETRY_PATH = process.env.RAG_TELEMETRY_PATH || join(logRoot(), 'rag-telemetry.jsonl');
@@ -69,13 +58,6 @@ export async function emitRAGTelemetry(record: Partial<RAGTelemetryRecord>): Pro
     errored: false,
     runId: process.env.RAG_RUN_ID,
     condition: process.env.RAG_CONDITION,
-    candidateShadowEnabled: false,
-    candidateShadowAttempted: false,
-    candidateLatencyMs: 0,
-    candidateBudgetMs: 0,
-    candidateHits: 0,
-    candidateResultConsumed: false,
-    candidateCleanupComplete: false,
     ...record,
   };
   try {
