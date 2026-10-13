@@ -36,11 +36,13 @@ enrichment — see the shadow experiment's decision status in the swarm docs.
 - **Qdrant access**: raw REST in `packages/swarm/src/rag/enrichment.ts` and
   `integration/qdrant-corpus.ts` (default `http://127.0.0.1:6333`); no Qdrant
   client library is vendored.
-- **Collections are host-provisioned**: `zouroboros-code`, `shared-memory-facts`,
-  `code-docs` (plus `zouroboros-research`, `commerce-a-knowledge` upstream) are
+- **Collections are host-provisioned**: `zouroboros-code` and `code-docs`
+  (plus `zouroboros-research`, `commerce-a-knowledge` upstream) are
   expected to pre-exist on the Qdrant host. This distribution ships no indexer
   and no Qdrant server — see `deploy/` (SQLite memory gate only). Missing
   collections fail soft per query and are reported in RAG telemetry.
+  (`shared-memory-facts` was retired 2026-10-13 — redundant with SQLite
+  hybrid search.)
 - **Relational/graph questions**: `skills/zouroboros/graphrag-relational/`
   (embedded FalkorDB, read-only Cypher over execution/ticket/gate/cost data).
   Rule of thumb: vector RAG for prose similarity; the graph for multi-hop
