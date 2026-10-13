@@ -153,7 +153,7 @@ export class SelfHeal {
             db.query(
               `INSERT OR REPLACE INTO facts(id,persona,entity,key,value,text,category,decay_class) VALUES(?,?,?,?,?,?,?,?)`
             ).run(factId, 'introspect', 'zouroboros.introspection', `scorecard-${dateStr}`, value,
-              `zouroboros.introspection scorecard-${dateStr}: ${value}`, 'fact', 'medium');
+              `zouroboros.introspection scorecard-${dateStr}: ${value}`, 'fact', 'stable');
           } finally {
             db.close();
           }
