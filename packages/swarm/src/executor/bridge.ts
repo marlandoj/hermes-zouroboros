@@ -5,7 +5,7 @@
  */
 
 import { spawn } from 'child_process';
-import { isAbsolute, join } from 'path';
+import { isAbsolute, join, dirname } from 'path';
 import { existsSync, readFileSync, unlinkSync } from 'fs';
 import { randomUUID } from 'crypto';
 import { getWorkspaceRoot } from 'zouroboros-core';
@@ -16,6 +16,103 @@ import {
   prepareFilesystemContainedSpawn,
   type AdapterSpawnSpec,
 } from '../transport/agent-containment.js';
+
+// --- Persona resolution (F-007) ---
+// Resolves task.persona against the persona registry and builds a prompt
+// prefix that injects the persona's domain expertise. Previously the persona
+// field was a ledger-only label; now it actually shapes the prompt.
+
+interface PersonaEntry {
+  id: string;
+  name: string;
+  expertise?: string[];
+  best_for?: string[];
+  mcp_capabilities?: string[];
+  skills?: string[];
+  system_prompt?: string;
+}
+
+let personaCache: PersonaEntry[] | null = null;
+
+function loadPersonas(): PersonaEntry[] {
+  if (personaCache !== null) return personaCache;
+  const loaded: PersonaEntry[] = [];
+  try {
+    // bridge.ts lives at packages/swarm/src/executor/bridge.ts;
+    // registry is at packages/swarm/assets/persona-registry.json
+    const here = dirname(new URL(import.meta.url).pathname);
+    const registryPath = join(here, '..', '..', 'assets', 'persona-registry.json');
+    if (existsSync(registryPath)) {
+      const raw = JSON.parse(readFileSync(registryPath, 'utf-8'));
+      const list = raw.personas || [];
+      for (const p of list) {
+        if (p && typeof p.name === 'string') loaded.push(p);
+      }
+    }
+  } catch {
+    // fall through with empty list
+  }
+  personaCache = loaded;
+  return loaded;
+}
+
+// Harness names that are executor labels, not domain personas.
+// These pass through unchanged for backward compatibility.
+const HARNESS_PERSONAS = new Set([
+  'codex', 'claude-code', 'hermes', 'gemini', 'kimi', 'opencode', 'pi',
+  'codex-cli', 'claude code', 'hermes agent', 'gemini cli', 'codex cli',
+  'kimi code cli', 'pi coding agent', 'opencode',
+]);
+
+export function resolvePersonaPrompt(personaName: string | undefined): string | null {
+  if (!personaName) return null;
+  const normalized = personaName.trim().toLowerCase();
+  if (HARNESS_PERSONAS.has(normalized)) return null; // harness label, not a domain persona
+  const personas = loadPersonas();
+  const match = personas.find(p =>
+    p.name.toLowerCase() === normalized ||
+    p.id.toLowerCase() === normalized
+  );
+  if (!match) return null;
+  let prefix = `[Persona: ${match.name}]\n`;
+  // Prefer a curated system prompt when the registry provides one (F-009).
+  if (match.system_prompt) {
+    prefix += `${match.system_prompt}\n`;
+  } else {
+    prefix += `You are operating with the expertise of a ${match.name}.\n`;
+    const expertise = (match.expertise || []).join(', ');
+    const bestFor = (match.best_for || []).join(', ');
+    if (expertise) prefix += `Areas of expertise: ${expertise}.\n`;
+    if (bestFor) prefix += `Best applied to: ${bestFor}.\n`;
+    prefix += `Bring this domain expertise to bear on the task below. Prefer idiomatic, production-quality approaches from your domain over generic solutions.\n`;
+  }
+  // Surface relevant workspace skills so the agent knows what to reach for.
+  const skills = match.skills || [];
+  if (skills.length > 0) {
+    prefix += `Relevant workspace skills (in ~/workspace/skills/): ${skills.join(', ')}. Consult the skill's SKILL.md before using it.\n`;
+  }
+  prefix += `\n---\n\n`;
+  return prefix;
+}
+
+/**
+ * Resolve the MCP servers a persona needs (F-009).
+ * Returns null when the persona is a harness label or unknown,
+ * in which case the bridge falls back to its default MCP set.
+ */
+export function resolvePersonaMCPs(personaName: string | undefined): string[] | null {
+  if (!personaName) return null;
+  const normalized = personaName.trim().toLowerCase();
+  if (HARNESS_PERSONAS.has(normalized)) return null;
+  const personas = loadPersonas();
+  const match = personas.find(p =>
+    p.name.toLowerCase() === normalized ||
+    p.id.toLowerCase() === normalized
+  );
+  if (!match || !match.mcp_capabilities) return null;
+  return match.mcp_capabilities;
+}
+
 
 export interface BridgeExecutionOptions {
   timeoutMs: number;
@@ -63,17 +160,24 @@ export class BridgeExecutor {
       ? bridgePath
       : join(getWorkspaceRoot(), bridgePath);
     const workdir = options.workdir || getWorkspaceRoot();
+    // F-007: resolve the task persona and inject its expertise into the prompt.
+    // Previously SWARM_PERSONA was set but never consumed by any bridge.
+    const personaPrefix = resolvePersonaPrompt(task.persona);
+    const effectivePrompt = personaPrefix ? personaPrefix + task.task : task.task;
+    // F-009: resolve persona MCP capabilities so the bridge only wires needed servers.
+    const personaMCPs = resolvePersonaMCPs(task.persona);
     const childEnv = {
       ...process.env,
       ...options.env,
       SWARM_TASK_ID: task.id,
       SWARM_EXECUTOR_ID: this.registryEntry.id,
       SWARM_PERSONA: task.persona,
+      ...(personaMCPs ? { SWARM_PERSONA_MCPS: personaMCPs.join(',') } : {}),
     } as Record<string, string>;
     let spawnSpec: AdapterSpawnSpec;
     try {
       spawnSpec = prepareFilesystemContainedSpawn(
-        { command: 'bash', args: [fullBridgePath, task.task, workdir] },
+        { command: 'bash', args: [fullBridgePath, effectivePrompt, workdir] },
         workdir,
         childEnv,
       );

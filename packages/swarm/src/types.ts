@@ -283,12 +283,23 @@ export interface ACPModelSelection {
 export interface WayfinderShadowConfig {
   /** Absent or false means no ranking and no child process. */
   enabled?: boolean;
-  /** Only 'shadow' is accepted. Live injection into factory prompts is unsupported. */
-  mode?: 'shadow';
+  /**
+   * 'shadow' (default): rank out of band, log only, never touch the prompt.
+   * 'canary': inject the pick into the prompt on the canary harness only.
+   * 'live': inject the pick into the prompt on every harness.
+   * Canary/live require WAYFINDER_LIVE_INJECT=1; without it they degrade to
+   * shadow. WAYFINDER_DRY_RUN=1 resolves the pick but never injects it.
+   */
+  mode?: 'shadow' | 'canary' | 'live';
   /** Absolute path to the Wayfinder checkout (the directory holding engine/run.py). */
   engineDir?: string;
   /** Label recorded in the shadow log. Defaults to the executor id. */
   harness?: string;
+  /**
+   * Harness id that receives canary injection. Defaults to `harness`.
+   * Ignored unless mode is 'canary'.
+   */
+  canaryHarness?: string;
   /** Colon-separated catalog roots; the first root wins on duplicate names. */
   skillsRoots?: string[];
   /** Wall-clock bound for the detached worker. It never blocks the task. */
