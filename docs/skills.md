@@ -385,3 +385,37 @@ The check fails if any of these is true:
 - a `pending` entry has no planned disposition;
 - a shipped entry has no `SKILL.md`, or a `skills/` directory is unclaimed;
 - `docs/SKILLS-PARITY.md` is stale.
+
+## The closed loop (introspect → prescribe → evolve → verify)
+
+Five distribution-authored skills under `skills/zouroboros/` implement the loop that the Constitution
+(Article II) names. They are a bundle: the scripts reference each other by relative path, and
+`tests/skills-loop.test.ts` fails CI if any skill, cross-skill script or held-out probe is missing.
+
+| Phase | Skill | What it does |
+|---|---|---|
+| Introspect | `zouroboros-platform-assessment` | Evidence-backed platform assessment: inventory, test matrix, defect register, report. Live model calls only within an operator-approved budget. |
+| Prescribe | `zouroboros-loop-prescribe` | Turns defects into immutable, digest-bound prescriptions with executable checks that must be red on `origin/main` for the defect's reason, a risk tier (governor) and a rollback. |
+| Evolve | `zouroboros-loop-evolve` | Applies one approved prescription in a worktree branch: red test, minimal fix, suite and scope gates. Opens a draft PR only after certification and only with the approved scope. Never merges or deploys. |
+| Verify | `zouroboros-loop-verify` | Rebuilds base and head independently. Runs held-out probes the evolve step never sees, compares base and head at test level and across the MCP harness, scans for test weakening, and issues certified, failed or inconclusive. |
+| Orchestrate | `zouroboros-loop` | Hash-chained ledger (every transition, actor and evidence digest), check runner, repository plumbing, status, and PR outcome sync from the GitHub API. |
+
+The ported `zouroboros-introspect`, `zouroboros-prescribe` and `zouroboros-evolve` skills are the
+upstream **metric** track (scorecard → playbook seeds). The loop skills are the **defect-driven**
+track and do not depend on the scorecard.
+
+Operating rules:
+- The agent never approves, raises a budget, merges, deploys or changes repository settings. Approvals
+  are recorded verbatim with the operator's words and bind the prescription's digest.
+- Runtime state lives in `ZO_LOOP_HOME`, else `$ZOUROBOROS_STATE_DIR/zouroboros-loop`, else
+  `<profile data>/state/zouroboros-loop`. That location holds the ledger, cycles, a mirror clone,
+  worktrees and logs, never the skill tree.
+- The repository comes from `ZO_LOOP_REPO`, or this checkout's GitHub `origin`. Checks and builds
+  refuse to run in the deployed checkout.
+- Every PR states the live branch-protection status of `main`. Where `main` is unprotected, human
+  review is the only selection barrier.
+- Constitutional promotion (Claude Code and Codex CLI attestations) is not distributed, so
+  "certified" means ready for human review.
+
+Unit suites (Python, stdlib only) live in each skill's `scripts/tests/` and run from
+`tests/skills-loop.test.ts`.

@@ -1,0 +1,83 @@
+{
+  "schema": "zo-loop/heldout-catalog@1",
+  "note": "Held-out checks are selected by verify from the prescription's heldout_ref class names (plus classes marked always), never shown to evolve, and must not be edited by any prescription (governor tier G; protected path in scope and tamper checks). Before adding or changing a probe, confirm it is red on the current base with its declared signature and green on a known-good fix.",
+  "classes": {
+    "concurrency": {
+      "checks": [
+        {
+          "id": "HO-CONC-1",
+          "kind": "heldout",
+          "description": "3 processes x 150 writes through the memory library (not MCP): all persisted, 0 errors",
+          "timeout_s": 180,
+          "cmd": "cp -a {repo} {scratch}/r || exit 97; {bun} {skills}/zouroboros/zouroboros-loop-verify/heldout/probes/memory-writers.ts {scratch}/r {scratch} 3 150",
+          "expect": {
+            "exit": 0
+          },
+          "red": {
+            "stdout_regex": "errors=[1-9]"
+          }
+        }
+      ],
+      "description": "Concurrent writers to the shared memory database must all persist."
+    },
+    "shell-injection": {
+      "checks": [
+        {
+          "id": "HO-SHELL-1",
+          "kind": "heldout",
+          "description": "7 metacharacter payload variants via cli.ts memory: none executes",
+          "timeout_s": 180,
+          "env": {
+            "BUN": "{bun}"
+          },
+          "cmd": "bash {skills}/zouroboros/zouroboros-loop-verify/heldout/probes/shell-payloads.sh {repo} {scratch}",
+          "expect": {
+            "exit": 0
+          },
+          "red": {
+            "stdout_regex": "INJECTED"
+          }
+        }
+      ],
+      "description": "Arguments passed through the operator CLI must never be interpreted by a shell."
+    },
+    "cancellation": {
+      "checks": [
+        {
+          "id": "HO-CANCEL-1",
+          "kind": "heldout",
+          "description": "SIGINT during task 1 of a 3-task chain: no survivors, no further task starts",
+          "timeout_s": 180,
+          "env": {
+            "BUN": "{bun}"
+          },
+          "cmd": "cp -a {repo} {scratch}/r || exit 97; bash {skills}/zouroboros/zouroboros-loop-verify/heldout/probes/interrupt-variant.sh {scratch}/r",
+          "expect": {
+            "exit": 0
+          },
+          "red": {
+            "stdout_regex": "result=FAIL"
+          }
+        }
+      ],
+      "description": "Cancelling a swarm run must stop the worker and prevent further task starts."
+    },
+    "mcp-contract": {
+      "always": true,
+      "checks": [
+        {
+          "id": "HO-MCP-ALL",
+          "kind": "heldout",
+          "description": "Full MCP assessment harness: compared per test base vs head by verify.py (no PASS->FAIL)",
+          "timeout_s": 300,
+          "cmd": "cp -a {repo} {scratch}/r && cp {skills}/zouroboros/zouroboros-platform-assessment/scripts/mcp-e2e.ts {scratch}/r/ || exit 97; cd {scratch}/r && mkdir -p {scratch}/h/data {scratch}/h/work && HERMES_ZOUROBOROS_HOME={scratch}/h/data HOME={scratch}/h {bun} integration/cli.ts init --workspace {scratch}/h/work >/dev/null || exit 97; HZ_TEST_HOME={scratch}/h {bun} mcp-e2e.ts {scratch}/r {scratch}/e2e.json >/dev/null 2>&1; cat {scratch}/e2e.json",
+          "expect": {
+            "stdout_regex": "\"id\": \"C-01\""
+          },
+          "compare": "mcp-e2e"
+        }
+      ],
+      "description": "The full MCP contract harness must not regress (compared per test, base vs head)."
+    }
+  }
+}
