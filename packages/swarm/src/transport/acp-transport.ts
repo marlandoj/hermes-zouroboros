@@ -12,7 +12,7 @@
  * - Tool allowlist passed via CLAUDE_AGENT_TOOLS env var at spawn time
  */
 
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, spawnSync, ChildProcess } from 'child_process';
 import { Writable, Readable } from 'stream';
 import type { Task, TaskResult, ExecutorRegistryEntry, WayfinderShadowConfig } from '../types.js';
 import { CircuitBreaker } from '../circuit/breaker.js';
@@ -867,10 +867,65 @@ export function dispatchWayfinderShadow(
   env: Record<string, string>,
   cwd: string,
 ): WayfinderSuggestion | undefined {
+  // This function implements the shadow path only: rank out of band, log,
+  // never touch the prompt. Canary/live injection goes through
+  // resolveWayfinderLivePick. Anything else here suggests nothing.
+  if (config?.mode !== undefined && config?.mode !== 'shadow') return undefined;
+  const setup = wayfinderRankSetup(task, config, env, cwd);
+  if (!setup) return undefined;
+
+  const childEnv: Record<string, string> = { ...env, WAYFINDER_HOME: setup.stateHome, PYTHONDONTWRITEBYTECODE: '1' };
+  if (setup.roots) childEnv.WAYFINDER_SKILLS_ROOTS = setup.roots;
+  else delete childEnv.WAYFINDER_SKILLS_ROOTS;
+  // Detached so a task timeout or adapter teardown cannot reap the ranking half
+  // way through, and 'ignore' on stdout so no part of this host's stdio - which
+  // includes a live JSON-RPC ACP pipe - can be reached by a stray write.
+  const child = spawn('bash', ['-c', setup.script], {
+    env: childEnv,
+    cwd,
+    detached: true,
+    stdio: ['ignore', 'ignore', 'ignore'],
+  });
+  child.on('error', () => {});
+  child.on('exit', () => {});
+
+  child.unref();
+
+  return {
+    invocationId: setup.invocationId,
+    harness: setup.harness,
+    taskId: task.id,
+    engineDir: setup.engineDir,
+    stateHome: setup.stateHome,
+    roots: setup.roots,
+    rowPath: setup.rowPath,
+  };
+}
+
+interface WayfinderRankSetup {
+  engineDir: string;
+  harness: string;
+  stateHome: string;
+  roots: string;
+  timeoutMs: number;
+  invocationId: string;
+  script: string;
+  rowPath: string;
+}
+
+/**
+ * Shared ranking setup for the shadow and live paths: resolves the engine,
+ * state dir, and catalog roots, and builds the exact ranking program.
+ * Returns undefined when ranking cannot run (disabled, no engine, no state).
+ * Pure setup — no process is spawned here.
+ */
+function wayfinderRankSetup(
+  task: Task,
+  config: ACPTransportConfig['wayfinder'],
+  env: Record<string, string>,
+  cwd: string,
+): WayfinderRankSetup | undefined {
   if (!config?.enabled) return undefined;
-  // Shadow is the only mode this transport implements. Anything else is a
-  // configuration error, and the safe reading of it is to suggest nothing.
-  if (config.mode !== undefined && config.mode !== 'shadow') return undefined;
   const engineDir = (config.engineDir ?? env.WAYFINDER_DIR ?? '').trim();
   const entrypoint = engineDir ? joinPath(engineDir, 'engine/run.py') : '';
   if (!entrypoint || !existsSync(entrypoint)) return undefined;
@@ -897,32 +952,103 @@ export function dispatchWayfinderShadow(
     event: { prompt: task.task ?? '', session_id: task.id, cwd },
   });
 
-  const childEnv: Record<string, string> = { ...env, WAYFINDER_HOME: stateHome, PYTHONDONTWRITEBYTECODE: '1' };
-  if (roots) childEnv.WAYFINDER_SKILLS_ROOTS = roots;
-  else delete childEnv.WAYFINDER_SKILLS_ROOTS;
-  // Detached so a task timeout or adapter teardown cannot reap the ranking half
-  // way through, and 'ignore' on stdout so no part of this host's stdio - which
-  // includes a live JSON-RPC ACP pipe - can be reached by a stray write.
-  const child = spawn('bash', ['-c', script], {
-    env: childEnv,
-    cwd,
-    detached: true,
-    stdio: ['ignore', 'ignore', 'ignore'],
-  });
-  child.on('error', () => {});
-  child.on('exit', () => {});
-  child.unref();
-
   return {
-    invocationId,
-    harness,
-    taskId: task.id,
     engineDir,
+    harness,
     stateHome,
     roots,
+    timeoutMs,
+    invocationId,
+    script,
     rowPath: wayfinderRowPath(stateHome, invocationId),
   };
 }
+
+
+
+/**
+ * Whether live injection is armed for this dispatch. Pure and testable.
+ * Canary additionally requires the harness to match the canary harness;
+ * everything degrades to false without WAYFINDER_LIVE_INJECT=1.
+ */
+export function wayfinderInjectionArmed(
+  config: ACPTransportConfig['wayfinder'],
+  env: Record<string, string>,
+): boolean {
+  const mode = config?.mode ?? 'shadow';
+  if (mode !== 'live' && mode !== 'canary') return false;
+  if (env.WAYFINDER_LIVE_INJECT !== '1') return false;
+  if (mode === 'live') return true;
+  const harness = (config?.harness ?? 'factory').trim() || 'factory';
+  const canaryHarness = (config?.canaryHarness ?? harness).trim() || harness;
+  return harness === canaryHarness;
+}
+
+/**
+ * Pure formatter for the injected suggestion. Kept separate so the exact
+ * prompt text is testable without spawning anything.
+ */
+export function formatWayfinderPromptSuffix(pick: { pick: string; pickPath?: string }): string {
+  const where = pick.pickPath ? ` (${pick.pickPath})` : '';
+  return `\n\n[WAYFINDER SUGGESTION]\nRelevant skill for this task: ${pick.pick}${where}. Consider reading its SKILL.md if it applies to the task.`;
+}
+
+/**
+ * Live-injection path: run the ranking synchronously, bounded by timeoutMs,
+ * and return the pick for prompt injection.
+ *
+ * Fail-safe by construction: the flag gate, any setup failure, a ranking
+ * timeout or crash, and a missing/empty pick all resolve to undefined, and
+ * the caller proceeds with the unmodified prompt. A suggester that can break
+ * a task is worse than no suggester — same rule as the shadow path.
+ */
+export async function resolveWayfinderLivePick(
+  task: Task,
+  config: ACPTransportConfig['wayfinder'],
+  env: Record<string, string>,
+  cwd: string,
+): Promise<WayfinderLivePick | undefined> {
+  // Without the explicit flag, live resolution degrades to nothing; the
+  // caller falls back to the shadow path.
+  if (env.WAYFINDER_LIVE_INJECT !== '1') return undefined;
+  const setup = wayfinderRankSetup(task, config, env, cwd);
+  if (!setup) return undefined;
+  const childEnv: Record<string, string> = { ...env, WAYFINDER_HOME: setup.stateHome, PYTHONDONTWRITEBYTECODE: '1' };
+  if (setup.roots) childEnv.WAYFINDER_SKILLS_ROOTS = setup.roots;
+  else delete childEnv.WAYFINDER_SKILLS_ROOTS;
+  try {
+    // Awaited, unlike the shadow path: the prompt cannot be built until the
+    // pick lands. spawnSync's timeout is the backstop; the script's own
+    // `timeout` command is the first bound. stdio stays disconnected from the
+    // live ACP pipe for the same reason as the shadow path.
+    const result = spawnSync('bash', ['-c', setup.script], {
+      env: childEnv,
+      cwd,
+      timeout: setup.timeoutMs + 5_000,
+      stdio: ['ignore', 'ignore', 'ignore'],
+    });
+    if (result.error) return undefined;
+  } catch {
+    return undefined;
+  }
+  const row = readWayfinderShadowRow(setup.rowPath);
+  if (!row?.pick) return undefined;
+  return {
+    pick: row.pick,
+    pickPath: row.pickPath,
+    invocationId: setup.invocationId,
+    rowPath: setup.rowPath,
+    harness: setup.harness,
+    engineDir: setup.engineDir,
+    stateHome: setup.stateHome,
+    roots: setup.roots,
+  };
+}
+
+/**
+ * The exact program the detached child runs.
+ *
+
 
 /**
  * The exact program the detached child runs.

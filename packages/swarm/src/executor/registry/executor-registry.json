@@ -7,6 +7,11 @@
       "name": "Claude Code",
       "executor": "local",
       "transport": "acp",
+      "transportFallback": {
+        "envVar": "CLAUDE_CODE_ACP_ENABLED",
+        "equals": "0",
+        "transport": "bridge"
+      },
       "bridge": "packages/swarm/src/executor/bridges/claude-code-bridge.sh",
       "description": "Claude Code CLI in one-shot mode \u2014 full codebase context, file editing, terminal access",
       "expertise": [
@@ -411,6 +416,11 @@
       "name": "Codex CLI",
       "executor": "local",
       "transport": "acp",
+      "transportFallback": {
+        "envVar": "CODEX_ACP_ENABLED",
+        "equals": "0",
+        "transport": "bridge"
+      },
       "bridge": "packages/swarm/src/executor/bridges/codex-bridge.sh",
       "description": "OpenAI Codex CLI (Rust) \u2014 fastest local executor (~3s per call). Code generation, shell commands, file editing with full sandbox support.",
       "expertise": [
@@ -522,6 +532,11 @@
       "name": "OpenCode CLI",
       "executor": "local",
       "transport": "acp",
+      "transportFallback": {
+        "envVar": "OPENCODE_ACP_ENABLED",
+        "equals": "0",
+        "transport": "bridge"
+      },
       "description": "Vendor-neutral OpenCode ACP executor with task-scoped provider and model selection",
       "expertise": [
         "code-generation",
