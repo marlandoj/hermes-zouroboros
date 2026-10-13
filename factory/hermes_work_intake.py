@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 BOARD = "software-factory"
-TASK_ID = re.compile(r"[A-Za-z0-9_.:-]{1,128}\Z")
+TASK_ID = re.compile(r"t_[0-9a-f]{8}\Z")  # canonical: matches KANBAN_TASK_ID in kanban-intake.ts
 # Pinned hermes_cli/kanban_db.py VALID_STATUSES at 345cd2b0 (SHA in manifest).
 STATUSES = frozenset({"triage", "todo", "scheduled", "ready", "running", "blocked", "review", "done", "archived"})
 MAX_TASKS = 1000

@@ -12,7 +12,7 @@ from pathlib import Path
 from hermes_work_intake import MAX_SNAPSHOT_BYTES, MAX_TASKS, project_tasks, read_fixture_snapshot
 
 
-def snapshot(task_id="task-1", status="ready"):
+def snapshot(task_id="t_1a2b3c4d", status="ready"):
     return {"board": "software-factory", "tasks": [
         {"id": task_id, "title": "Build queue", "body": "Acceptance criteria", "status": status}
     ]}
@@ -22,7 +22,7 @@ class HermesWorkIntakeTests(unittest.TestCase):
     def test_readonly_sqlite_fixture_reaches_projection(self):
         with sqlite3.connect(":memory:") as connection:
             connection.execute("CREATE TABLE tasks(id TEXT, title TEXT, body TEXT, status TEXT)")
-            connection.execute("INSERT INTO tasks VALUES(?,?,?,?)", ("task-1", "Build queue", None, "ready"))
+            connection.execute("INSERT INTO tasks VALUES(?,?,?,?)", ("t_1a2b3c4d", "Build queue", None, "ready"))
             with self.assertRaisesRegex(ValueError, "SNAPSHOT_READONLY_REQUIRED"):
                 read_fixture_snapshot(connection)
             connection.execute("PRAGMA query_only=ON")
@@ -63,11 +63,11 @@ class HermesWorkIntakeTests(unittest.TestCase):
         self.assertEqual(first["factory_work_id"], again["factory_work_id"])
         # Pinned by the TypeScript held-work-to-claim bridge and its fixture receipt.
         self.assertEqual(first["factory_work_id"],
-                         "fw_827ce197981d1904313d3b67adb6f60cfb616694938a714e509b0a81d4549a64")
+                         "fw_d0374b025f9b17f8084141ca6a5ac9346499edbf6878d27993c5e6fd4fb9be03")
         self.assertTrue(first["factory_work_id"].startswith("fw_"))
         self.assertEqual(first["source"], "hermes")
         self.assertEqual(first["external_references"],
-                         {"hermes_board": "software-factory", "hermes_task_id": "task-1"})
+                         {"hermes_board": "software-factory", "hermes_task_id": "t_1a2b3c4d"})
         self.assertFalse(first["dispatch_eligible"])
         self.assertFalse(again["dispatch_eligible"])
         self.assertNotIn("linear_id", first)
@@ -82,14 +82,14 @@ class HermesWorkIntakeTests(unittest.TestCase):
         changed = snapshot()
         changed["tasks"][0]["title"] = "Renamed"
         self.assertEqual(original, project_tasks(changed)[0]["factory_work_id"])
-        self.assertNotEqual(original, project_tasks(snapshot("task-2"))[0]["factory_work_id"])
+        self.assertNotEqual(original, project_tasks(snapshot("t_5e6f7890"))[0]["factory_work_id"])
 
     def test_duplicate_and_malformed_tasks_fail_closed(self):
         duplicate = snapshot()
         duplicate["tasks"].append(dict(duplicate["tasks"][0]))
         with self.assertRaisesRegex(ValueError, "TASK_DUPLICATE"):
             project_tasks(duplicate)
-        for task_id in ("", "../escape", " spaced ", "a" * 129):
+        for task_id in ("", "task-1", "../escape", " spaced ", "a" * 129, "t_1A2B3C4D"):
             with self.subTest(task_id=task_id), self.assertRaisesRegex(ValueError, "TASK_ID"):
                 project_tasks(snapshot(task_id))
 
