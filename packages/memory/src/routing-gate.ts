@@ -17,6 +17,7 @@ import { existsSync } from 'fs';
 import { randomUUID } from 'crypto';
 import { getMemoryDbPath } from 'zouroboros-core';
 import { searchFactsHybrid } from './facts.js';
+import { searchFactsGraphBoosted, extractQueryEntities } from './graph.js';
 import type { MemorySearchResult } from 'zouroboros-core';
 
 type MemoryConfig = import('zouroboros-core').MemoryConfig;
@@ -143,8 +144,11 @@ export function logMemoryRoute(
 }
 
 /**
- * Wrap searchFactsHybrid with the routing gate. Behaviour-preserving — same
- * results, plus a logged routing decision per call.
+ * Wrap searchFactsHybrid with the routing gate, then fuse the graph signal.
+ * Three-signal retrieval (keyword + vector + graph) is the default whenever
+ * config.graphBoost is enabled (default true); set graphBoost: false to opt
+ * out. The graph boost is purely additive — on any failure it returns the
+ * hybrid results unchanged.
  *
  * Callers should prefer this over direct searchFactsHybrid() so all unified
  * memory queries pass through the gate.
@@ -156,12 +160,22 @@ export async function routeMemoryQuery(
 ): Promise<MemorySearchResult[]> {
   const decision = classifyMemoryQuery(query);
   const start = Date.now();
-  const results = await searchFactsHybrid(query, config, {
+  let results = await searchFactsHybrid(query, config, {
     limit: options.limit,
     vectorWeight: options.vectorWeight,
     rerank: options.rerank,
     persona: options.persona,
   });
+  if (config.graphBoost !== false) {
+    try {
+      const queryEntities = extractQueryEntities(query);
+      results = searchFactsGraphBoosted(results, queryEntities, {
+        limit: options.limit ?? 10,
+      });
+    } catch {
+      // Graph boost is additive; never break the search path.
+    }
+  }
   const latency = Date.now() - start;
   logMemoryRoute(query, decision, latency, results.length, options.persona, options.sessionId);
   return results;

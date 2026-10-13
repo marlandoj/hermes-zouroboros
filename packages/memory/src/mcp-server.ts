@@ -83,7 +83,7 @@ const TOOLS: McpToolDefinition[] = [
         entity: { type: 'string', description: 'Filter by entity' },
         category: { type: 'string', description: 'Filter by category' },
         limit: { type: 'number', description: 'Max results (default 10)' },
-        mode: { type: 'string', enum: ['keyword', 'hybrid', 'deep'], description: 'Search mode: keyword (exact), hybrid (RRF fusion), deep (hybrid + rerank + CoT answer)' },
+        mode: { type: 'string', enum: ['keyword', 'hybrid', 'deep'], description: 'Search mode: keyword (exact), hybrid (keyword + vector + graph RRF fusion), deep (hybrid + rerank + CoT answer)' },
         disposition: { type: 'object', description: 'Optional disposition knobs for deep-mode answering, each 0..1 (skepticism, literalism, empathy)', properties: { skepticism: { type: 'number' }, literalism: { type: 'number' }, empathy: { type: 'number' } } },
       },
       required: ['query'],
