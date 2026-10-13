@@ -546,14 +546,14 @@ try {
                 original=[dict(row) for row in db.execute('SELECT * FROM facts ORDER BY id')]
             receipt=next(row for row in original if row['entity']=='hermes-zouroboros-installation')
             ordinary=next(row for row in original if row['entity']=='ordinary-fixture')
-            self.assertEqual(ordinary['decay_class'],'medium')
+            self.assertEqual(ordinary['decay_class'],'stable')
             self.assertEqual(ordinary['expires_at']-ordinary['created_at'],90*24*3600)
             config=fixture.config.read_bytes()
             for retry in range(2):
                 with self.subTest(retry=retry):
                     # Simulate the legacy medium receipt's expiration each time.
                     with closing(sqlite3.connect(fixture.data/'memory.db')) as db, db:
-                        db.execute("UPDATE facts SET decay_class='medium', expires_at=1 WHERE id=?",(receipt['id'],))
+                        db.execute("UPDATE facts SET decay_class='stable', expires_at=1 WHERE id=?",(receipt['id'],))
                         before_check=db.execute('SELECT * FROM facts ORDER BY id').fetchall()
                     checked=fixture.run('--check')
                     self.assertEqual(checked.returncode,0,checked.stdout+checked.stderr)
@@ -582,11 +582,11 @@ try {
                 receipt=dict(db.execute('SELECT * FROM facts').fetchone())
                 # Historical exact duplicate plus an older user-owned lookalike.
                 duplicate={**receipt,'id':'fixture-historical-duplicate','created_at':receipt['created_at']+1,
-                           'decay_class':'medium','expires_at':1}
+                           'decay_class':'stable','expires_at':1}
                 # Each six-field identity discriminator must independently
                 # protect an older lookalike from receipt recovery.
                 lookalikes=[{**receipt,'id':'fixture-lookalike-'+field,field:value,
-                             'created_at':receipt['created_at']-1,'decay_class':'short','expires_at':1}
+                             'created_at':receipt['created_at']-1,'decay_class':'active','expires_at':1}
                             for field,value in [('source','manual'),('persona','operator'),('category','decision')]]
                 for row in [duplicate,*lookalikes]:
                     columns=','.join(row)
@@ -594,7 +594,7 @@ try {
             for retry in range(2):
                 with self.subTest(retry=retry):
                     with closing(sqlite3.connect(fixture.data/'memory.db')) as db, db:
-                        db.execute("UPDATE facts SET decay_class='medium', expires_at=1 WHERE id=?",(receipt['id'],))
+                        db.execute("UPDATE facts SET decay_class='stable', expires_at=1 WHERE id=?",(receipt['id'],))
                     result=fixture.run()
                     self.assertEqual(result.returncode,0,result.stdout+result.stderr)
                     verification=json.loads(result.stdout.strip().splitlines()[-1])['verification']
@@ -629,13 +629,13 @@ try {
             receipt=rows()[receipt['id']]
             for row in rows().values():
                 if row['id']!=receipt['id']:
-                    self.assertEqual(row['decay_class'],'medium')
+                    self.assertEqual(row['decay_class'],'stable')
                     self.assertEqual(row['expires_at']-row['created_at'],90*24*3600)
         else:
             with closing(sqlite3.connect(fixture.data/'memory.db')) as db, db:
                 for i in range(30):
                     duplicate={**receipt,'id':'fixture-newer-duplicate-'+str(i),'created_at':receipt['created_at']+i+1,
-                               'decay_class':'medium','expires_at':receipt['created_at']+90*24*3600}
+                               'decay_class':'stable','expires_at':receipt['created_at']+90*24*3600}
                     db.execute('INSERT INTO facts ('+','.join(duplicate)+') VALUES ('+','.join('?' for _ in duplicate)+')',tuple(duplicate.values()))
         originals=rows()
         self.assertEqual(len(originals),31)
@@ -648,7 +648,7 @@ try {
         for retry in range(2):
             with self.subTest(kind=kind,retry=retry):
                 with closing(sqlite3.connect(fixture.data/'memory.db')) as db, db:
-                    db.execute("UPDATE facts SET decay_class='medium', expires_at=1 WHERE id=?",(receipt['id'],))
+                    db.execute("UPDATE facts SET decay_class='stable', expires_at=1 WHERE id=?",(receipt['id'],))
                 before_check=rows()
                 checked=fixture.run('--check')
                 self.assertEqual(checked.returncode,0,checked.stdout+checked.stderr)
@@ -804,7 +804,7 @@ try {
             for retry in range(2):
                 with self.subTest(expired_retry=retry):
                     with closing(sqlite3.connect(fixture.data/'memory.db')) as db, db:
-                        db.execute("UPDATE facts SET decay_class='medium', expires_at=1 WHERE id=?",(receipt_id,))
+                        db.execute("UPDATE facts SET decay_class='stable', expires_at=1 WHERE id=?",(receipt_id,))
                     again=fixture.run();self.assertEqual(again.returncode,0,again.stdout+again.stderr)
                     self.assertTrue(json.loads(again.stdout.strip().splitlines()[-1])['verification']['memoryRoundTrip'])
                     with closing(sqlite3.connect(fixture.data/'memory.db')) as db, db:
