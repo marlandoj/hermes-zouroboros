@@ -55,13 +55,13 @@ flowchart LR
 | Capability | Included behavior |
 | --- | --- |
 | Shared memory | Store/search work facts through Hermes MCP or the CLI; local SQLite, no API key needed for keyword search |
-| Swarm | Validate task dependencies, prepare reviewable campaigns, explicitly run bounded local Hermes workers with failure exit codes |
+| Swarm | Validate task dependencies, prepare reviewable campaigns, run bounded local workers with failure exit codes; persona injection, per-run cost attribution, model-catalog fallback; 84 tests, 30+ ops scripts |
 | Hermes integration | Isolated profile, absolute MCP wiring, portable one-shot executor; provider/model configuration stays under operator control |
 | Factory intake | Read a qualified Hermes Kanban board, reject schema drift, select ready/unclaimed work; offline deterministic work projection |
 | VPS operations | Setup and doctor commands, optional loopback memory-gate systemd template, backup guidance, CI and portable-state verification |
 | Source | Nine Zouroboros packages plus the upstream CLI dependency closure, with per-file source hashes |
 
-The default executor is Hermes. The bundled swarm library supports additional harnesses, but adding one requires reviewing its bridge and registry settings for your host. Installation adds the Zouroboros MCP connection to the selected existing normal Hermes profile while preserving unrelated settings; it does not change existing VPS services or other profiles.
+The default executor is Hermes. The bundled swarm library (`packages/swarm/`) carries the reliability remediation wave: persona prompt/MCP injection from a 33-persona neutral registry, per-run cost-ledger attribution, a wayfinder suggestion seam (shadow by default, explicitly flag-gated), and a model-catalog last-known-good fallback — with 84 passing tests, 30+ ops scripts (campaign runner, dep-graph, eval harnesses, Qdrant indexer), and ACP→bridge transport fallbacks for four executors (claude-code, hermes, codex, opencode). Host paths resolve from env/XDG (`src/host-roots.ts`); the legacy `/var/lib/zouroboros` layout is restorable with `ZOUROBOROS_STATE_DIR`. It supports additional harnesses, but adding one requires reviewing its bridge and registry settings for your host. Installation adds the Zouroboros MCP connection to the selected existing normal Hermes profile while preserving unrelated settings; it does not change existing VPS services or other profiles.
 
 ## Start here
 
@@ -159,7 +159,7 @@ bun scripts/ci/leak-gate.ts          # needs GITLEAKS_BIN; see docs/skills.md
 bun scripts/ci/skills-parity.ts check
 ```
 
-Tests include a real MCP client handshake, SQLite memory round trip, factory integrity checks, fake-executor campaigns, and relocation of portable state. They do not make paid model calls. See [verification](docs/verification.md), [operations](docs/operations.md), and [source provenance](provenance/workspace.json).
+Tests include a real MCP client handshake, SQLite memory round trip, factory integrity checks, fake-executor campaigns, and relocation of portable state. They do not make paid model calls. The swarm package ships its own suite — 84 tests (`bun test src/__tests__/ scripts/__tests__/` in `packages/swarm/`) covering the decision gate, executor selector, RAG enrichment, shared catalog, budget governor, and ops scripts. Dependencies install cleanly (`pnpm install`) and the full workspace builds (`pnpm run build`, all green). See [verification](docs/verification.md), [operations](docs/operations.md), and [source provenance](provenance/workspace.json).
 
 ## Licensing
 
