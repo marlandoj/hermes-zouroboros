@@ -12,7 +12,7 @@ import {
 } from 'zouroboros-memory';
 import { paths, repoRoot, settings } from '../../../../integration/profile.ts';
 
-const DECAY = ['permanent', 'long', 'medium', 'short'] as const;
+const DECAY = ['permanent', 'stable', 'active', 'session', 'checkpoint'] as const;
 const CATEGORY = ['preference', 'fact', 'decision', 'convention', 'other', 'reference', 'project'] as const;
 const OUTCOME = ['success', 'failure', 'resolved', 'ongoing'] as const;
 type Decay = typeof DECAY[number];

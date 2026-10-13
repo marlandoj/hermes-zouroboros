@@ -13,12 +13,13 @@ import type { MemoryConfig, MemoryEntry, MemorySearchResult, DecayClass } from '
 /** Calibrated against the 2026-09-09 production shadow probe and 2026-09-10 post-threshold probe (RAG-2). */
 export const DEFAULT_VECTOR_SIMILARITY_THRESHOLD = 0.46;
 
-// Decay class TTLs in seconds
+// Decay class TTLs in seconds (activity-set vocabulary)
 const TTL_DEFAULTS: Record<DecayClass, number | null> = {
   permanent: null,
-  long: 365 * 24 * 3600,
-  medium: 90 * 24 * 3600,
-  short: 30 * 24 * 3600,
+  stable: 90 * 24 * 3600,
+  active: 14 * 24 * 3600,
+  session: 24 * 3600,
+  checkpoint: 4 * 3600,
 };
 
 type Category = 'preference' | 'fact' | 'decision' | 'convention' | 'other' | 'reference' | 'project';
@@ -65,7 +66,7 @@ export async function storeFact(
   const db = getDatabase();
   const id = randomUUID();
   const now = Math.floor(Date.now() / 1000);
-  const decay = input.decay || 'medium';
+  const decay = input.decay || 'stable';
   const ttl = TTL_DEFAULTS[decay];
   const expiresAt = ttl ? now + ttl : null;
 

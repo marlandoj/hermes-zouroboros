@@ -61,7 +61,7 @@ bun "$Z" where        # prints the database path in use
 All commands print JSON on stdout. Options:
 
 - `--category`: `preference | fact | decision | convention | reference | project | other` (default `fact`)
-- `--decay`: `permanent | long | medium | short` (default `medium`)
+- `--decay`: `permanent | stable | active | session | checkpoint` (default `stable`)
 - `--outcome`: `success | failure | resolved | ongoing`
 - `--since` / `--until`: ISO date or a window such as `30m`, `24h`, `7d`, `4w`
 

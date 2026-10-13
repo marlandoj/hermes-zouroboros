@@ -325,7 +325,7 @@ function stagePersist(plan: Plan, sources: Source[]) {
   if (!DO_PERSIST) { log("persist: disabled"); return; }
   if (!existsSync(ZMEM)) { log("persist: zo-memory-system skill not found — skipping (soft)"); return; }
   const val = `Deep research run on "${plan.query}" (${plan.domain}): ${sources.length} sources across ${plan.subQuestions.length} sub-questions. Report: ${artPath("report.md")}`;
-  const res = spawnSync(process.execPath, [ZMEM, "store", "--entity", "deep-research", "--key", slug, "--value", val, "--decay", "long", "--category", "project"], { encoding: "utf8", timeout: 60_000 });
+  const res = spawnSync(process.execPath, [ZMEM, "store", "--entity", "deep-research", "--key", slug, "--value", val, "--decay", "stable", "--category", "project"], { encoding: "utf8", timeout: 60_000 });
   if (res.status === 0) log("persist: run stored to profile memory");
   else log(`persist: memory store non-zero (soft) — ${(res.stderr || "").slice(0, 120)}`);
 }

@@ -374,7 +374,7 @@ function createLiveDependencies(): RagShadowDependencies {
     captureIntervalMinutes: 30,
     graphBoost: true,
     hydeExpansion: false,
-    decayConfig: { permanent: Infinity, long: 365, medium: 90, short: 30 },
+    decayConfig: { permanent: Infinity, stable: 90, active: 14, session: 1, checkpoint: 4 / 24 },
     reranker: { enabled: false },
   };
   let memoryInitialized = false;

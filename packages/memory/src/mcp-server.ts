@@ -67,7 +67,7 @@ const TOOLS: McpToolDefinition[] = [
         value: { type: 'string', description: 'The fact content' },
         key: { type: 'string', description: 'Optional key for the fact' },
         category: { type: 'string', enum: ['preference', 'fact', 'decision', 'convention', 'other', 'reference', 'project'] },
-        decay: { type: 'string', enum: ['permanent', 'long', 'medium', 'short'] },
+        decay: { type: 'string', enum: ['permanent', 'stable', 'active', 'session', 'checkpoint'] },
         importance: { type: 'number', description: 'Importance score (default 1.0)' },
       },
       required: ['entity', 'value'],
@@ -573,7 +573,7 @@ if (import.meta.main) {
     captureIntervalMinutes: 30,
     graphBoost: true,
     hydeExpansion: false,
-    decayConfig: { permanent: Infinity, long: 365, medium: 90, short: 30 },
+    decayConfig: { permanent: Infinity, stable: 90, active: 14, session: 1, checkpoint: 4 / 24 },
   };
 
   startMcpServer(config);

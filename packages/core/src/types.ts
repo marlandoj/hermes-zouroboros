@@ -10,7 +10,7 @@
 
 export type UUID = string;
 export type Timestamp = string; // ISO 8601
-export type DecayClass = 'permanent' | 'long' | 'medium' | 'short';
+export type DecayClass = 'permanent' | 'stable' | 'active' | 'session' | 'checkpoint';
 
 export type DeepPartial<T> = T extends readonly unknown[]
   ? T
@@ -127,9 +127,10 @@ export interface MemoryConfig {
   hydeExpansion: boolean;
   decayConfig: {
     permanent: number;
-    long: number;      // days
-    medium: number;    // days
-    short: number;     // days
+    stable: number;     // days
+    active: number;     // days
+    session: number;    // days
+    checkpoint: number; // days
   };
   reranker?: {
     enabled: boolean;

@@ -118,7 +118,7 @@ The atomic unit of memory is a `Fact`: an entity/key/value triple in one local S
 | `RagCorpus` | Candidate documents qualified for retrieval | areas: `swarm`, `vault`, `autoloop`, `eval`, `persona` | `packages/rag/src/` |
 | `GraphRagNode` | Relational graph over factory operations | `Execution`, `Ticket`, `CostEntry`, `GateDecision`, `FactoryRecord` | `skills/zouroboros/graphrag-relational` |
 
-Two decay vocabularies coexist. The memory package writes `permanent`, `long`, `medium`, `short` (TTL none, 365, 90, 30 days) and enforces them with a `CHECK` constraint; the swarm types declare `permanent`, `stable`, `active`, `session`, `checkpoint`, the set the upstream `zo-memory-system` skill uses. The same split exists upstream in zouroboros-workspace, so this is unresolved drift rather than a distribution choice. This ontology records both and treats neither as canonical until one is chosen.
+Decay vocabulary (unified 2026-10-13): the activity set `permanent`, `stable`, `active`, `session`, `checkpoint` (TTL none, 90, 14, 1, 1/6 days) is canonical everywhere — memory package, swarm types, and the upstream `zo-memory-system` skill. The old longevity set (`long`, `medium`, `short`) is retired; existing databases are migrated (`008_unify_decay_vocabulary`: `long`→`stable`, `medium`→`stable`, `short`→`active`; per-row `expires_at` untouched).
 
 ## Factory
 

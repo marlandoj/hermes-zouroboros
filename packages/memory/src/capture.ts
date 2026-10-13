@@ -156,7 +156,7 @@ export async function autoCapture(
       persona: options.persona,
       category: fact.category as any,
       source,
-      decay: 'medium',
+      decay: 'stable',
       importance: fact.category === 'decision' ? 1.5 : 1.0,
     }, config);
     result.facts.push(stored);

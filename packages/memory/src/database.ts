@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS facts (
   value TEXT NOT NULL,
   text TEXT NOT NULL,
   category TEXT DEFAULT 'fact' CHECK(category IN ('preference', 'fact', 'decision', 'convention', 'other', 'reference', 'project')),
-  decay_class TEXT DEFAULT 'medium' CHECK(decay_class IN ('permanent', 'long', 'medium', 'short')),
+  decay_class TEXT DEFAULT 'stable' CHECK(decay_class IN ('permanent', 'stable', 'active', 'session', 'checkpoint')),
   importance REAL DEFAULT 1.0,
   source TEXT,
   created_at INTEGER DEFAULT (strftime('%s', 'now')),
@@ -407,6 +407,52 @@ export function runMigrations(config: MemoryConfig): void {
           created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         );
         CREATE INDEX IF NOT EXISTS idx_crystallization_events_id ON crystallization_events(crystallization_id, created_at);
+      `,
+    },
+    {
+      name: '008_unify_decay_vocabulary',
+      sql: `
+        -- Adopt the activity-set decay vocabulary
+        -- (permanent/stable/active/session/checkpoint) everywhere.
+        -- Relabels: long -> stable, medium -> stable, short -> active.
+        -- expires_at is per-row and left untouched, so existing rows keep
+        -- their computed expiry; only the label (and future-write TTLs) change.
+        -- The facts table is rebuilt because SQLite cannot ALTER a CHECK.
+        -- (PRAGMA foreign_keys is never enabled in this codebase, so the
+        -- DROP does not cascade into fact_embeddings.)
+        CREATE TABLE IF NOT EXISTS facts_new (
+          id TEXT PRIMARY KEY,
+          persona TEXT,
+          entity TEXT NOT NULL,
+          key TEXT,
+          value TEXT NOT NULL,
+          text TEXT NOT NULL,
+          category TEXT DEFAULT 'fact' CHECK(category IN ('preference', 'fact', 'decision', 'convention', 'other', 'reference', 'project')),
+          decay_class TEXT DEFAULT 'stable' CHECK(decay_class IN ('permanent', 'stable', 'active', 'session', 'checkpoint')),
+          importance REAL DEFAULT 1.0,
+          source TEXT,
+          created_at INTEGER DEFAULT (strftime('%s', 'now')),
+          expires_at INTEGER,
+          last_accessed INTEGER DEFAULT (strftime('%s', 'now')),
+          confidence REAL DEFAULT 1.0,
+          metadata TEXT
+        );
+        INSERT INTO facts_new (id, persona, entity, key, value, text, category, decay_class, importance, source, created_at, expires_at, last_accessed, confidence, metadata)
+          SELECT id, persona, entity, key, value, text, category,
+            CASE decay_class
+              WHEN 'long' THEN 'stable'
+              WHEN 'medium' THEN 'stable'
+              WHEN 'short' THEN 'active'
+              ELSE decay_class
+            END,
+            importance, source, created_at, expires_at, last_accessed, confidence, metadata
+          FROM facts;
+        DROP TABLE facts;
+        ALTER TABLE facts_new RENAME TO facts;
+        CREATE INDEX IF NOT EXISTS idx_facts_entity_key ON facts(entity, key);
+        CREATE INDEX IF NOT EXISTS idx_facts_decay ON facts(decay_class, expires_at);
+        CREATE INDEX IF NOT EXISTS idx_facts_category ON facts(category);
+        CREATE INDEX IF NOT EXISTS idx_facts_persona ON facts(persona);
       `,
     },
   ];

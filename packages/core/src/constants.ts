@@ -45,9 +45,10 @@ export const DEFAULT_CAPTURE_INTERVAL = 30; // minutes
 
 export const DECAY_DAYS = {
   permanent: Infinity,
-  long: 365,
-  medium: 90,
-  short: 30,
+  stable: 90,
+  active: 14,
+  session: 1, // 24h
+  checkpoint: 4 / 24, // 4h
 };
 
 // ============================================================================
@@ -214,7 +215,7 @@ export const KNOWN_CAPABILITY_IDS = [
   'distribution-and-rollback',
 ] as const;
 export const VALID_LATENCY_PREFERENCES = ['fast', 'balanced', 'quality'] as const;
-export const VALID_DECAY_CLASSES = ['permanent', 'long', 'medium', 'short'] as const;
+export const VALID_DECAY_CLASSES = ['permanent', 'stable', 'active', 'session', 'checkpoint'] as const;
 export const VALID_TASK_TYPES = [
   'coding',
   'review',

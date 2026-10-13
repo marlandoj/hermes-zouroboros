@@ -205,21 +205,21 @@ function evalConfig(dbPath: string): MemoryConfig {
     captureIntervalMinutes: 30,
     graphBoost: false,
     hydeExpansion: false,
-    decayConfig: { permanent: Infinity, long: 365, medium: 90, short: 30 },
+    decayConfig: { permanent: Infinity, stable: 90, active: 14, session: 1, checkpoint: 4 / 24 },
   };
 }
 
 async function seedBank(config: MemoryConfig): Promise<void> {
   for (const f of MM_FACTS) {
-    await storeFact({ entity: f.entity, key: f.key, value: f.value, persona: f.persona, importance: f.importance, category: 'fact', decay: 'long', source: 'eval-fixture' }, config);
+    await storeFact({ entity: f.entity, key: f.key, value: f.value, persona: f.persona, importance: f.importance, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
   }
   for (const o of ONEOFF_FACTS) {
-    await storeFact({ entity: o.entity, key: 'fact', value: o.value, importance: 0.5, category: 'fact', decay: 'long', source: 'eval-fixture' }, config);
+    await storeFact({ entity: o.entity, key: 'fact', value: o.value, importance: 0.5, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
   }
   // Update groups: stale fact first with HIGHER importance, fresh fact second.
   for (const g of UPDATE_GROUPS) {
-    await storeFact({ entity: g.entity, key: 'state', value: g.oldValue, importance: 0.85, category: 'fact', decay: 'long', source: 'eval-fixture' }, config);
-    await storeFact({ entity: g.entity, key: 'state', value: g.newValue, importance: 0.8, category: 'fact', decay: 'long', source: 'eval-fixture' }, config);
+    await storeFact({ entity: g.entity, key: 'state', value: g.oldValue, importance: 0.85, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
+    await storeFact({ entity: g.entity, key: 'state', value: g.newValue, importance: 0.8, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
   }
   // Contested groups + pending conflict rows (same DDL as conflict-resolver.ts).
   const db = getDatabase();
@@ -235,8 +235,8 @@ async function seedBank(config: MemoryConfig): Promise<void> {
     );
   `);
   for (const g of CONTESTED_GROUPS) {
-    const a = await storeFact({ entity: g.entity, key: 'claim', value: g.valueA, importance: 0.7, category: 'fact', decay: 'long', source: 'eval-fixture' }, config);
-    const b = await storeFact({ entity: g.entity, key: 'claim', value: g.valueB, importance: 0.7, category: 'fact', decay: 'long', source: 'eval-fixture' }, config);
+    const a = await storeFact({ entity: g.entity, key: 'claim', value: g.valueA, importance: 0.7, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
+    const b = await storeFact({ entity: g.entity, key: 'claim', value: g.valueB, importance: 0.7, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
     db.run(
       `INSERT INTO fact_conflicts (id, fact_id, conflicting_fact_id, conflict_type, resolution) VALUES (?, ?, ?, 'semantic', 'pending')`,
       [randomUUID(), a.id, b.id],

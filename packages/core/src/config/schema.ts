@@ -65,9 +65,10 @@ export { SecretReferenceSchema, SecretReferencesSchema } from './secret-referenc
 
 const DecayConfigSchema = z.object({
   permanent: positiveNumber,
-  long: positiveNumber,
-  medium: positiveNumber,
-  short: positiveNumber,
+  stable: positiveNumber,
+  active: positiveNumber,
+  session: positiveNumber,
+  checkpoint: positiveNumber,
 }).strict();
 
 const RerankerConfigSchema = z.object({

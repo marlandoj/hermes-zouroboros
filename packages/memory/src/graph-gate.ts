@@ -313,7 +313,7 @@ export function fuseTextAndGraph(
   });
   graph.forEach((r, i) => {
     const c: FusedCandidate = byId.get(r.id) ?? {
-      id: r.id, entity: r.entity, key: r.key, value: r.value, decay: String(r.decay_class ?? 'medium'), rrf: 0,
+      id: r.id, entity: r.entity, key: r.key, value: r.value, decay: String(r.decay_class ?? 'stable'), rrf: 0,
     };
     c.graph = r;
     c.rrf += graphWeight / (RRF_K + i + 1);
