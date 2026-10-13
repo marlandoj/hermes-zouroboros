@@ -2,7 +2,10 @@
 
 import { $ } from "bun";
 
-const SCRIPT = "/home/workspace/Skills/zo-swarm-orchestrator/scripts/tier-resolve.ts";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), "tier-resolve.ts");
 
 interface TestCase {
   prompt: string;

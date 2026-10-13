@@ -10,6 +10,7 @@ import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { finishCase, classifyFailure } from "./native-swarm-bench-support";
+import { workspaceRoot, stateRoot } from '../src/host-roots.js';
 const args = process.argv.slice(2);
 const option = (name: string, fallback: string) => {
   const i = args.indexOf(name);
@@ -17,16 +18,16 @@ const option = (name: string, fallback: string) => {
 };
 if (args.includes("--help")) {
   console.log(
-    "bun native-swarm-bench.ts --workspace /opt/zouroboros/repo [--out NEW_DIR] [--only offline|models|executor|bridge|dag|fallback|subagents|campaign] [--harness ID] [--model MODEL] [--case ID] [--max-calls 36] [--budget 10]"
+    "bun native-swarm-bench.ts --workspace REPO_DIR [--out NEW_DIR] [--only offline|models|executor|bridge|dag|fallback|subagents|campaign] [--harness ID] [--model MODEL] [--case ID] [--max-calls 36] [--budget 10]"
   );
   process.exit(0);
 }
-const runtime = resolve(option("--workspace", "/opt/zouroboros/repo"));
+const runtime = resolve(option("--workspace", process.env.ZOUROBOROS_WORKSPACE ?? workspaceRoot()));
 const out = resolve(
   option(
     "--out",
-    "/var/lib/zouroboros/swarm-bench/" +
-      new Date().toISOString().replace(/[:.]/g, "-")
+    join(process.env.SWARM_BENCH_OUT ?? join(stateRoot(), "swarm-bench"),
+      new Date().toISOString().replace(/[:.]/g, "-"))
   )
 );
 if (existsSync(out) && readdirSync(out).length)

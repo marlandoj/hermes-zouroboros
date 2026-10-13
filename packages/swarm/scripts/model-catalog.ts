@@ -3,6 +3,7 @@ import { appendFileSync, mkdirSync, renameSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname } from 'node:path';
 import {
+import { workspaceRoot, stateRoot, runtimeRoot } from '../src/host-roots.js';
   buildModelCatalog,
   DEFAULT_MODEL_CATALOG_PATH,
   publishModelCatalog,
@@ -11,7 +12,7 @@ import {
   type ModelCatalog,
 } from '../src/routing/model-catalog.js';
 
-const workspace = process.env.SWARM_WORKSPACE ?? process.env.ZOUROBOROS_WORKSPACE_ROOT ?? '/home/workspace';
+const workspace = process.env.SWARM_WORKSPACE ?? process.env.ZOUROBOROS_WORKSPACE_ROOT ?? workspaceRoot();
 const runtimeRoot = `${workspace}/.runtime/zouroboros-model-intelligence/v1/current`;
 const registryPath = `${workspace}/packages/swarm/src/executor/registry/executor-registry.json`;
 const outputPath = process.env.SWARM_MODEL_CATALOG_PATH ?? DEFAULT_MODEL_CATALOG_PATH;

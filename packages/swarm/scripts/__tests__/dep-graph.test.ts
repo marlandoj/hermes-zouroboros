@@ -4,7 +4,7 @@ import { join } from "path";
 
 const SWARM_SRC = join(import.meta.dir, "../../src");
 // Scan the repository this test was checked out into. A hard-coded
-// /home/workspace/zouroboros only resolves in the operator workspace and
+// operator-workspace path only resolves on the source host and
 // throws ENOENT on any CI-shaped checkout.
 const REPO_ROOT = process.env.SWARM_REPO_ROOT || join(import.meta.dir, "../../../..");
 

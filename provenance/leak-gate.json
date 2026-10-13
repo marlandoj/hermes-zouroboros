@@ -211,6 +211,22 @@
         "personal-data:email-address"
       ],
       "reason": "Upstream AgentMail documentation (MIT): illustrative role addresses only (agent@/support@/sales@/billing@/router@ on the vendor service domain, boss@/known-customer@ company.com, attacker@ evil.com, a random local part on agents.example). No personal data; reviewed 2026-10-09 (t1-portable)."
+    },
+    {
+      "path": "packages/swarm/src/__tests__/shared-catalog.test.ts",
+      "sha256": "3d1c99814ec4c19a36dac54a21d9413a3e09a6f7fbbc6b39760440780519dd23",
+      "rules": [
+        "host-path:host-state-root"
+      ],
+      "reason": "Test fixture: verifies the legacy state-dir layout is honored when ZOUROBOROS_STATE_DIR points at the old host path, and NOT used otherwise. The literal is the assertion target; reviewed 2026-10-13."
+    },
+    {
+      "path": "packages/swarm/package.json",
+      "sha256": "aeb62822f934c222414743c791553f6f93a2794f4b58242069f90c8b507d947e",
+      "rules": [
+        "personal-data:operator-name-2"
+      ],
+      "reason": "repository.url must contain the GitHub owner/repo; public repo metadata, not a leak. Reviewed 2026-10-13."
     }
   ],
   "contextAllowances": [

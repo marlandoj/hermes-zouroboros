@@ -7,8 +7,9 @@
 import { spawn } from "child_process";
 import { existsSync } from "fs";
 import { join } from "path";
+import { workspaceRoot } from '../src/host-roots.js';
 
-const WORKSPACE = "/home/workspace";
+const WORKSPACE = process.env.ZOUROBOROS_WORKSPACE ?? workspaceRoot();
 const BRIDGES_DIR = join(WORKSPACE, "Skills", "zo-swarm-executors", "bridges");
 
 interface BridgeTest {
