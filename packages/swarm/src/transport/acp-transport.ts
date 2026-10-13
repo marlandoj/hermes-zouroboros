@@ -993,6 +993,18 @@ export function formatWayfinderPromptSuffix(pick: { pick: string; pickPath?: str
   return `\n\n[WAYFINDER SUGGESTION]\nRelevant skill for this task: ${pick.pick}${where}. Consider reading its SKILL.md if it applies to the task.`;
 }
 
+/** A ranking resolved synchronously for prompt injection. */
+export interface WayfinderLivePick {
+  pick: string;
+  pickPath?: string;
+  invocationId: string;
+  rowPath: string;
+  harness: string;
+  engineDir: string;
+  stateHome: string;
+  roots: string;
+}
+
 /**
  * Live-injection path: run the ranking synchronously, bounded by timeoutMs,
  * and return the pick for prompt injection.
