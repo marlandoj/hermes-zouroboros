@@ -116,7 +116,14 @@ The atomic unit of memory is a `Fact`: an entity/key/value triple in one local S
 | `CognitiveProfile` | Learned traits and preferences for one entity | `traits`, `preferences`, `interaction_count` | `packages/memory/src/profiles.ts` |
 | `Instinct` | A learned trigger-response pattern with confidence | `status` (`candidate`, `active`, `suspended`, `retired`), `confidence`, `trigger`, `pattern` | `packages/core/src/instincts.ts`, `skills/zouroboros/instinct-harvester` |
 | `RagCorpus` | Candidate documents qualified for retrieval | areas: `swarm`, `vault`, `autoloop`, `eval`, `persona` | `packages/rag/src/` |
-| `GraphRagNode` | Relational graph over factory operations | `Execution`, `Ticket`, `CostEntry`, `GateDecision`, `FactoryRecord` | `skills/zouroboros/graphrag-relational` |
+| `GraphRagNode` | Relational graph over factory operations (embedded FalkorDB, read-only Cypher) | `Execution`, `Ticket`, `CostEntry`, `GateDecision`, `FactoryRecord` | `skills/zouroboros/graphrag-relational` |
+
+> Naming note: "GraphRAG" is also used for the SQLite-side community
+> summarization over the `fact_links` knowledge graph (`packages/memory`
+> `graph.ts`, "GraphRAG Edge 2024"). The two are different systems: use
+> vector RAG for prose similarity, the FalkorDB graph for multi-hop joins
+> and "does this edge exist" questions, and the `fact_links` graph for
+> memory-local association.
 
 Decay vocabulary (unified 2026-10-13): the activity set `permanent`, `stable`, `active`, `session`, `checkpoint` (TTL none, 90, 14, 1, 1/6 days) is canonical everywhere — memory package, swarm types, and the upstream `zo-memory-system` skill. The old longevity set (`long`, `medium`, `short`) is retired; existing databases are migrated (`008_unify_decay_vocabulary`: `long`→`stable`, `medium`→`stable`, `short`→`active`; per-row `expires_at` untouched).
 

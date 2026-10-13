@@ -1,76 +1,47 @@
 # zouroboros-rag
 
-Retrieval-Augmented Generation for the Zouroboros ecosystem. Provides context injection across 5 areas: swarm orchestration, vault search, autoloop experiments, three-stage eval, and persona memory.
+Corpus-qualification library for the Zouroboros RAG stack. This package does
+**not** talk to Qdrant directly (no vector-DB dependencies) — it prepares,
+chunks, and qualifies the corpora that Qdrant collections are built from, and
+provides the shadow-retrieval path used to A/B a candidate embedding model
+against the incumbent.
 
-> Consolidated from `Projects/zouroboros-rag-expansion/` into the Zouroboros monorepo (2026-04-01).
+> Distribution note: the script-heavy RAG runtime (`qdrant-rag-mcp.ts`,
+> `rag-pipeline.ts`, `daily-rag-maintenance.ts`, …) lives in the upstream
+> monorepo, not in this distribution. This package ships the library
+> half: chunking, corpus assembly, qualification policy, and retrieval
+> through injected dependencies.
 
-## Scripts
+## What's here (`src/`)
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `rag-swarm-retrieval.ts` | Episode/procedure retrieval and completed-result capture for swarm routing | `bun scripts/rag-swarm-retrieval.ts --post-swarm ~/.swarm/results/swarm_xxx.json` |
-| `vault-hybrid.ts` | Semantic + wikilink graph RRF fusion search | `bun scripts/vault-hybrid.ts --hybrid "query"` |
-| `autoloop-memory.ts` | Experiment history recall for autoloop | `bun scripts/autoloop-memory.ts --query "optimize"` |
-| `eval-memory.ts` | Prior eval results and AC templates | `bun scripts/eval-memory.ts --prior /path/to/file.ts` |
-| `persona-memory-gate.ts` | Domain fact injection per persona | `bun scripts/persona-memory-gate.ts --persona "<persona>"` |
-| `seed-rag-config.ts` | Initialize config DB with 9 RAG configs | `bun scripts/seed-rag-config.ts` |
-| `daily-rag-maintenance.ts` | Unified daily maintenance for all 4 areas | `bun scripts/daily-rag-maintenance.ts run` |
-| `qdrant-rag-mcp.ts` | MCP server exposing `rag_search` over Qdrant collections | `bun scripts/qdrant-rag-mcp.ts` |
-| `rag-pipeline.ts` | Retrieval enhancement layer: cross-encoder rerank, HyDE, CRAG, RRF | imported by `qdrant-rag-mcp.ts` |
-| `ingest-hermes-docs-hybrid.ts` | Hybrid (BM25 sparse + dense) ingest for `hermes-docs` | `bun scripts/ingest-hermes-docs-hybrid.ts` |
+| File | Purpose |
+|---|---|
+| `index.ts` | RAG area config (`swarm`/`vault`/`autoloop`/`eval`/`persona`); re-exports |
+| `ingestion.ts` | Text chunking (1500 chars / 200 overlap), deterministic `sha256:` chunk IDs |
+| `candidate-corpus-builder.ts` | Candidate corpus assembly |
+| `candidate-collection.ts` | Corpus manifest: candidate embedding path = local `sentence-transformers/all-MiniLM-L6-v2` (384-dim, pinned revision) vs incumbent OpenAI `text-embedding-3-small` (1536-dim); minimums (500 docs / 2,000 chunks / 200 held-out queries); strata: code, documentation, governance, workflow_and_swarm, rag_and_memory_public_docs |
+| `candidate-qualification.ts` | Qualification batch format (sha-pinned batches for embedding) |
+| `candidate-policy.ts` | Fail-closed policy: the public candidate corpus may come from exactly one approved https repo (`ZOUROBOROS_CANDIDATE_REPOSITORY`; unset = no corpus) |
+| `candidate-retrieval.ts` | Retrieval through injected deps (embed via HTTP + Qdrant `/points/search` via `fetch`); shadow-only — results are telemetry, never consumed |
 
-### Pipeline enhancements (2026-05)
+## Consumer
 
-`rag-pipeline.ts` adds opt-in retrieval enhancements on top of dense vector search, surfaced through `rag_search` flags on the `qdrant-rag-mcp.ts` server:
+The only in-repo consumer is `packages/swarm` (`src/rag/shadow-comparator.ts`),
+which runs the 384-dim MiniLM candidate path alongside the incumbent on swarm
+tasks when `MODAL_RAG_SHADOW_ENABLED=1`. Candidate results are never used for
+enrichment — see the shadow experiment's decision status in the swarm docs.
 
-- **`--rerank`** — RankGPT-style cross-encoder reranking of candidate passages.
-- **`--hybrid`** — BM25 sparse + dense fusion via Reciprocal Rank Fusion (RRF); requires a hybrid-ingested collection (see `ingest-hermes-docs-hybrid.ts`).
-- **`--hyde`** — Hypothetical Document Embeddings query expansion.
-- **`--crag`** — Corrective-RAG verdict with query-rewrite fallback (folds in a Self-RAG-style reflection step).
+## The rest of the RAG picture
 
-> These scripts are dual-homed: the live runtime is the zo-memory-system Skill, mirrored here for durable history. `model-client.ts` re-exports the Skill's model client to keep the copies byte-identical. Production-readiness audit: `evaluations/eval-rag-enhancements-2026-05-28.md`.
-
-## Quick Start
-
-```bash
-cd packages/rag
-
-# Initialize config DB
-bun scripts/seed-rag-config.ts
-
-# Index vault files
-bun scripts/vault-hybrid.ts index
-
-# Run daily maintenance
-bun scripts/daily-rag-maintenance.ts run
-
-# Check status
-bun scripts/daily-rag-maintenance.ts status
-```
-
-## Dependencies
-
-- **zo-memory-system**: Shared facts DB at `~/.zo/memory/shared-facts.db`
-- **OpenAI**: Embeddings via `text-embedding-3-small` (model-client, 1536d)
-- **Bun**: Runtime (1.2+)
-
-## System State
-
-| Metric | Value |
-|--------|-------|
-| Facts in memory | 5,387 |
-| Swarm episodes | 104 |
-| Vault files indexed | 345 |
-| Wikilinks tracked | 11,506 |
-
-## Architecture
-
-```
-packages/rag/
-├── src/index.ts              # Type exports
-├── scripts/                  # CLI tools (7 scripts)
-├── data/rag-config.db        # SQLite config (9 configs)
-└── SPEC.md                   # Full technical specification
-```
-
-All scripts use `bun:sqlite` for DB access and OpenAI `text-embedding-3-small` (via model-client) for embeddings. No external npm dependencies required.
+- **Qdrant access**: raw REST in `packages/swarm/src/rag/enrichment.ts` and
+  `integration/qdrant-corpus.ts` (default `http://127.0.0.1:6333`); no Qdrant
+  client library is vendored.
+- **Collections are host-provisioned**: `zouroboros-code`, `shared-memory-facts`,
+  `code-docs` (plus `zouroboros-research`, `commerce-a-knowledge` upstream) are
+  expected to pre-exist on the Qdrant host. This distribution ships no indexer
+  and no Qdrant server — see `deploy/` (SQLite memory gate only). Missing
+  collections fail soft per query and are reported in RAG telemetry.
+- **Relational/graph questions**: `skills/zouroboros/graphrag-relational/`
+  (embedded FalkorDB, read-only Cypher over execution/ticket/gate/cost data).
+  Rule of thumb: vector RAG for prose similarity; the graph for multi-hop
+  joins and "does this edge exist" questions.
