@@ -129,7 +129,7 @@ if (command === 'store' || command === 'search') {
 
 // v4 subcommand routing — delegates to individual script CLIs
 if (command) {
-  const { execSync } = require('child_process');
+  const { spawnSync } = require('child_process');
   // When running from the compiled dist/ output, import.meta.dir points at
   // packages/memory/dist/. The subcommand scripts are Bun-native .ts files
   // that only live under src/, so map dist → src at runtime. See issue #74.
@@ -139,7 +139,7 @@ if (command) {
     candidateSrcDir !== thisDir && existsSync(candidateSrcDir)
       ? candidateSrcDir
       : thisDir;
-  const subArgs = process.argv.slice(3).join(' ');
+  const subArgs = process.argv.slice(3);
 
   const commandMap: Record<string, string> = {
     'metrics': 'metrics.ts',
@@ -159,14 +159,13 @@ if (command) {
   const scriptFile = commandMap[command];
   if (scriptFile) {
     const scriptPath = join(srcDir, scriptFile);
-    try {
-      execSync(`bun "${scriptPath}" ${subArgs}`, { stdio: 'inherit' });
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`Command "${command}" failed: ${msg}`);
+    // Pass arguments as argv, never through a shell (D-02).
+    const result = spawnSync(process.execPath, [scriptPath, ...subArgs], { stdio: 'inherit' });
+    if (result.error) {
+      console.error(`Command "${command}" failed: ${result.error.message}`);
       process.exit(1);
     }
-    process.exit(0);
+    process.exit(result.status ?? 1);
   }
 
   console.error(`Unknown command: ${command}`);
