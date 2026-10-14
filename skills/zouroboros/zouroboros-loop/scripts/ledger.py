@@ -43,10 +43,12 @@ TRANSITIONS = {
     "pr-opened":    ({"certified"}, "pr-open", {"evolve"}),
     "merged":       ({"pr-open"}, "merged", {"github", "operator"}),
     "closed":       ({"pr-open", "certified"}, "closed", {"github", "operator"}),
-    "confirmed":    ({"merged"}, "confirmed", {"introspect"}),
-    "regressed":    ({"merged"}, "regressed", {"introspect"}),
+    "applied":      ({"approved"}, "applied", {"operator"}),   # operator delivery: the runbook was performed
+    "confirmed":    ({"merged", "applied"}, "confirmed", {"introspect"}),
+    "regressed":    ({"merged", "applied"}, "regressed", {"introspect"}),
 }
-SCOPES = {"evolve-local", "push-branch", "open-draft-pr"}
+SCOPES = {"evolve-local", "push-branch", "open-draft-pr"}   # delivery "pr"
+RUNBOOK_SCOPES = {"operator-runbook"}                        # delivery "operator"
 CYCLE_EVENTS = {"cycle-open", "cycle-close", "spend", "budget-raise"}
 
 
@@ -164,7 +166,7 @@ def validate_event(events, a, data, evidence):
     if a.actor == "test-fixture":
         if mode != "smoke":
             raise Refused("actor test-fixture is only valid in a smoke-mode ledger")
-        actor_role = "operator" if a.event in ("approve", "reject", "withdraw", "merged", "closed") else None
+        actor_role = "operator" if a.event in ("approve", "reject", "withdraw", "applied", "merged", "closed") else None
     else:
         actor_role = a.actor
     rxs, cycles = fold(events)
@@ -193,24 +195,37 @@ def validate_event(events, a, data, evidence):
             raise Refused("approve requires --rx-file (approval binds the prescription digest)")
         try:
             with open(a.rx_file) as f:
-                tier = (json.load(f).get("governor") or {}).get("tier")
+                rxj = json.load(f)
+            tier = (rxj.get("governor") or {}).get("tier")
+            delivery = rxj.get("delivery", "pr")
         except ValueError:
-            tier = None
+            tier, delivery = None, None
         if tier in (None, "BLOCK"):
             raise Refused(f"{a.rx}: governor tier is {tier!r} — resolve blockers (and run governor.py --write) before approval")
+        allowed = RUNBOOK_SCOPES if delivery == "operator" else SCOPES
         scope = data.get("scope")
-        if not scope or not set(scope) <= SCOPES | {s for s in scope if s.startswith("live-calls:")}:
-            raise Refused(f"approve requires data.scope ⊆ {sorted(SCOPES)} + live-calls:<n>")
+        if not scope or not set(scope) <= allowed | {s for s in scope if s.startswith("live-calls:")}:
+            raise Refused(f"approve of a delivery={delivery!r} prescription requires data.scope ⊆ {sorted(allowed)} + live-calls:<n>")
+        if delivery == "operator" and "operator-runbook" not in scope:
+            raise Refused("approve of an operator-delivered prescription requires scope 'operator-runbook'")
+        data["delivery"] = delivery
         if not data.get("operator_words"):
             raise Refused("approve requires data.operator_words (the operator's approval, verbatim)")
         data["rx_digest"] = file_digest(a.rx_file)
-    if a.event in ("start", "pr-opened"):
+    if a.event in ("start", "pr-opened", "applied"):
         appr = rec.get("approval") or {}
+        if a.event == "start" and appr.get("delivery") == "operator":
+            raise Refused(f"{a.rx}: operator-delivered — the operator performs the runbook; evolve never starts it")
         if not a.rx_file or file_digest(a.rx_file) != appr.get("rx_digest"):
             raise Refused(f"{a.rx}: prescription changed since approval (or --rx-file missing) — re-approve")
-        need = "evolve-local" if a.event == "start" else "open-draft-pr"
+        need = {"start": "evolve-local", "pr-opened": "open-draft-pr", "applied": "operator-runbook"}[a.event]
         if need not in appr.get("scope", []) or (a.event == "pr-opened" and "push-branch" not in appr.get("scope", [])):
             raise Refused(f"{a.rx}: approval scope lacks '{need}'" + (" and 'push-branch'" if a.event == "pr-opened" else ""))
+    if a.event == "applied":
+        if not data.get("operator_words"):
+            raise Refused("applied requires data.operator_words (who performed the runbook, or the operator's direction, verbatim)")
+        if not evidence:
+            raise Refused("applied requires --evidence (the acceptance-check result after the runbook)")
     if a.event == "verify-abort" and not a.note:
         raise Refused("verify-abort requires --note (what interrupted verification)")
     if a.event == "abandon" and cur in ("failed", "inconclusive") and (actor_role or a.actor) != "operator":

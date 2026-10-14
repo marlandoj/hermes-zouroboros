@@ -3420,8 +3420,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "f5757e75c73ef4d2a92a982ffa85dd2415ef942b691c0456376ab03f25741575",
-      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+      "distributedSha256": "2378536416971b3467296b14bb9edfaea6828c98ae9df35069bd18a1ee18d1f0",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop Amended by RX-C20261013-1-10 (D-28): operator-delivery path."
     },
     {
       "path": "skills/zouroboros/zouroboros-loop/scripts/check-runner.py",
@@ -3438,8 +3438,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "56228f3bc55f043b38db4ce6ae94a4e99ac3b7a7c49fd5995a0c4a384c6ff859",
-      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+      "distributedSha256": "2814a876b8c612bf5905ecff4e80b8312a28a1713f9c16e0f6f91bab3037a284",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop Amended by RX-C20261013-1-10 (D-28): operator-delivery path."
     },
     {
       "path": "skills/zouroboros/zouroboros-loop/scripts/loop_paths.py",
@@ -3465,8 +3465,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "59e9cfd269b25650c9c11a2ef0f85fc1e25fe9d8824ca63424692a3b6f52c597",
-      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+      "distributedSha256": "87ab2e4b9d4f090f894a8826fbe875861a7915b826e55b5f8a53da1ee05d88f1",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop Amended by RX-C20261013-1-10 (D-28): operator-delivery path."
     },
     {
       "path": "skills/zouroboros/zouroboros-loop/scripts/pr-sync.py",
@@ -3501,8 +3501,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "ca3dc1a3937a0dbbfa3b57e5ddf0f7a13b8d1f690fbc8733ee4e899f10526d5b",
-      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+      "distributedSha256": "6b815b5aa7424510d7b788b33f561bdee351ce4158ef0f639bf270bafd7ff6d9",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop Amended by RX-C20261013-1-10 (D-28): operator-delivery path."
     },
     {
       "path": "skills/zouroboros/zouroboros-loop/SKILL.md",
@@ -3510,8 +3510,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "b726e1ed04798ac2193b4152b7b525cc1cafb202c7d54fc8f511914bc961e39e",
-      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+      "distributedSha256": "f04689c211c01fd5ba8c371227d95dfbfc8faab8b02ee872cb4a8ea2f5941758",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop Amended by RX-C20261013-1-10 (D-28): operator-delivery path."
     },
     {
       "path": "skills/zouroboros/zouroboros-loop/templates/CYCLE.md",
