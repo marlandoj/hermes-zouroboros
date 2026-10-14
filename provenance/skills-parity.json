@@ -773,10 +773,11 @@
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
       "disposition": "adapted",
-      "reason": "Umbrella rewritten for Hermes: skills/zouroboros/zouroboros is the index, read-only doctor (integration/cli.ts doctor + governance verify-docs + skill tree) and exact-phrase operator shortcuts resolved by zouroboros-core resolveOperatorShortcut against distribution commands; install.ts replaced by scripts/setup.sh + integration/cli.ts init. Nested sub-skills: workflow/unstuck-lateral shipped as skills/zouroboros/unstuck-lateral (MIT, Q00/ouroboros); assets/template.program.md shipped as autoloop/templates/program.md (units fixed); workflow/autoloop and three-stage-eval are covered by the autoloop and three-stage-eval entries; skills/memory (41 host scripts) and skills/swarm (host bridges, persona registry, benchmarks, MCP servers) are covered by zo-memory-system, zo-swarm-orchestrator and zo-swarm-executors; skills/selfheal SKILL-introspect/prescribe/evolve duplicate the zouroboros-introspect/-prescribe/-evolve entries (t5); spec-first-interview has its own entry. Not shipped: skill-tracker.ts (writes the host shared memory DB), scripts/package.json, swarm references/images and persona registry.",
+      "reason": "Umbrella rewritten for Hermes: skills/zouroboros/zouroboros is the index, read-only doctor (integration/cli.ts doctor + governance verify-docs + skill tree) and exact-phrase operator shortcuts resolved by zouroboros-core resolveOperatorShortcut against distribution commands; install.ts replaced by scripts/setup.sh + integration/cli.ts init. Nested sub-skills: workflow/unstuck-lateral shipped as skills/zouroboros/unstuck-lateral (MIT, Q00/ouroboros); assets/template.program.md shipped as autoloop/templates/program.md (units fixed); workflow/autoloop and three-stage-eval are covered by the autoloop and three-stage-eval entries; skills/memory (41 host scripts) and skills/swarm (host bridges, persona registry, benchmarks, MCP servers) are covered by zo-memory-system, zo-swarm-orchestrator and zo-swarm-executors; skills/selfheal SKILL-introspect/prescribe/evolve duplicate the zouroboros-introspect/-prescribe/-evolve entries (t5); spec-first-interview has its own entry. Not shipped: skill-tracker.ts (writes the host shared memory DB), scripts/package.json, swarm references/images and persona registry. Also distributed as zouroboros-loop: distribution-authored orchestrator of the introspect → prescribe → evolve → verify loop (hash-chained ledger, check runner, repo plumbing) under the Constitution.",
       "distributedAs": [
         "skills/zouroboros/zouroboros",
-        "skills/zouroboros/unstuck-lateral"
+        "skills/zouroboros/unstuck-lateral",
+        "skills/zouroboros/zouroboros-loop"
       ],
       "followUp": "/status should switch to the self-heal scorecard once zouroboros-introspect ships (t5)."
     },
@@ -794,9 +795,11 @@
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
       "disposition": "adapted",
-      "reason": "Thin Hermes skill over packages/selfheal evolve(); anything but --dry-run is opt-in via HERMES_ZOUROBOROS_ALLOW_SWARM=1; autoloop mode runs the distribution autoloop skill (ZOUROBOROS_AUTOLOOP_SCRIPT); results under ZOUROBOROS_STATE_DIR/selfheal/results; crystallize invocation log under ZOUROBOROS_LOG_DIR (no /dev/shm). Not shipped: source evolve.ts.",
+      "reason": "Thin Hermes skill over packages/selfheal evolve(); anything but --dry-run is opt-in via HERMES_ZOUROBOROS_ALLOW_SWARM=1; autoloop mode runs the distribution autoloop skill (ZOUROBOROS_AUTOLOOP_SCRIPT); results under ZOUROBOROS_STATE_DIR/selfheal/results; crystallize invocation log under ZOUROBOROS_LOG_DIR (no /dev/shm). Not shipped: source evolve.ts. Also distributed as zouroboros-loop-evolve (worktree branch, red-green, scope and suite gates, gated draft PR; git-native rollback) and zouroboros-loop-verify (held-out probes, tamper check, test-level base/head comparison, fail-closed verdicts): distribution-authored.",
       "distributedAs": [
-        "skills/zouroboros/zouroboros-evolve"
+        "skills/zouroboros/zouroboros-evolve",
+        "skills/zouroboros/zouroboros-loop-evolve",
+        "skills/zouroboros/zouroboros-loop-verify"
       ]
     },
     {
@@ -817,9 +820,10 @@
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
       "disposition": "adapted",
-      "reason": "Thin Hermes skill over packages/selfheal introspect() (integration/selfheal.ts): memory read through the distribution memory layer (profile memory.db enforced; inherited ZO_MEMORY_DB/ZOUROBOROS_MEMORY_DB overridden; schema initialised), scorecards under ZOUROBOROS_STATE_DIR/selfheal, logs under ZOUROBOROS_LOG_DIR. packages/selfheal paths made configurable (src/paths.ts) and its --store fact write fixed for the memory schema. Not shipped: source introspect.ts and skill-tracker.ts (Zo shared-facts schema via sqlite3 CLI; superseded by the package collector), references/metric-thresholds.md (describes the superseded 6-metric script).",
+      "reason": "Thin Hermes skill over packages/selfheal introspect() (integration/selfheal.ts): memory read through the distribution memory layer (profile memory.db enforced; inherited ZO_MEMORY_DB/ZOUROBOROS_MEMORY_DB overridden; schema initialised), scorecards under ZOUROBOROS_STATE_DIR/selfheal, logs under ZOUROBOROS_LOG_DIR. packages/selfheal paths made configurable (src/paths.ts) and its --store fact write fixed for the memory schema. Not shipped: source introspect.ts and skill-tracker.ts (Zo shared-facts schema via sqlite3 CLI; superseded by the package collector), references/metric-thresholds.md (describes the superseded 6-metric script). Also distributed as zouroboros-platform-assessment: distribution-authored, defect-driven introspect (evidence-backed platform assessment, test matrix, defect register) that feeds the closed loop; see docs/skills.md.",
       "distributedAs": [
-        "skills/zouroboros/zouroboros-introspect"
+        "skills/zouroboros/zouroboros-introspect",
+        "skills/zouroboros/zouroboros-platform-assessment"
       ]
     },
     {
@@ -849,9 +853,10 @@
       "trackedAtRevision": true,
       "triage": "adapt/self-improvement",
       "disposition": "adapted",
-      "reason": "Thin Hermes skill over packages/selfheal prescribe(); prescriptions under ZOUROBOROS_STATE_DIR/selfheal/prescriptions; governor unchanged. Not shipped: source prescribe.ts and references/playbooks.md (superseded by the package playbooks).",
+      "reason": "Thin Hermes skill over packages/selfheal prescribe(); prescriptions under ZOUROBOROS_STATE_DIR/selfheal/prescriptions; governor unchanged. Not shipped: source prescribe.ts and references/playbooks.md (superseded by the package playbooks). Also distributed as zouroboros-loop-prescribe: distribution-authored defect-driven prescribe phase (governor ported from selfheal flags into Constitution tiers, immutable digest-bound prescriptions, red reproduction on the base).",
       "distributedAs": [
-        "skills/zouroboros/zouroboros-prescribe"
+        "skills/zouroboros/zouroboros-prescribe",
+        "skills/zouroboros/zouroboros-loop-prescribe"
       ],
       "followUp": "Package playbook targets follow the Zouroboros workspace layout (Skills/zo-memory-system/...); retarget them to distribution skills."
     }

@@ -1,0 +1,8 @@
+<type>(<area>): <imperative summary> [<RX-ID>]
+
+<why, one paragraph: the defect, its evidence, the spec restored>
+
+Prescription: <RX-ID> (digest <first 12 of rx digest>)
+Defects: <D-NN …>
+Evidence: red on <base sha12> — <check ids>
+Loop: zouroboros-loop cycle <C>

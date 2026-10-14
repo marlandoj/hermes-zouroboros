@@ -1,0 +1,25 @@
+{
+  "schema": "zo-loop/prescription@1",
+  "id": "RX-C<YYYYMMDD>-<n>-<nn>",
+  "cycle": "C<YYYYMMDD>-<n>",
+  "kind": "heal",
+  "delivery": "pr",
+  "title": "<imperative one-liner>",
+  "defects": ["D-NN"],
+  "source": {"assessment": "<workspace>/zouroboros-assessment-<date>", "defects_digest": "<ledger.py digest DEFECTS.md>"},
+  "spec": "<observable property that must hold afterwards>",
+  "rationale": "<evidence: numbers, file:line, which trees reproduce it>",
+  "base": {"repo": "<owner>/hermes-zouroboros", "ref": "origin/main", "sha": "<40-hex from repo.sh sync>"},
+  "reproduction": {"result_file": "<cycles/C/evidence/red-on-main-<sha12>.json>", "digest": "<ledger.py digest result_file>", "red_on_sha": "<base.sha>", "meets_expectation": true},
+  "acceptance_checks": [
+    {"id": "D-NN/AC-1", "kind": "acceptance", "description": "<what the check decides>", "timeout_s": 120,
+     "cmd": "<self-contained command; exit 97 on setup failure>", "expect": {"exit": 0}, "red": {"stdout_regex": "<defect signature>"}}
+  ],
+  "heldout_ref": [],
+  "change_plan": {"summary": "<smallest sufficient change>", "files": ["<path>", "tests/<new>.test.ts"], "max_files": 2,
+                  "tests_to_add": ["tests/<new>.test.ts"], "approach": ["red: add failing test", "green: minimal fix", "full build/typecheck/test"]},
+  "risk": {"blast_radius": "<who is affected>", "reversibility": "<how undoable>"},
+  "rollback": "Close the PR (pre-merge) or git revert the commit; <data effects>.",
+  "budget": {"live_calls": 0, "usd": 0},
+  "open_questions": []
+}

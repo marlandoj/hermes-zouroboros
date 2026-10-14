@@ -3172,6 +3172,357 @@
       "adaptation": "Rewritten for Hermes: thin skill over packages/selfheal introspect() via integration/selfheal.ts; profile memory DB enforced (inherited ZO_MEMORY_DB/ZOUROBOROS_MEMORY_DB overridden); scorecards under ZOUROBOROS_STATE_DIR/selfheal; Zo schedule/author lines removed. Source introspect.ts/skill-tracker.ts and references/metric-thresholds.md not shipped (Zo shared-facts schema, superseded by the package's 13-metric collector)."
     },
     {
+      "path": "skills/zouroboros/zouroboros-loop-evolve/references/evolve-procedure.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "dcb8fabcec3e113e38eb5b40bf6d8bb042c1e87d6e9f5caba69f593ac8332e5a",
+      "adaptation": "Distribution-authored: loop evolve phase (worktree branch, red-green, scope and suite gates, gated draft PR)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-evolve/scripts/evolve-record.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "9126bd7d59346a03830af4d3d5f0a3248c5f34caec0cc95b72f27039fd200cb6",
+      "adaptation": "Distribution-authored: loop evolve phase (worktree branch, red-green, scope and suite gates, gated draft PR)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-evolve/scripts/local-suite.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "9d2c26055cd02154cf651b9d11a1fd417540ef1e27c45c3f0d14b9c9374e2f8e",
+      "adaptation": "Distribution-authored: loop evolve phase (worktree branch, red-green, scope and suite gates, gated draft PR)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-evolve/scripts/open-pr.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "080a1f92cf3bf8ecc1148a850022e21d57bc0face46ecd400c4ebf683935f5c6",
+      "adaptation": "Distribution-authored: loop evolve phase (worktree branch, red-green, scope and suite gates, gated draft PR)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-evolve/scripts/scope-check.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "b9a0cd8a87c1a730aefd1d6abb1faf623fb1cbea6e3d043c0097ca333ce3c0ba",
+      "adaptation": "Distribution-authored: loop evolve phase (worktree branch, red-green, scope and suite gates, gated draft PR)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-evolve/SKILL.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "7b768087af46f8f86e1c83c01ec6bc85f5765e1cc6954184e6d3297d60ea20a9",
+      "adaptation": "Distribution-authored: loop evolve phase (worktree branch, red-green, scope and suite gates, gated draft PR)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-evolve/templates/COMMIT_MSG.txt",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "9fde6d7f40e55a29f608c5baf971bc4d7a4cfa2a7102ef0a4ad43eea40147c75",
+      "adaptation": "Distribution-authored: loop evolve phase (worktree branch, red-green, scope and suite gates, gated draft PR)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-evolve/templates/PR_BODY.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "ca858b96d6eb72bc4e8e6f1cd4f7390a25ad7d8857f158361fe577e9e0afd8eb",
+      "adaptation": "Distribution-authored: loop evolve phase (worktree branch, red-green, scope and suite gates, gated draft PR)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-prescribe/references/check-patterns.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "6a337d7efdbc2241c54b097bea3447146b54cab3337f4f4142206a1d7dbcfc27",
+      "adaptation": "Distribution-authored: loop prescribe phase (governor ported from selfheal flags, prescription schema and validator)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-prescribe/references/prescription-schema.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "32c830dc4193937ea19b29bdcb9b02ace86122ebb88bb57aef031b845237f3c8",
+      "adaptation": "Distribution-authored: loop prescribe phase (governor ported from selfheal flags, prescription schema and validator)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-prescribe/scripts/governor.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "a15f432ffade88d4ad72db4e3e7f1a814f043f0c292edb2639b0ebe1b10a40fc",
+      "adaptation": "Distribution-authored: loop prescribe phase (governor ported from selfheal flags, prescription schema and validator)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-prescribe/scripts/rx-validate.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "982d49228d73a82b3bda85088bd8e402d5fc4ec8684c9898f0bcc30355ffad53",
+      "adaptation": "Distribution-authored: loop prescribe phase (governor ported from selfheal flags, prescription schema and validator)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-prescribe/scripts/tests/test_governor.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "ea44f7beabe7d2fc30f6ce5276635d342d2afa7795d8702ca8a358f54189e06d",
+      "adaptation": "Distribution-authored: loop prescribe phase (governor ported from selfheal flags, prescription schema and validator)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-prescribe/scripts/tests/test_rx_validate.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "e8b7df63aa4b02a8fae1a3070804f8ff244de627acba0d14edb4c7b15e9a884a",
+      "adaptation": "Distribution-authored: loop prescribe phase (governor ported from selfheal flags, prescription schema and validator)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-prescribe/SKILL.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "7beaa3e10fd1242b94cb28e9c1c7614ee50384f3dbb3422773f90214240291dc",
+      "adaptation": "Distribution-authored: loop prescribe phase (governor ported from selfheal flags, prescription schema and validator)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-prescribe/templates/prescription.json",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "04a7c32fa4c5e91107c0769268c351b0929aa75cdeb465c2fe6812f30a3c5229",
+      "adaptation": "Distribution-authored: loop prescribe phase (governor ported from selfheal flags, prescription schema and validator)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-prescribe/templates/PRESCRIPTIONS-review.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "940358e5a543b92aa28be6fed784257f7e078fe653ebcacbb090cf795e336fad",
+      "adaptation": "Distribution-authored: loop prescribe phase (governor ported from selfheal flags, prescription schema and validator)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/heldout/catalog.json",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "87ada65c9f9f563afcdc8d683b020d23e0cac943b1b1a8779668db6e79a3c568",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/heldout/probes/interrupt-variant.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "8a8e84a090466562bc56d01e61103c9487cc476544b3f32e32c983a3b50fd7dd",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/heldout/probes/memory-writers.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "a5ac56a6f15cc1078391d648baf80adef9fe11439707ae0b57e1ddfde3d4783d",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/heldout/probes/shell-payloads.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "851bf771ef4df64be40901bc6e4b6e9c9e6f33141ccad6c080a1c6cb6b3cdb67",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/references/heldout-catalog.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "ad2293bf777bc98f27d79caa5d569a17740ed8ed53162c09cf3a7d370fb9248f",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/references/verdict-rules.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "21f4530ad7a8b1ff4bd5f9f83ff5a9d87fd4c3fe6a0c4fcd47dc5e500e903d18",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/scripts/tamper-check.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "d0f2f089887430004642454cf351fa0d006571a8f7a941ddf4391df45b93a692",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/scripts/tests/test_tamper_check.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "833ed63015bedad924a7feafdfc2257087f070fc6db4ee39f05c42f74b314e34",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/scripts/verify.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "7c2cf77657a315dc58958aba39aac13963a28008ec9b92deee1cbb577d49b615",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop-verify/SKILL.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "91565476f2934a45127b1b26d62ad058ba17de71005297a935e5a902d7c07cd8",
+      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/references/loop-contract.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "f5757e75c73ef4d2a92a982ffa85dd2415ef942b691c0456376ab03f25741575",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/scripts/check-runner.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "667352248a5c8420704ee9e38c1f8fce79ca7edb99489370626d589cf4f2ebf6",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/scripts/ledger.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "56228f3bc55f043b38db4ce6ae94a4e99ac3b7a7c49fd5995a0c4a384c6ff859",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/scripts/loop_paths.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "441256ba0590709f415639fd27a9c2b402696e8f0d03fc607135fb206cf1acd3",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/scripts/loop-env.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "73b9bebbc542abf038bada696cef10dbf28596c681b101ac985fd6e2e786ae84",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/scripts/loop-status.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "59e9cfd269b25650c9c11a2ef0f85fc1e25fe9d8824ca63424692a3b6f52c597",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/scripts/pr-sync.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "78ed54dfc9164155446695d28f81cdf19e4483d004b5c3e657a94e8d03654a66",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/scripts/repo.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "e5023c8bfb734c7121d96e2a5820a3409f8457f8726bfbeaefdac45383308ef7",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/scripts/tests/test_check_runner.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "cb7492b606f85da3a4bf8e4c232ee16f069e179bc3ad0456fe261ea52b30cff0",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/scripts/tests/test_ledger.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "ca3dc1a3937a0dbbfa3b57e5ddf0f7a13b8d1f690fbc8733ee4e899f10526d5b",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/SKILL.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "b726e1ed04798ac2193b4152b7b525cc1cafb202c7d54fc8f511914bc961e39e",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-loop/templates/CYCLE.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "a7658df85b85bebd790e291e933229a9fd5565e486440281192fbdff7ea82a12",
+      "adaptation": "Distribution-authored: closed-loop orchestrator (ledger, check runner, repo plumbing) implementing the Constitution's introspect-prescribe-evolve-verify loop"
+    },
+    {
       "path": "skills/zouroboros/zouroboros-observatory/assets/install.prompt.md",
       "skill": "zouroboros-observatory",
       "sourcePath": "Skills/zouroboros-observatory/assets/install.prompt.md",
@@ -3188,6 +3539,150 @@
       "sourceSha256": "4c2c68f5146130423fecc1b5c052863c132f53813c3721e22f202c6b82241415",
       "distributedSha256": "b122d537864f6d945add74ff9761848c55ea71e42638bea1019ca2fb6caf1505",
       "adaptation": "Rewritten for Hermes hosts: run the published zouroboros-observatory@0.1.0 via bunx; Zo Site deploy replaced by private remote-access guidance (token, private network, approval); env var list matches packages/observatory/src/config.ts; Hermes frontmatter added; operator author handle removed."
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/references/assessment-brief.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "300e340b5307cfa5461d083262878b705452ea4410d650a79e50ceb984692c70",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/references/helper-prompts.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "4849ae0a2ff565f4fc065f1314e4c9ba06caf44caf7cd1d7d9c0ec20676e0b48",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/references/procedure.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "2767a9b5ddb61c118c28a6fb8a7cdde59e71bcd8148ebccd30817ea19560784a",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/scripts/cors-probe.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "78deebb1e1df89db6517fed09a6c8853961298a50bf31fb5f1568cc9745b6202",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/scripts/interrupt-test.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "3f72feb92aa1ccb6a8dee511f842d39e59aa292017b49be964cc4aa06e48e143",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/scripts/live-reliability.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "44e567c51236da01d421a9b1d07cbb985f3fc835799ab37c4eae24cb501c099e",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/scripts/matrix-totals.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "aa0b0495cccb867b05f74dcf17518c4535f02e0fa1bbb16e99b77851a5f6eda7",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/scripts/mcp-e2e.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "c454dd70ffebc34d0c86c84839f5864fa292eda938e55aa73a073b002c176bf3",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/scripts/provenance-map.sh",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "9a97410f4646381c5b00290be32044eae4172043a4f133a1d2ed3ff8c511a3b6",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/scripts/rag-eval.ts",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "e79badeb96e435985da0801b1522d11875f22e5447f444a804d5908d279403b9",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/scripts/restore-drill.py",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "0818ac24ccfca200130f6d873cf3cd3588d9d97cf81a1ba13b0f137a51da9f57",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/SKILL.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "bd358b03c28fea49fb2b05f847b6e300d902dc66b8c20d836ed4364ac4016315",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/templates/DEFECTS.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "3fb79438c10ddc0dedddf17cd2a7c8d0016fcc408e37c826f4c0cf94a059d369",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/templates/PROGRESS.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "da44703de1410e6e77565feb122887d4602e9190d22ffa45ddcfed710aed7ef6",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/templates/REPORT.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "da754611ba639d9a24b6b21bc7dbe1a3d08565b57ce784b996932fb0e703626b",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+    },
+    {
+      "path": "skills/zouroboros/zouroboros-platform-assessment/templates/TEST-MATRIX.md",
+      "skill": null,
+      "sourcePath": null,
+      "sourceRevision": null,
+      "sourceSha256": null,
+      "distributedSha256": "c3ccdcd530e1dd0045aae3b93cff17cac7306c721fdae3d37c87510d91a36f14",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
     },
     {
       "path": "skills/zouroboros/zouroboros-prescribe/scripts/prescribe.ts",
