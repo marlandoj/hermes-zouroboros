@@ -104,8 +104,12 @@ test('memory_search exact ID still requires existing SQLite keyword matching', a
     const target = await store(client, 'distinct-entity');
     await store(client, 'decoy', 'no-match');
     expect(await search(client, { query: 'no-match', id: target.id })).toEqual([]);
-    for (const query of ['COPPER', 'distinct-entity', 'decision', '%widgets', 'c_pper']) {
+    for (const query of ['COPPER', 'distinct-entity', 'decision']) {
       expect((await search(client, { query, id: target.id })).map((row: any) => row.id)).toEqual([target.id]);
+    }
+    // LIKE wildcards are literal (D-13).
+    for (const query of ['%widgets', 'c_pper']) {
+      expect(await search(client, { query, id: target.id })).toEqual([]);
     }
   });
 });
