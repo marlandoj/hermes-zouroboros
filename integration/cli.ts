@@ -40,7 +40,13 @@ try {
     if (process.env.HERMES_ZOUROBOROS_ALLOW_SWARM !== '1') throw new Error('Execution is opt-in: set HERMES_ZOUROBOROS_ALLOW_SWARM=1 after reviewing the task file and workspace.');
     if (args.length !== 1) throw new Error('swarm requires one tasks.json path');
     const child = Bun.spawn([process.execPath, join(repoRoot, 'integration/swarm-worker.ts'), resolve(args[0]!)], { env: runtimeEnv(), cwd: settings().workspace, stdin: 'ignore', stdout: 'inherit', stderr: 'inherit' });
-    process.exitCode = await child.exited;
+    // Forward cancellation to the worker, which stops its Hermes children; exit only after it has (D-01).
+    let cancelledBy = 0;
+    for (const [signal, number] of [['SIGTERM', 15], ['SIGINT', 2]] as const) {
+      process.on(signal, () => { cancelledBy ||= number; child.kill(signal); });
+    }
+    const code = await child.exited;
+    process.exitCode = cancelledBy ? 128 + cancelledBy : code;
   } else {
     console.log('Hermes Zouroboros\n  init --workspace PATH [--model ID [--provider NAME]]\n  skills register (add skills/ to an existing profile)\n  doctor\n  hermes [setup | chat | ...]\n  memory store|search ...\n  swarm /absolute/tasks.json (opt-in)\nMCP: bun integration/mcp.ts');
     if (command && !['help', '--help', '-h'].includes(command)) process.exitCode = 2;
