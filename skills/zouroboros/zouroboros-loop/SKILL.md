@@ -54,7 +54,9 @@ Tests: `python3 -m unittest discover -s tests` (ledger and check-runner).
 ## Quick Reference
 - One cycle: `cycle-open` (zero budget by the loop, or a budget by the operator) → introspect →
   prescribe → **operator approves** → evolve → verify → **operator decides PR** → human merges
-  → next introspect confirms → `cycle-close`.
+  → next introspect confirms → `cycle-close`. Operator-delivered runbooks: approve
+  (`operator-runbook`) → the operator performs the runbook → `applied` (operator words +
+  acceptance evidence) → confirm.
 - The agent never: approves, raises budget, merges, deploys, changes repo settings, or edits
   approved prescriptions.
 - Stop and report on: any operator step, budget exhausted, 2 consecutive `failed`, retry limit,
@@ -72,14 +74,16 @@ Tests: `python3 -m unittest discover -s tests` (ledger and check-runner).
    validation, `PRESCRIPTIONS.md`, `propose` events. **Pause for approval.**
 5. **Record approvals** exactly as given:
    `ledger.py event --event approve --actor operator --rx-file … --data '{"scope":[…],"operator_words":"<verbatim>"}'`.
-6. **Evolve** each approved prescription (`zouroboros-loop-evolve`), one at a time, up to 3.
+6. **Evolve** each approved PR prescription (`zouroboros-loop-evolve`), one at a time, up to 3.
+   Operator-delivered prescriptions skip evolve: once the runbook is performed, record
+   `ledger.py event --event applied --actor operator --rx-file … --evidence <acceptance result> --data '{"operator_words":"<verbatim>"}'`.
 7. **Verify** each evolved prescription (`zouroboros-loop-verify`). Then:
    - **certified:** pause for the operator's PR decision.
    - **failed:** report, and pause for retry or abandon.
    - **inconclusive:** report the missing evidence, and pause.
 8. **PR** only with scope: run evolve's `open-pr.sh` (draft). Then run `pr-sync.py`
    periodically. A human merges and deploys.
-9. **Confirm.** After deploy, run the assessment again. For each merged prescription, record
+9. **Confirm.** After deploy, run the assessment again. For each merged (or `applied`) prescription, record
    `confirmed` or `regressed` (actor `introspect`, with the assessment path and matrix rows). A
    regression becomes a new heal prescription.
 10. **Close** the cycle (`cycle-close`) when no prescription is active. Update `CYCLE.md` from

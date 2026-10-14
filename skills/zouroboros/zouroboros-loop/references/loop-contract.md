@@ -57,21 +57,32 @@ certified ──pr-opened──▶ pr-open ──merged(human)──▶ merged �
 failed / inconclusive ──retry(approve again)──▶ approved   (max 2 retries per prescription)
 failed / inconclusive ──abandon(operator)──▶ abandoned
 verifying ──verify-abort(recovery, --note)──▶ evolved
+
+delivery "operator" (runbook performed by a human, or by the agent on the operator's direction):
+proposed ──approve(operator-runbook)──▶ approved ──applied(operator, words + evidence)──▶ applied
+applied ──confirmed(acceptance re-run / next introspect)──▶ confirmed     applied ──regressed──▶ regressed
 ```
-- `approve`, `withdraw`, `retry`, `pr-opened` (push and PR), `merged` and `closed` need
+- `approve`, `withdraw`, `retry`, `applied`, `pr-opened` (push and PR), `merged` and `closed` need
   `actor: operator`, or evidence of a human action. `merged` is recorded from the GitHub API,
   never asserted.
 - `certified`, `failed` and `inconclusive` can only be written by the verify skill with a
   verify report digest.
 - `confirmed` and `regressed` can only be written from a later introspect, citing the matrix
-  row that re-tested the defect.
+  row that re-tested the defect. They follow `merged` (PR delivery) or `applied` (operator
+  delivery).
+- `applied` records that an operator-delivered runbook was performed. It needs the operator's
+  words (who performed it, or their direction to the agent), at least one evidence file (the
+  acceptance-check result), and the prescription unchanged since approval. Evolve never
+  `start`s an operator-delivered prescription.
 
 ## Approval record
 An approval is a ledger event `{"event":"approve", "actor":"operator", "scope":[...], "rx":..., "rx_digest":...}`.
 - `rx_digest` is the SHA-256 of the canonical prescription JSON. Editing the prescription
   after approval invalidates the approval, which is fail-closed.
-- `scope` lists what is authorized: `evolve-local` (worktree and commits only),
-  `push-branch`, `open-draft-pr`, and `live-calls:<n>`.
+- `scope` lists what is authorized. For `delivery: pr`: `evolve-local` (worktree and commits
+  only), `push-branch`, `open-draft-pr`. For `delivery: operator`: `operator-runbook` only.
+  Either may add `live-calls:<n>`. The ledger refuses a scope that doesn't match the
+  prescription's delivery, and records the delivery in the approval.
 - Approvals come from the operator in the conversation. The agent records them verbatim and
   never infers them.
 

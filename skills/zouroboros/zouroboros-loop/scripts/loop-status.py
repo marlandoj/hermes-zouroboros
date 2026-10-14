@@ -22,11 +22,28 @@ NEXT = {  # state -> (owner, action)
     "certified": ("operator", "decide: open draft PR (needs push-branch + open-draft-pr scope; then evolve open-pr.sh) or withdraw"),
     "pr-open": ("agent", "pr-sync.py (records merged/closed from the GitHub API); human reviews and merges"),
     "merged": ("agent", "after deploy, run the platform assessment; record confirmed/regressed from its matrix"),
+    "applied": ("agent", "re-run the acceptance checks read-only (or the next assessment); record confirmed/regressed from the matrix"),
     "failed": ("operator", "read VERIFY-<rx>.md; approve a retry (≤2) or abandon"),
     "inconclusive": ("operator", "supply the missing evidence (known-failures entry, held-out probe, re-derive) then approve a retry, or abandon"),
     "regressed": ("agent", "prescribe a new heal for the regression (stop condition: operator attention first)"),
 }
 TERMINAL = {"rejected", "withdrawn", "abandoned", "closed", "confirmed"}
+NEXT_OPERATOR_DELIVERY = {  # delivery "operator": a human performs the runbook (references/loop-contract.md)
+    "proposed": ("operator", "review PRESCRIPTIONS.md; approve with scope operator-runbook or reject"),
+    "approved": ("operator", "perform the runbook (or direct the agent to), then ledger applied --evidence <acceptance result> --data operator_words"),
+}
+
+
+def delivery_of(home, rx, rec):
+    """Delivery recorded at approval, else the prescription file's, else 'pr' (pre-delivery prescriptions)."""
+    d = (rec.get("approval") or {}).get("delivery")
+    if d:
+        return d
+    f = os.path.join(home, "cycles", rec.get("cycle") or "", "prescriptions", f"{rx}.json")
+    try:
+        return json.load(open(f)).get("delivery", "pr")
+    except (OSError, ValueError):
+        return "pr"
 
 
 def main():
@@ -52,15 +69,16 @@ def main():
             stops.append(f"{k}: regressed after merge")
         if r["retries"] >= 2 and r["state"] in ("failed", "inconclusive"):
             stops.append(f"{k}: retry limit reached")
-    active_pr = [k for k, r in rxs.items() if r["state"] in ACTIVE]
+    active_pr = [k for k, r in rxs.items() if r["state"] in ACTIVE and delivery_of(a.home, k, r) == "pr"]
     if len(active_pr) > 3:
-        stops.append(f"{len(active_pr)} active prescriptions (> 3)")
+        stops.append(f"{len(active_pr)} active PR prescriptions (> 3)")
     closed = [c for c, i in sorted(cycles.items()) if not i["open"]]
     if len(closed) >= 2 and not any(r["state"] == "confirmed" and r["cycle"] in closed[-2:] for r in rxs.values()):
         stops.append("stagnation: no confirmed improvement across the last 2 closed cycles")
     rows = []
     for k, r in sorted(rxs.items()):
-        owner, action = NEXT.get(r["state"], ("none", "terminal") if r["state"] in TERMINAL else ("unknown", "inspect ledger"))
+        table = {**NEXT, **NEXT_OPERATOR_DELIVERY} if delivery_of(a.home, k, r) == "operator" else NEXT
+        owner, action = table.get(r["state"], ("none", "terminal") if r["state"] in TERMINAL else ("unknown", "inspect ledger"))
         tier = None
         f = os.path.join(a.home, "cycles", r["cycle"] or "", "prescriptions", f"{k}.json")
         if os.path.exists(f):
