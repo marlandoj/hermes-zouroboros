@@ -3,7 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { DEFAULT_CONFIG } from 'zouroboros-core';
-import { initDatabase, closeDatabase, storeFact, searchFacts, getFact, getDatabase, getDbStats } from 'zouroboros-memory';
+import { initDatabase, closeDatabase, storeFact, searchFacts, getFact, getDbStats } from 'zouroboros-memory';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -34,13 +34,9 @@ server.tool('memory_search', 'Find shared work facts by keyword, optionally rest
   id: z.string().min(1).max(200).optional(),
 }, async ({ query, limit, id }) => {
   if (id === undefined) return result(searchFacts(query, { limit }));
-  // Filter by ID before the keyword result cap, retaining searchFacts' SQLite
-  // LIKE and expiry semantics. getFact alone intentionally includes expired rows.
-  const pattern = `%${query}%`;
-  const match = getDatabase().query(`SELECT id FROM facts WHERE id = ?
-    AND (text LIKE ? OR entity LIKE ? OR value LIKE ?)
-    AND (expires_at IS NULL OR expires_at > strftime('%s', 'now'))`)
-    .get(id, pattern, pattern, pattern);
+  // searchFacts filters by ID before its result cap, with the same keyword and
+  // expiry semantics. getFact alone intentionally includes expired rows.
+  const match = searchFacts(query, { id, limit: 1 }).length > 0;
   const fact = match ? getFact(id) : null;
   return result(fact ? [fact] : []);
 });
