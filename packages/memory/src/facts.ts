@@ -146,12 +146,16 @@ export async function storeFact(
   return entry;
 }
 
+const MAX_SEARCH_TERMS = 16;
+
 /**
- * Search facts by exact match or keyword
+ * Search facts by keyword: every whitespace-separated term must occur (in any
+ * order) in the fact's text, entity or value. LIKE wildcards in terms are literal.
  */
 export function searchFacts(
   query: string,
   options: {
+    id?: string;
     entity?: string;
     category?: string;
     persona?: string;
@@ -159,17 +163,30 @@ export function searchFacts(
   } = {}
 ): MemoryEntry[] {
   const db = getDatabase();
-  const { entity, category, persona, limit = 10 } = options;
+  const { id, entity, category, persona, limit = 10 } = options;
+
+  const terms = query.split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS);
+  if (terms.length === 0) return [];
 
   let sql = `
     SELECT id, persona, entity, key, value, category, decay_class as decayClass,
            importance, source, created_at as createdAt, expires_at as expiresAt,
            confidence, metadata
     FROM facts
-    WHERE (text LIKE ? OR entity LIKE ? OR value LIKE ?)
-      AND (expires_at IS NULL OR expires_at > strftime('%s', 'now'))
+    WHERE (expires_at IS NULL OR expires_at > strftime('%s', 'now'))
   `;
-  const params: (string | number)[] = [`%${query}%`, `%${query}%`, `%${query}%`];
+  const params: (string | number)[] = [];
+
+  for (const term of terms) {
+    const pattern = `%${term.replace(/[\\%_]/g, '\\$&')}%`;
+    sql += " AND (text LIKE ? ESCAPE '\\' OR entity LIKE ? ESCAPE '\\' OR value LIKE ? ESCAPE '\\')";
+    params.push(pattern, pattern, pattern);
+  }
+
+  if (id) {
+    sql += ' AND id = ?';
+    params.push(id);
+  }
 
   if (persona) {
     sql += ' AND (persona = ? OR persona = ?)';
