@@ -1,5 +1,5 @@
 """Unit tests for scripts/ledger.py (stdlib only). Run: python3 -m unittest discover -s tests -v"""
-import io, json, os, sys, tempfile, unittest
+import io, json, os, subprocess, sys, tempfile, unittest
 from contextlib import redirect_stderr, redirect_stdout
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -183,6 +183,100 @@ class LedgerTests(unittest.TestCase):
     def test_init_refuses_overwrite(self):
         self.open_cycle()
         self.assertEqual(run("init", "--home", self.home)[0], 3)
+
+
+class OperatorDeliveryTests(unittest.TestCase):
+    """Operator-delivered prescriptions (runbooks): approve → applied → confirmed (assessment D-28)."""
+
+    def setUp(self):
+        self.d = tempfile.mkdtemp(prefix="zo-task-ledger-")
+        self.home = os.path.join(self.d, "loop")
+        self.prx = os.path.join(self.home, "cycles", "C1", "prescriptions")
+        os.makedirs(self.prx)
+        self.evidence = os.path.join(self.d, "acceptance.json")
+        with open(self.evidence, "w") as f:
+            json.dump({"meets_expectation": True}, f)
+        self.assertEqual(run("init", "--home", self.home)[0], 0)
+        self.assertEqual(run("cycle-open", "--home", self.home, "--cycle", "C1", "--budget-calls", "0", "--budget-usd", "0", "--actor", "operator")[0], 0)
+
+    def rx(self, n, delivery):
+        p = os.path.join(self.prx, f"RX-C1-{n}.json")
+        with open(p, "w") as f:
+            json.dump({"id": f"RX-C1-{n}", "kind": "heal", "delivery": delivery, "title": "t", "governor": {"tier": "H"}}, f)
+        self.assertEqual(self.ev(n, "propose", "prescribe")[0], 0)
+        return p
+
+    def ev(self, n, event, actor, data=None, evidence=None, rx_file=True):
+        args = ["event", "--home", self.home, "--cycle", "C1", "--rx", f"RX-C1-{n}", "--event", event, "--actor", actor]
+        if rx_file:
+            args += ["--rx-file", os.path.join(self.prx, f"RX-C1-{n}.json")]
+        if data is not None:
+            args += ["--data", json.dumps(data)]
+        if evidence:
+            args += ["--evidence", *evidence]
+        return run(*args)
+
+    def approve(self, n, scope):
+        return self.ev(n, "approve", "operator", data={"scope": scope, "operator_words": "Approved"})
+
+    def status(self):
+        p = subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "..", "loop-status.py"), "--home", self.home, "--json"],
+                           capture_output=True, text=True)
+        out = json.loads(p.stdout)
+        return {r["rx"]: r for r in out["prescriptions"]}, out["stop"]
+
+    def state(self, n):
+        return json.loads(run("state", "--home", self.home, "--json")[1])["rx"][f"RX-C1-{n}"]["state"]
+
+    def test_lifecycle_approve_applied_confirmed(self):
+        self.rx("01", "operator")
+        self.assertEqual(self.approve("01", ["operator-runbook"])[0], 0)
+        rows, _ = self.status()
+        self.assertEqual((rows["RX-C1-01"]["state"], rows["RX-C1-01"]["owner"]), ("approved", "operator"))
+        self.assertEqual(self.ev("01", "start", "evolve")[0], 3)                        # evolve never runs a runbook
+        self.assertEqual(self.ev("01", "applied", "operator", data={"operator_words": "done"})[0], 3)   # no evidence
+        self.assertEqual(self.ev("01", "applied", "operator", evidence=[self.evidence])[0], 3)         # no operator words
+        self.assertEqual(self.ev("01", "applied", "evolve", data={"operator_words": "done"}, evidence=[self.evidence])[0], 3)
+        self.assertEqual(self.ev("01", "applied", "operator", data={"operator_words": "done"}, evidence=[self.evidence])[0], 0)
+        rows, _ = self.status()
+        self.assertEqual((rows["RX-C1-01"]["state"], rows["RX-C1-01"]["owner"]), ("applied", "agent"))
+        self.assertEqual(self.ev("01", "confirmed", "introspect", data={})[0], 3)
+        self.assertEqual(self.ev("01", "confirmed", "introspect", data={"assessment": "/a", "matrix_rows": ["G-06"]})[0], 0)
+        self.assertEqual(self.state("01"), "confirmed")
+        self.assertEqual(run("verify", "--home", self.home)[0], 0)
+
+    def test_regressed_from_applied(self):
+        self.rx("01", "operator"); self.approve("01", ["operator-runbook"])
+        self.ev("01", "applied", "operator", data={"operator_words": "done"}, evidence=[self.evidence])
+        self.assertEqual(self.ev("01", "regressed", "introspect", data={"assessment": "/a", "matrix_rows": ["G-06"]})[0], 0)
+
+    def test_scope_must_match_delivery(self):
+        self.rx("01", "operator"); self.rx("02", "pr")
+        self.assertEqual(self.approve("01", ["evolve-local"])[0], 3)
+        self.assertEqual(self.approve("01", ["operator-runbook", "evolve-local"])[0], 3)
+        self.assertEqual(self.approve("02", ["operator-runbook"])[0], 3)
+        self.assertEqual(self.approve("02", ["evolve-local", "operator-runbook"])[0], 3)
+        self.assertEqual(self.approve("01", ["operator-runbook", "live-calls:2"])[0], 0)
+        self.assertEqual(self.approve("02", ["evolve-local"])[0], 0)
+
+    def test_applied_needs_unchanged_prescription_and_runbook_scope(self):
+        p = self.rx("01", "operator"); self.approve("01", ["operator-runbook"])
+        with open(p, "w") as f:
+            json.dump({"id": "RX-C1-01", "kind": "heal", "delivery": "operator", "title": "changed", "governor": {"tier": "H"}}, f)
+        code, _, err = self.ev("01", "applied", "operator", data={"operator_words": "done"}, evidence=[self.evidence])
+        self.assertEqual(code, 3); self.assertIn("changed since approval", err)
+        self.rx("02", "pr"); self.approve("02", ["evolve-local"])
+        self.assertEqual(self.ev("02", "applied", "operator", data={"operator_words": "done"}, evidence=[self.evidence])[0], 3)
+
+    def test_runbooks_do_not_count_toward_active_pr_limit(self):
+        for n in ("01", "02", "03", "04"):
+            self.rx(n, "operator"); self.assertEqual(self.approve(n, ["operator-runbook"])[0], 0)
+        _, stops = self.status()
+        self.assertEqual(stops, [])
+        for n in ("05", "06", "07", "08"):
+            self.rx(n, "pr"); self.approve(n, ["evolve-local"])
+        _, stops = self.status()
+        self.assertTrue(any("active" in s for s in stops))
 
 
 if __name__ == "__main__":
