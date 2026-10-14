@@ -236,6 +236,9 @@ export function initDatabase(config: MemoryConfig): Database {
   }
 
   db = new Database(config.dbPath);
+  // Several processes (Hermes and Claude Code MCP servers, CLI, selfheal) share
+  // one memory.db; wait for a competing writer instead of failing with SQLITE_BUSY.
+  db.exec('PRAGMA busy_timeout = 5000');
   db.exec('PRAGMA journal_mode = WAL');
   // Legacy hook-capture table must move to event_observations before the base
   // schema creates belief-observation indexes (see reconcile helper above).
