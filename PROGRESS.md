@@ -11,14 +11,14 @@ Objective: independent Hermes/Zouroboros VPS distribution extracted from the wor
 - [x] Build imported packages; validate portable state relocation.
 - [x] Verify MCP memory round trip and fake executor integration.
 - [x] Complete final typecheck, acceptance suite and clean-checkout proof (18 Bun tests, 10 Python tests, portable relocation).
-- [x] Publish independent private repository and verify remote revision.
+- [x] Publish independent repository and verify remote revision.
 - [x] Pass GitHub fresh-runner CI: build, TypeScript, 18 Bun tests, 10 Python tests, portable relocation.
 
 Source workspace preflight: graph IPC and operation-window ledger are inaccessible in this sandbox. Targeted source reads were used. Specialist routing ran in shadow mode; bounded read-only/code reviews used the operator-authorized agents. No real specialist provider calls or paid model execution.
 
 Known scope limits: production Factory dispatch and deployment are not installed; standalone self-heal probes/TUI/bundled skills are excluded. Private package license declarations are preserved. See README and NOTICE.
 
-GitHub repository created and verified PRIVATE, `isFork=false`: https://github.com/marlandoj/hermes-zouroboros.
+GitHub repository created, `isFork=false`: https://github.com/marlandoj/hermes-zouroboros. Correction (2026-10-14): the repository has been public since creation (2026-10-06), not private as originally recorded; it stays public by operator decision (2026-10-13). `main` is protected: changes land only through pull requests with a passing `verify` check, enforced for administrators, with no force-push or deletion.
 
 Verified implementation revision: `2103e0123990b4da69f4efc90773eb98fefee281`.
 
