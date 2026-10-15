@@ -619,7 +619,7 @@ try {
         receipt=next(iter(rows().values()))
         if kind=='ordinary':
             stored=fixture.memory_calls([{'name':'memory_store','arguments':{
-                'entity':'ordinary-matching-'+str(i),'key':'decision','value':receipt['value']+' ordinary '+str(i),'actor':'installer-test'}} for i in range(30)])
+                'entity':'ordinary-matching-'+str(i),'key':'decision','value':receipt['value']+' ordinary '+str(i),'actor':'hermes-zouroboros-installer'}} for i in range(30)])
             self.assertEqual(len({row['id'] for row in stored}),30)
             # Make the original deterministically older; do not change ordinary
             # MCP-created timestamps, payloads, importance, or default lifetimes.
@@ -640,7 +640,7 @@ try {
         originals=rows()
         self.assertEqual(len(originals),31)
         # A bounded ordinary keyword search really hides the selected receipt.
-        found=fixture.memory_calls([{'name':'memory_search','arguments':{'query':receipt['value'],'limit':30,'actor':'installer-test'}}])[0]
+        found=fixture.memory_calls([{'name':'memory_search','arguments':{'query':receipt['value'],'limit':30,'actor':'hermes-zouroboros-installer'}}])[0]
         self.assertEqual(len(found),30)
         self.assertNotIn(receipt['id'],[row['id'] for row in found])
         preserved=[fixture.config,fixture.credentials,fixture.data/'executors.json',fixture.data/'settings.json',fixture.data/'hermes/config.yaml']
