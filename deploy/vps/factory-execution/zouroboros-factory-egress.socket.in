@@ -1,0 +1,18 @@
+[Unit]
+Description=Factory execution egress (CONNECT allowlist) inside the execution netns
+Requires=zouroboros-factory-egress-netns.service
+BindsTo=zouroboros-factory-egress-netns.service
+After=zouroboros-factory-egress-netns.service
+
+[Socket]
+ListenStream=127.0.0.1:3128
+NetworkNamespacePath=/run/netns/zouroboros-factory-execution
+Accept=yes
+MaxConnections=16
+Backlog=16
+NoDelay=yes
+TriggerLimitIntervalSec=600
+TriggerLimitBurst=400
+
+[Install]
+WantedBy=sockets.target

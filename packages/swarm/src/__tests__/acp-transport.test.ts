@@ -9,6 +9,11 @@
  */
 
 import { describe, test, expect, mock } from 'bun:test';
+
+// The transport merges process.env into every session env (buildEnv), and a host harness that
+// exports SWARM_* routing vars would flip the fail-closed model-selection check for executors
+// that declare none. Model routing is exercised through explicit options.env only.
+for (const key of ['SWARM_PROVIDER', 'SWARM_RESOLVED_MODEL']) delete process.env[key];
 import { BridgeTransport } from '../transport/bridge-transport.js';
 import {
   ACPTransport,
@@ -91,8 +96,8 @@ describe('Wayfinder shadow integration', () => {
     mode: 'shadow' as const,
     engineDir,
     harness: 'factory',
-    home: '/home/workspace/.wayfinder',
-    skillsRoots: ['/home/workspace/Skills'],
+    home: '/home/wsroot/.wayfinder',
+    skillsRoots: ['/home/wsroot/Skills'],
   };
   const task = {
     id: 'task-1',
@@ -105,12 +110,12 @@ describe('Wayfinder shadow integration', () => {
     const script = wayfinderRankScript({
       entrypoint,
       harness: 'factory',
-      stateHome: '/home/workspace/.wayfinder',
-      roots: '/home/workspace/Skills',
-      cwd: '/home/workspace/.factory-worktrees/wt-1',
+      stateHome: '/home/wsroot/.wayfinder',
+      roots: '/home/wsroot/Skills',
+      cwd: '/home/wsroot/.factory-worktrees/wt-1',
       timeoutMs: 15_000,
       invocationId: 'inv-1',
-      event: { prompt: task.task, session_id: 'task-1', cwd: '/home/workspace/.factory-worktrees/wt-1' },
+      event: { prompt: task.task, session_id: 'task-1', cwd: '/home/wsroot/.factory-worktrees/wt-1' },
     });
 
     test('passes the event in argv so the child needs no stdin pipe', () => {
@@ -123,9 +128,9 @@ describe('Wayfinder shadow integration', () => {
     });
 
     test('carries state, roots, cwd and a hard timeout', () => {
-      expect(script).toContain(`export WAYFINDER_HOME='/home/workspace/.wayfinder'`);
-      expect(script).toContain(`export WAYFINDER_SKILLS_ROOTS='/home/workspace/Skills'`);
-      expect(script).toContain(`cd '/home/workspace/.factory-worktrees/wt-1' || exit 0`);
+      expect(script).toContain(`export WAYFINDER_HOME='/home/wsroot/.wayfinder'`);
+      expect(script).toContain(`export WAYFINDER_SKILLS_ROOTS='/home/wsroot/Skills'`);
+      expect(script).toContain(`cd '/home/wsroot/.factory-worktrees/wt-1' || exit 0`);
       expect(script).toContain('timeout 15 python3');
     });
 
@@ -174,12 +179,12 @@ describe('Wayfinder shadow integration', () => {
         mkdirSync(join(home, 'invocations', 'inv-9'), { recursive: true, mode: 0o700 });
         writeFileSync(rowPath, JSON.stringify({
           pick: 'fal-ai-media',
-          pick_path: '/home/workspace/Skills/fal-ai-media/SKILL.md',
-          candidates: [{ id: 'fal-ai-media', source: '/home/workspace/Skills/fal-ai-media/SKILL.md' }],
+          pick_path: '/home/wsroot/Skills/fal-ai-media/SKILL.md',
+          candidates: [{ id: 'fal-ai-media', source: '/home/wsroot/Skills/fal-ai-media/SKILL.md' }],
         }) + '\n');
         const row = readWayfinderShadowRow(rowPath);
         expect(row?.pick).toBe('fal-ai-media');
-        expect(row?.pickPath).toBe('/home/workspace/Skills/fal-ai-media/SKILL.md');
+        expect(row?.pickPath).toBe('/home/wsroot/Skills/fal-ai-media/SKILL.md');
       } finally {
         rmSync(home, { recursive: true, force: true });
       }
@@ -190,24 +195,24 @@ describe('Wayfinder shadow integration', () => {
     });
 
     test('derives the row path from state home and invocation id', () => {
-      expect(wayfinderRowPath('/home/workspace/.wayfinder', 'inv-1'))
-        .toBe('/home/workspace/.wayfinder/invocations/inv-1/shadow.jsonl');
+      expect(wayfinderRowPath('/home/wsroot/.wayfinder', 'inv-1'))
+        .toBe('/home/wsroot/.wayfinder/invocations/inv-1/shadow.jsonl');
     });
   });
 
   describe('adoption labelling', () => {
     const row = {
       pick: 'fal-ai-media',
-      pickPath: '/home/workspace/Skills/fal-ai-media/SKILL.md',
-      candidates: [{ id: 'fal-ai-media', source: '/home/workspace/Skills/fal-ai-media/SKILL.md' }],
+      pickPath: '/home/wsroot/Skills/fal-ai-media/SKILL.md',
+      candidates: [{ id: 'fal-ai-media', source: '/home/wsroot/Skills/fal-ai-media/SKILL.md' }],
     };
 
     test('counts a suggestion as adopted when the agent read the skill', () => {
-      const result = evaluateWayfinderShadow(row, new Set(['/home/workspace/Skills/fal-ai-media/SKILL.md']));
+      const result = evaluateWayfinderShadow(row, new Set(['/home/wsroot/Skills/fal-ai-media/SKILL.md']));
       expect(result).toEqual({
         pick: 'fal-ai-media',
         used: true,
-        readSkills: ['/home/workspace/Skills/fal-ai-media/SKILL.md'],
+        readSkills: ['/home/wsroot/Skills/fal-ai-media/SKILL.md'],
       });
     });
 
@@ -218,7 +223,7 @@ describe('Wayfinder shadow integration', () => {
     });
 
     test('labels a read-but-ignored suggestion as not adopted', () => {
-      const result = evaluateWayfinderShadow(row, new Set(['/home/workspace/AGENTS.md']));
+      const result = evaluateWayfinderShadow(row, new Set(['/home/wsroot/AGENTS.md']));
       expect(result?.used).toBe(false);
       expect(result?.readSkills).toEqual([]);
     });
@@ -682,7 +687,7 @@ describe('ACPTransport', () => {
         { configPath, includeShared: true },
         {
           env: {
-            ZO_API_KEY: 'test-token',
+            ZO_API_KEY: 'dummy-token',
             ZO_CONVERSATION_ID: 'test-conversation',
           },
         },

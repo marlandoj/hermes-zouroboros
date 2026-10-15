@@ -121,7 +121,7 @@ describe('ECC-010: Memory Explosion Throttling', () => {
   beforeEach(() => {
     resetThrottleState();
     fetchCallCount = 0;
-    process.env.OPENAI_API_KEY = 'sk-test-key';
+    process.env.OPENAI_API_KEY = 'dummy-key';
     mockOpenAIFetch();
   });
 
@@ -184,7 +184,7 @@ describe('OpenAI embedding provider', () => {
 
   beforeEach(() => {
     resetThrottleState();
-    process.env.OPENAI_API_KEY = 'sk-test-key';
+    process.env.OPENAI_API_KEY = 'dummy-key';
   });
 
   test('routes to OpenAI endpoint and parses data[0].embedding', async () => {

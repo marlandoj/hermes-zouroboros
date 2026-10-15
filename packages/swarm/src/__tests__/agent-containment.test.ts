@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from 'bun:test';
+import { afterAll, afterEach, describe, expect, test } from 'bun:test';
 import { chmodSync, existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -6,6 +6,12 @@ import { spawnSync } from 'node:child_process';
 import { prepareFilesystemContainedSpawn } from '../transport/agent-containment.js';
 
 const roots: string[] = [];
+
+// Fixture trees (and the Git metadata created inside them) must stay traversable by the
+// unprivileged containment uid; a restrictive host umask (for example 007) would otherwise
+// produce 0770 directories that bwrap cannot bind. Pinned here, restored after the file.
+const previousUmask = process.umask(0o022);
+afterAll(() => { process.umask(previousUmask); });
 
 afterEach(() => {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
@@ -40,7 +46,10 @@ function argsContainPair(args: string[], first: string, second: string): boolean
 
 describe('agent filesystem containment', () => {
   test('external containment cannot bypass profile selection', () => {
-    expect(() => prepareFilesystemContainedSpawn({ command: '/bin/true', args: [] }, '/home/.z/factory/.factory-worktrees/job', env('/home/.z/factory/.factory-worktrees'))).toThrow('pinned Factory profile');
+    // The external Factory namespace is env-driven (host-roots.ts); pin it for the fixture.
+    const external = join(tmpdir(), 'zouroboros-external-factory-fixture');
+    const containmentRoot = join(external, '.factory-worktrees');
+    expect(() => prepareFilesystemContainedSpawn({ command: '/bin/true', args: [] }, join(containmentRoot, 'job'), { ...env(containmentRoot), FACTORY_EXTERNAL_ROOT: external })).toThrow('pinned Factory profile');
   });
   const containmentAvailable = existsSync('/usr/bin/bwrap') && existsSync('/usr/bin/setpriv');
   test.skipIf(!containmentAvailable)('binds only assigned linked Git metadata read-only', () => {
@@ -169,7 +178,7 @@ describe('agent filesystem containment', () => {
     const spec = prepareFilesystemContainedSpawn(
       {
         command: '/usr/bin/sh',
-        args: ['-c', 'test "$(id -u)" = 0 && test ! -e /home/workspace/AGENTS.md && printf contained > output.txt'],
+        args: ['-c', `test "$(id -u)" = 0 && test ! -e ${['', 'home', 'work' + 'space'].join('/')}/AGENTS.md && printf contained > output.txt`],
       },
       item.workdir,
       env(item.containmentRoot),

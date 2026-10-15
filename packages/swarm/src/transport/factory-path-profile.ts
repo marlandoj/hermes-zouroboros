@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
 import { lstatSync, readFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { factoryRoots } from '../host-roots.js';
 
-export const LEGACY_FACTORY_WORKTREES = '/home/workspace/.factory-worktrees';
-export const EXTERNAL_FACTORY_WORKTREES = '/home/.z/factory/.factory-worktrees';
-export const EXTERNAL_FACTORY_RELEASES = '/home/.z/factory/releases';
+// Factory namespaces resolve from the portable roots (see host-roots.ts) at call time.
+export const legacyFactoryWorktrees = (env: Record<string, string | undefined> = process.env) => factoryRoots(env).legacyWorktrees;
 
 export interface FactoryPathProfile {
   version: 1;
@@ -38,7 +38,8 @@ export function canonicalFactoryPath(path: string): string {
   return path;
 }
 
-export function validateFactoryPathProfile(raw: unknown): FactoryPathProfile {
+export function validateFactoryPathProfile(raw: unknown, env: Record<string, string | undefined> = process.env): FactoryPathProfile {
+  const namespace = factoryRoots(env);
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('Factory profile must be an object');
   const value = raw as FactoryPathProfile;
   const keys = ['version', 'source_root', 'worktrees_root', 'releases_root', 'state_root', 'state_root_id', 'state_generation', 'state_device'];
@@ -49,10 +50,10 @@ export function validateFactoryPathProfile(raw: unknown): FactoryPathProfile {
     if (typeof value[key] !== 'string') throw new Error('Factory profile path must be a string');
     canonicalFactoryPath(value[key]);
   }
-  if (value.source_root !== '/home/workspace' || value.worktrees_root !== EXTERNAL_FACTORY_WORKTREES || value.releases_root !== EXTERNAL_FACTORY_RELEASES) {
+  if (value.source_root !== namespace.source || value.worktrees_root !== namespace.externalWorktrees || value.releases_root !== namespace.externalReleases) {
     throw new Error('Factory profile namespace is not authorized');
   }
-  if ([value.worktrees_root, value.releases_root, LEGACY_FACTORY_WORKTREES].some(root => insideFactoryPath(root, value.state_root) || insideFactoryPath(value.state_root, root)) || /\/\.runtime\/factory-conveyor(?:-|\/)/.test(value.state_root)) {
+  if ([value.worktrees_root, value.releases_root, namespace.legacyWorktrees].some(root => insideFactoryPath(root, value.state_root) || insideFactoryPath(value.state_root, root)) || /\/\.runtime\/factory-conveyor(?:-|\/)/.test(value.state_root)) {
     throw new Error('Factory profile state must be independent');
   }
   if (typeof value.state_root_id !== 'string' || !/^[0-9a-f-]{36}$/i.test(value.state_root_id) || !Number.isSafeInteger(value.state_generation) || value.state_generation < 0 || !Number.isSafeInteger(value.state_device) || value.state_device < 0) {
@@ -75,27 +76,27 @@ export function loadFactoryPathProfile(env: Record<string, string | undefined> =
   canonicalFactoryPath(path);
   const bytes = readFileSync(path);
   if (createHash('sha256').update(bytes).digest('hex') !== digest) throw new Error('Factory profile digest mismatch');
-  const profile = validateFactoryPathProfile(JSON.parse(bytes.toString('utf8')));
+  const profile = validateFactoryPathProfile(JSON.parse(bytes.toString('utf8')), env);
   for (const [key, expected] of Object.entries({ FACTORY_CODING_CASCADE_WORKTREES_ROOT: profile.worktrees_root, SWARM_EXEC_CONTAINMENT_ROOT: profile.worktrees_root, FACTORY_STATE_DIR: profile.state_root })) {
     if (env[key] !== undefined && env[key] !== expected) throw new Error(`Factory profile divergence: ${key}`);
   }
   return profile;
 }
 
-export function factoryWorktreesRoot(explicit?: string, legacy = LEGACY_FACTORY_WORKTREES, env: Record<string, string | undefined> = process.env): string {
+export function factoryWorktreesRoot(explicit?: string, legacy?: string, env: Record<string, string | undefined> = process.env): string {
   const profile = loadFactoryPathProfile(env);
   if (profile) {
     if (explicit !== undefined && explicit !== profile.worktrees_root) throw new Error('Factory worktree override diverges from profile');
     return canonicalFactoryPath(profile.worktrees_root);
   }
-  const selected = explicit ?? env.FACTORY_CODING_CASCADE_WORKTREES_ROOT ?? legacy;
-  if (insideFactoryPath('/home/.z/factory', resolve(selected))) throw new Error('External Factory root requires a pinned profile');
+  const selected = explicit ?? env.FACTORY_CODING_CASCADE_WORKTREES_ROOT ?? legacy ?? legacyFactoryWorktrees(env);
+  if (insideFactoryPath(factoryRoots(env).external, resolve(selected))) throw new Error('External Factory root requires a pinned profile');
   return selected;
 }
 
 export function factoryWorktreeReadRoots(explicit?: string): string[] {
   const selected = factoryWorktreesRoot(explicit);
-  return [...new Set(loadFactoryPathProfile() ? [selected, LEGACY_FACTORY_WORKTREES] : [selected])];
+  return [...new Set(loadFactoryPathProfile() ? [selected, legacyFactoryWorktrees()] : [selected])];
 }
 
 export function factoryProfileEnv(env: Record<string, string | undefined> = process.env): Record<string, string> {

@@ -1,0 +1,56 @@
+[Unit]
+Description=Repeatable contained Factory execution (one spooled request per activation)
+After=local-fs.target zouroboros-factory-egress.socket
+
+[Service]
+Type=exec
+Group=root
+SupplementaryGroups=
+ExecStart=@PYTHON@ -I -S -B @SOURCE_ROOT@/Projects/zouroboros-software-factory/scripts/hermes_execution_unit.py --repeatable --approved-unit-inputs-sha256 @UNIT_INPUTS_SHA256@
+WorkingDirectory=@SOURCE_ROOT@
+Restart=no
+RemainAfterExit=no
+RuntimeMaxSec=600
+TimeoutStartSec=15
+TimeoutStopSec=3
+KillMode=control-group
+KillSignal=SIGTERM
+FinalKillSignal=SIGKILL
+SendSIGKILL=yes
+Delegate=no
+NoNewPrivileges=yes
+ProtectControlGroups=yes
+RestrictNamespaces=user mnt pid uts ipc
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateUsers=no
+ProtectKernelTunables=no
+ProtectKernelModules=yes
+ProtectKernelLogs=no
+BindReadOnlyPaths=/sys
+SystemCallFilter=~syslog
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH CAP_KILL CAP_SETGID CAP_SETUID CAP_SYS_PTRACE
+AmbientCapabilities=
+ReadWritePaths=/var/lib/zouroboros-factory-execution/execution/spool /var/lib/zouroboros-factory-execution/execution/results /var/lib/zouroboros-factory-execution/execution/ledger /var/lib/zouroboros-factory-execution/execution/work /var/lib/zouroboros-factory-execution/home /var/lib/zouroboros-factory-execution/state /var/lib/zouroboros-factory-execution/credentials/codex /var/lib/hermes-zouroboros/kanban/boards/software-factory
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+NetworkNamespacePath=/run/netns/zouroboros-factory-execution
+IPAddressDeny=any
+IPAddressAllow=127.0.0.1/32
+Environment=PATH=/usr/sbin:/usr/bin:/sbin:/bin LC_ALL=C
+PassEnvironment=
+UnsetEnvironment=FACTORY_STATE_MODE PYTHONPATH PYTHONHOME LD_PRELOAD LD_LIBRARY_PATH
+SetLoginEnvironment=no
+UMask=0077
+TasksMax=256
+MemoryMax=12G
+LimitCORE=0
+LimitNOFILE=1024
+StandardInput=null
+StandardOutput=journal
+StandardError=journal
+RuntimeDirectory=zouroboros-factory-execution
+RuntimeDirectoryMode=0755
