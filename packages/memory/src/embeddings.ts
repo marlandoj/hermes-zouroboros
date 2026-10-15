@@ -92,9 +92,10 @@ export function resetThrottleState(): void {
 
 // ─── Provider selection ───────────────────────────────────────────────────────
 
-export type EmbeddingProvider = 'openai';
+export type EmbeddingProvider = 'openai' | 'deterministic';
 export const PRODUCTION_EMBEDDING_MODEL = 'text-embedding-3-small';
 export const PRODUCTION_EMBEDDING_DIMENSION = 1536;
+export const DETERMINISTIC_EMBEDDING_MODEL = 'deterministic-hash-v1';
 
 export interface ResolvedEmbeddingProvider {
   provider: EmbeddingProvider;
@@ -104,8 +105,46 @@ export interface ResolvedEmbeddingProvider {
 export function resolveEmbeddingProvider(
   config: MemoryConfig,
 ): ResolvedEmbeddingProvider {
-  const provider: EmbeddingProvider = 'openai';
-  return { provider, model: config.embeddingModel ?? PRODUCTION_EMBEDDING_MODEL };
+  if (config.embeddingProvider === 'deterministic') {
+    return { provider: 'deterministic', model: DETERMINISTIC_EMBEDDING_MODEL };
+  }
+  return { provider: 'openai', model: config.embeddingModel ?? PRODUCTION_EMBEDDING_MODEL };
+}
+
+/**
+ * Deterministic pseudo-embedding: signed hashing-trick bag-of-tokens.
+ *
+ * Each lowercased alphanumeric token is projected onto 4 signed dimensions
+ * derived from its SHA-256 digest, then the vector is L2-normalized. Cosine
+ * similarity therefore tracks token overlap: paraphrases sharing content
+ * words score high, disjoint texts score near zero. No network, no keys,
+ * identical output across processes and machines — this is the hermetic CI
+ * substitute for real embeddings (it exercises the vector plumbing and RRF
+ * fusion, not real semantic quality; the nightly real-embedding lane
+ * measures that).
+ */
+export function deterministicEmbedding(
+  text: string,
+  dimension: number = PRODUCTION_EMBEDDING_DIMENSION,
+): number[] {
+  const vec = new Array<number>(dimension).fill(0);
+  const tokens = text.toLowerCase().match(/[a-z0-9]+/g) ?? [];
+  for (const token of tokens) {
+    const digest = createHash('sha256').update(token).digest();
+    for (let probe = 0; probe < 4; probe++) {
+      const offset = probe * 3;
+      const idx = ((digest[offset] << 8) | digest[offset + 1]) % dimension;
+      const sign = (digest[offset + 2] & 1) === 0 ? 1 : -1;
+      vec[idx] += sign;
+    }
+  }
+  let norm = Math.sqrt(vec.reduce((sum, v) => sum + v * v, 0));
+  if (norm === 0) {
+    // Empty token set: fail closed to a fixed unit vector rather than NaN.
+    vec[0] = 1;
+    norm = 1;
+  }
+  return vec.map(v => v / norm);
 }
 
 async function _generateEmbeddingFromOpenAI(
@@ -145,6 +184,10 @@ async function _generateEmbeddingProvider(
   text: string,
   config: MemoryConfig,
 ): Promise<number[]> {
+  const { provider } = resolveEmbeddingProvider(config);
+  if (provider === 'deterministic') {
+    return deterministicEmbedding(text, config.embeddingDimension ?? PRODUCTION_EMBEDDING_DIMENSION);
+  }
   return _generateEmbeddingFromOpenAI(text, config);
 }
 
@@ -310,7 +353,8 @@ export function deserializeEmbedding(buffer: Buffer): number[] {
 /**
  * Check if the embedding provider (OpenAI) is available
  */
-export async function checkEmbeddingProviderHealth(_config: MemoryConfig): Promise<boolean> {
+export async function checkEmbeddingProviderHealth(config: MemoryConfig): Promise<boolean> {
+  if (resolveEmbeddingProvider(config).provider === 'deterministic') return true;
   try {
     const key = process.env.OPENAI_API_KEY || process.env.ZO_OPENAI_API_KEY;
     if (!key) return false;

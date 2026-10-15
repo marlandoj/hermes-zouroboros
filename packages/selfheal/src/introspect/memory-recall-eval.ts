@@ -19,7 +19,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_CONFIG, type MemorySearchResult } from 'zouroboros-core';
-import { closeDatabase, extractQueryEntities, initDatabase, runMigrations, searchFacts, searchFactsGraphBoosted, storeFact } from 'zouroboros-memory';
+import { closeDatabase, extractQueryEntities, initDatabase, resolveScope, runMigrations, searchFacts, searchFactsGraphBoosted, storeFact } from 'zouroboros-memory';
+
+// Track 1 actor scoping: this eval stores and recalls synthetic fixtures in a
+// scratch database, so everything runs under the deliberate cross-persona
+// 'shared' actor (fail-closed APIs require an explicit identity).
+const EVAL_ACTOR = 'shared';
 
 export interface RecallFixtureSet {
   name: string;
@@ -41,14 +46,15 @@ function recall(query: string): string[] {
   const hits = new Map<string, { result: MemorySearchResult; count: number; first: number }>();
   let order = 0;
   for (const word of keywords(query)) {
-    for (const entry of searchFacts(word, { limit: 50 })) {
+    for (const entry of searchFacts(word, { actor: EVAL_ACTOR, limit: 50 })) {
       const hit = hits.get(entry.id) ?? { result: { entry, score: 0, matchType: 'exact' as const }, count: 0, first: order++ };
       hit.count++;
       hits.set(entry.id, hit);
     }
   }
   const base = [...hits.values()].sort((a, b) => b.count - a.count || a.first - b.first).map((hit) => hit.result);
-  return searchFactsGraphBoosted(base, extractQueryEntities(query), { limit: TOP_K })
+  const scope = resolveScope(EVAL_ACTOR, 'memory-recall-eval');
+  return searchFactsGraphBoosted(base, extractQueryEntities(query, scope), scope, { limit: TOP_K })
     .map((result) => `${result.entry.entity} ${result.entry.key ?? ''} ${result.entry.value}`.toLowerCase());
 }
 
@@ -59,7 +65,7 @@ export async function runRecallEval(fixturesPath = process.env.ZOUROBOROS_MEMORY
   try {
     initDatabase(config);
     runMigrations(config);
-    for (const fact of fixtures.facts) await storeFact({ ...fact, decay: 'permanent', source: 'synthetic-eval' }, config);
+    for (const fact of fixtures.facts) await storeFact({ actor: EVAL_ACTOR, ...fact, decay: 'permanent', source: 'synthetic-eval' }, config);
     const failed = fixtures.cases.filter((c) => {
       const top = recall(c.query);
       return !c.expectAny.some((needle) => top.some((text) => text.includes(needle.toLowerCase())));

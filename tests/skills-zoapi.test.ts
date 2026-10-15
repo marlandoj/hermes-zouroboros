@@ -106,7 +106,7 @@ test('ponytail-review: one governed call, parsed findings, advisory on failure',
 
 test('deep-research: full DAG through the governed ask layer, profile memory in and out', () => {
   const zmem = skill('zouroboros/zo-memory-system/scripts/zmem.ts');
-  expect(run(zmem, ['store', '--entity', 'project.widgets', '--key', 'alloy', '--value', 'Copper widgets resist corrosion in our tests']).code).toBe(0);
+  expect(run(zmem, ['store', '--actor', 'shared', '--entity', 'project.widgets', '--key', 'alloy', '--value', 'Copper widgets resist corrosion in our tests']).code).toBe(0);
   fakeHermes(`p="$*"
 case "$p" in
   *"research planner"*) echo '{"subQuestions":["Do copper widgets corrode?","How long do they last?"],"domain":"scientific"}' ;;
@@ -127,7 +127,7 @@ esac`);
   expect(report).toContain('project.widgets.alloy');
   const gathered = JSON.parse(readFileSync(join(runDir, '01-gather.json'), 'utf8')).sources;
   expect(new Set(gathered.map((s: { type: string }) => s.type))).toEqual(new Set(['literature', 'web', 'internal']));
-  expect(JSON.parse(run(zmem, ['search', 'Deep research run']).stdout).some((f: { entity: string }) => f.entity === 'deep-research')).toBe(true);
+  expect(JSON.parse(run(zmem, ['search', 'Deep research run', '--actor', 'shared']).stdout).some((f: { entity: string }) => f.entity === 'deep-research')).toBe(true);
 
   // Idempotent: a rerun reuses every artifact and calls no model.
   const before = calls().length;
@@ -137,7 +137,7 @@ esac`);
 
 test('deep-research: internal memory is searched by the query keywords, not only the sub-questions', () => {
   const zmem = skill('zouroboros/zo-memory-system/scripts/zmem.ts');
-  expect(run(zmem, ['store', '--entity', 'demo', '--key', 'choice', '--value', 'Use copper widgets']).code).toBe(0);
+  expect(run(zmem, ['store', '--actor', 'shared', '--entity', 'demo', '--key', 'choice', '--value', 'Use copper widgets']).code).toBe(0);
   // Verbose sub-questions whose four longest words never include "copper" or "widgets".
   fakeHermes(`p="$*"
 case "$p" in

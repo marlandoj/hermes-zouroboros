@@ -168,6 +168,41 @@ CREATE TABLE IF NOT EXISTS mental_models (
   UNIQUE(persona, question)
 );
 
+-- Intelligence plane (Track 1): audit trail for every scoped memory access
+CREATE TABLE IF NOT EXISTS memory_audit (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  actor TEXT NOT NULL,
+  scope TEXT NOT NULL,
+  action TEXT NOT NULL,
+  fact_id TEXT,
+  call_id TEXT,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+);
+
+-- Intelligence plane (Track 1): append-only promotion pipeline ledger.
+-- A fact's current stage is its latest row (capture → extraction → review →
+-- promotion); review is reserved for contradictions/contested facts.
+CREATE TABLE IF NOT EXISTS fact_promotions (
+  id TEXT PRIMARY KEY,
+  fact_id TEXT NOT NULL REFERENCES facts(id) ON DELETE CASCADE,
+  stage TEXT NOT NULL CHECK(stage IN ('capture', 'extraction', 'review', 'promotion')),
+  decided_by TEXT NOT NULL,
+  decided_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+  contradiction_of TEXT REFERENCES facts(id),
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+);
+
+-- Intelligence plane (Track 1): reversible forgetting. A row here hides the
+-- fact from every retrieval path; deleting the row restores it. Hard deletes
+-- only happen via purge after a retention window.
+CREATE TABLE IF NOT EXISTS fact_forgotten (
+  fact_id TEXT PRIMARY KEY REFERENCES facts(id) ON DELETE CASCADE,
+  forgotten_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+  forgotten_by TEXT NOT NULL,
+  reason TEXT,
+  retention_score REAL
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_facts_entity_key ON facts(entity, key);
 CREATE INDEX IF NOT EXISTS idx_facts_decay ON facts(decay_class, expires_at);
@@ -184,6 +219,13 @@ CREATE INDEX IF NOT EXISTS idx_crystallization_events_id ON crystallization_even
 CREATE INDEX IF NOT EXISTS idx_observations_entity ON observations(entity, key);
 CREATE INDEX IF NOT EXISTS idx_observations_persona ON observations(persona, status);
 CREATE INDEX IF NOT EXISTS idx_mental_models_persona ON mental_models(persona);
+CREATE INDEX IF NOT EXISTS idx_memory_audit_actor ON memory_audit(actor, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_memory_audit_fact ON memory_audit(fact_id);
+CREATE INDEX IF NOT EXISTS idx_memory_audit_action ON memory_audit(action, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_memory_audit_call ON memory_audit(call_id);
+CREATE INDEX IF NOT EXISTS idx_fact_promotions_fact ON fact_promotions(fact_id, decided_at DESC);
+CREATE INDEX IF NOT EXISTS idx_fact_promotions_stage ON fact_promotions(stage, decided_at DESC);
+CREATE INDEX IF NOT EXISTS idx_fact_forgotten_at ON fact_forgotten(forgotten_at);
 `;
 
 /**
@@ -456,6 +498,76 @@ export function runMigrations(config: MemoryConfig): void {
         CREATE INDEX IF NOT EXISTS idx_facts_decay ON facts(decay_class, expires_at);
         CREATE INDEX IF NOT EXISTS idx_facts_category ON facts(category);
         CREATE INDEX IF NOT EXISTS idx_facts_persona ON facts(persona);
+      `,
+    },
+    // -----------------------------------------------------------------
+    // Migration-numbering reconciliation (Track 1, 2026-10-14).
+    //
+    // Two migration systems share the `_migrations` table:
+    //  (a) this file's name-tracked list (INSERT (name); the integer id is
+    //      auto-assigned by SQLite), and
+    //  (b) packages/core/src/migrations.ts's id-tracked registry
+    //      (INSERT (id, name)), whose id 8 is `008_add_procedure_episodes`.
+    // The decay unification added `008_unify_decay_vocabulary` here, so the
+    // number 008 now names two different migrations, and this list's
+    // auto-assigned row ids can collide with core's explicit ids (core's
+    // runner decides "applied" by id, so a row this list inserted can mask a
+    // core migration).
+    //
+    // Resolution: (1) `008_unify_decay_vocabulary` keeps its name — renaming
+    // an applied migration would re-run its table rebuild on deployed DBs.
+    // (2) All NEW migrations in this file use the 1xx block; the 0xx numeric
+    // space is ceded to packages/core's registry (currently 001–019). Core
+    // ids stay < 100, so the 1xx names can never be confused with a core id,
+    // and the name-vs-id collision cannot recur for new entries. The
+    // pre-existing id-masking hazard between the two runners is unchanged
+    // (out of Track 1 scope) but is now documented here.
+    // -----------------------------------------------------------------
+    {
+      name: '100_create_memory_audit',
+      sql: `
+        CREATE TABLE IF NOT EXISTS memory_audit (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          actor TEXT NOT NULL,
+          scope TEXT NOT NULL,
+          action TEXT NOT NULL,
+          fact_id TEXT,
+          call_id TEXT,
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_memory_audit_actor ON memory_audit(actor, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_memory_audit_fact ON memory_audit(fact_id);
+        CREATE INDEX IF NOT EXISTS idx_memory_audit_action ON memory_audit(action, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_memory_audit_call ON memory_audit(call_id);
+      `,
+    },
+    {
+      name: '101_create_fact_promotions',
+      sql: `
+        CREATE TABLE IF NOT EXISTS fact_promotions (
+          id TEXT PRIMARY KEY,
+          fact_id TEXT NOT NULL REFERENCES facts(id) ON DELETE CASCADE,
+          stage TEXT NOT NULL CHECK(stage IN ('capture', 'extraction', 'review', 'promotion')),
+          decided_by TEXT NOT NULL,
+          decided_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+          contradiction_of TEXT REFERENCES facts(id),
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_fact_promotions_fact ON fact_promotions(fact_id, decided_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_fact_promotions_stage ON fact_promotions(stage, decided_at DESC);
+      `,
+    },
+    {
+      name: '102_create_fact_forgotten',
+      sql: `
+        CREATE TABLE IF NOT EXISTS fact_forgotten (
+          fact_id TEXT PRIMARY KEY REFERENCES facts(id) ON DELETE CASCADE,
+          forgotten_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+          forgotten_by TEXT NOT NULL,
+          reason TEXT,
+          retention_score REAL
+        );
+        CREATE INDEX IF NOT EXISTS idx_fact_forgotten_at ON fact_forgotten(forgotten_at);
       `,
     },
   ];

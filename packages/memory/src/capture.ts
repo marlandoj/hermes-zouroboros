@@ -19,8 +19,11 @@ export interface CaptureResult {
 }
 
 export interface CaptureOptions {
+  /** Required caller identity (fail-closed; see scope.ts). */
+  actor: string;
   source?: string;
   entity?: string;
+  /** Persona captured facts are stored under; defaults to the actor. */
   persona?: string;
   conversationId?: string;
   dryRun?: boolean;
@@ -129,7 +132,7 @@ export function extractFromText(text: string): {
 export async function autoCapture(
   text: string,
   config: MemoryConfig,
-  options: CaptureOptions = {}
+  options: CaptureOptions
 ): Promise<CaptureResult> {
   const start = performance.now();
   const { source = 'auto-capture', entity: defaultEntity, dryRun = false } = options;
@@ -150,6 +153,7 @@ export async function autoCapture(
   // Store facts
   for (const fact of extracted.facts) {
     const stored = await storeFact({
+      actor: options.actor,
       entity: defaultEntity ?? fact.entity,
       key: fact.key,
       value: fact.value,
@@ -197,7 +201,7 @@ export function bufferForCapture(text: string): void {
  */
 export function startAutoCapture(
   config: MemoryConfig,
-  options: CaptureOptions = {}
+  options: CaptureOptions
 ): void {
   if (captureTimer) return;
 
@@ -218,7 +222,7 @@ export function startAutoCapture(
  */
 export async function stopAutoCapture(
   config: MemoryConfig,
-  options: CaptureOptions = {}
+  options: CaptureOptions
 ): Promise<CaptureResult | null> {
   if (captureTimer) {
     clearInterval(captureTimer);

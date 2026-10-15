@@ -81,6 +81,7 @@ if (command === 'store' || command === 'search') {
   const sub = parseArgs({
     args: process.argv.slice(3),
     options: {
+      actor: { type: 'string' },
       entity: { type: 'string' },
       key: { type: 'string' },
       value: { type: 'string' },
@@ -92,15 +93,23 @@ if (command === 'store' || command === 'search') {
   });
   const v = sub.values as Record<string, string | undefined>;
 
+  // Fail-closed (Track 1): every store/search carries a caller identity.
+  if (!v.actor) {
+    console.error(
+      `Missing --actor. Memory access is scoped per caller identity; pass --actor <persona-slug> (use "shared" only for deliberately cross-persona access).`,
+    );
+    process.exit(1);
+  }
+
   if (command === 'store') {
     if (!v.entity || !v.value) {
       console.error(
-        'Usage: zouroboros-memory store --entity <entity> [--key <key>] --value <value> [--persona <slug>]',
+        'Usage: zouroboros-memory store --actor <slug> --entity <entity> [--key <key>] --value <value> [--persona <slug>]',
       );
       process.exit(1);
     }
     const entry = await storeFact(
-      { entity: v.entity, key: v.key, value: v.value, persona: v.persona },
+      { actor: v.actor, entity: v.entity, key: v.key, value: v.value, persona: v.persona },
       memoryConfig,
     );
     const label = entry.key ? `${entry.entity}.${entry.key}` : entry.entity;
@@ -110,11 +119,11 @@ if (command === 'store' || command === 'search') {
 
   const query = sub.positionals.join(' ').trim();
   if (!query) {
-    console.error('Usage: zouroboros-memory search <query> [--limit <n>] [--persona <slug>]');
+    console.error('Usage: zouroboros-memory search <query> --actor <slug> [--limit <n>]');
     process.exit(1);
   }
   const limit = v.limit ? parseInt(v.limit, 10) : 10;
-  const results = searchFacts(query, { persona: v.persona, limit });
+  const results = searchFacts(query, { actor: v.actor, limit });
   if (results.length === 0) {
     console.log(`No stored memory matches "${query}".`);
     process.exit(0);

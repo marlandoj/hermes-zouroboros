@@ -4,30 +4,56 @@
  * Builds an implicit entity graph from facts and episodes,
  * then uses graph traversal to boost search results for
  * entities that are closely related to the query context.
+ *
+ * Track 1 scope rules: every fact read in this module is filtered through a
+ * required ScopePredicate (see scope.ts). Episodes carry no persona column,
+ * so episode co-occurrence edges remain shared substrate; fact CONTENT and
+ * fact-derived entity lists never cross scope. This closes the
+ * definer-rights leak where the graph arm returned other actors' facts.
  */
 
 import { getDatabase } from './database.js';
+import { scopeSql, type ScopePredicate } from './scope.js';
+import { notForgottenSql } from './facts.js';
 import type { GraphNode, GraphEdge, MemoryEntry, MemorySearchResult } from 'zouroboros-core';
 
-/** Cached graph with TTL to avoid rebuilding on every search */
-let _graphCache: { nodes: GraphNode[]; edges: GraphEdge[]; builtAt: number } | null = null;
+/** Cached graphs per scope key, each with a TTL to avoid rebuilds per search. */
+const _graphCache = new Map<string, { nodes: GraphNode[]; edges: GraphEdge[]; builtAt: number }>();
 const GRAPH_CACHE_TTL_MS = 60_000; // 1 minute
 
 /**
- * Invalidate the graph cache. Call after mutations (fact store/delete, episode create).
+ * Invalidate the graph cache. Call after mutations (fact store/delete/forget,
+ * episode create). Clears every scope's cache — mutations in one scope can
+ * affect the shared pool visible to all.
  */
 export function invalidateGraphCache(): void {
-  _graphCache = null;
+  _graphCache.clear();
+}
+
+/** Visibility predicate shared by every fact read in this module. */
+function visibleFactsWhere(scope: ScopePredicate, alias = ''): { sql: string; params: string[] } {
+  const col = alias ? `${alias}.persona` : 'persona';
+  const idCol = alias ? `${alias}.id` : 'id';
+  const expiresCol = alias ? `${alias}.expires_at` : 'expires_at';
+  const predicate = scopeSql(scope, col);
+  return {
+    sql: `(${expiresCol} IS NULL OR ${expiresCol} > strftime('%s', 'now'))
+      AND ${notForgottenSql(idCol)}
+      AND ${predicate.sql}`,
+    params: predicate.params,
+  };
 }
 
 /**
  * Build a graph of entity co-occurrences from episodes.
  * Two entities are connected if they appear in the same episode.
- * Results are cached with a 60-second TTL.
+ * Fact-derived entity nodes are restricted to the given scope.
+ * Results are cached per scope with a 60-second TTL.
  */
-export function buildEntityGraph(): { nodes: GraphNode[]; edges: GraphEdge[] } {
-  if (_graphCache && Date.now() - _graphCache.builtAt < GRAPH_CACHE_TTL_MS) {
-    return { nodes: _graphCache.nodes, edges: _graphCache.edges };
+export function buildEntityGraph(scope: ScopePredicate): { nodes: GraphNode[]; edges: GraphEdge[] } {
+  const cached = _graphCache.get(scope.key);
+  if (cached && Date.now() - cached.builtAt < GRAPH_CACHE_TTL_MS) {
+    return { nodes: cached.nodes, edges: cached.edges };
   }
   const db = getDatabase();
 
@@ -65,10 +91,11 @@ export function buildEntityGraph(): { nodes: GraphNode[]; edges: GraphEdge[] } {
     }
   }
 
-  // Also build edges from facts sharing the same entity
+  // Also add nodes for entities visible in the actor's fact scope
+  const visible = visibleFactsWhere(scope);
   const factEntities = db.query(
-    'SELECT DISTINCT entity FROM facts'
-  ).all() as { entity: string }[];
+    `SELECT DISTINCT entity FROM facts WHERE ${visible.sql}`
+  ).all(...visible.params) as { entity: string }[];
 
   for (const fe of factEntities) {
     const existing = nodes.find(n => n.id === fe.entity);
@@ -87,7 +114,7 @@ export function buildEntityGraph(): { nodes: GraphNode[]; edges: GraphEdge[] } {
     return { source, target, relation: 'co-occurs', weight };
   });
 
-  _graphCache = { nodes, edges, builtAt: Date.now() };
+  _graphCache.set(scope.key, { nodes, edges, builtAt: Date.now() });
   return { nodes, edges };
 }
 
@@ -97,10 +124,11 @@ export function buildEntityGraph(): { nodes: GraphNode[]; edges: GraphEdge[] } {
  */
 export function getRelatedEntities(
   entity: string,
+  scope: ScopePredicate,
   options: { depth?: number; limit?: number } = {}
 ): { entity: string; score: number }[] {
   const { depth = 2, limit = 20 } = options;
-  const { edges } = buildEntityGraph();
+  const { edges } = buildEntityGraph(scope);
 
   // BFS with decay
   const visited = new Map<string, number>(); // entity → score
@@ -144,10 +172,14 @@ export function getRelatedEntities(
  * 1. Exact/keyword matches (weight: exactWeight)
  * 2. Vector/semantic matches (weight: vectorWeight)
  * 3. Graph-adjacent facts (weight: graphWeight)
+ *
+ * The graph-adjacent fact fetch is scope-filtered: only facts visible to the
+ * calling actor can enter the fusion.
  */
 export function searchFactsGraphBoosted(
   baseResults: MemorySearchResult[],
   queryEntities: string[],
+  scope: ScopePredicate,
   options: {
     limit?: number;
     graphWeight?: number;
@@ -160,7 +192,7 @@ export function searchFactsGraphBoosted(
   // Collect related entities from graph
   const relatedEntities = new Map<string, number>();
   for (const entity of queryEntities) {
-    for (const related of getRelatedEntities(entity, { depth: graphDepth })) {
+    for (const related of getRelatedEntities(entity, scope, { depth: graphDepth })) {
       const existing = relatedEntities.get(related.entity) ?? 0;
       relatedEntities.set(related.entity, Math.max(existing, related.score));
     }
@@ -168,18 +200,19 @@ export function searchFactsGraphBoosted(
 
   if (relatedEntities.size === 0) return baseResults;
 
-  // Fetch facts for related entities
+  // Fetch facts for related entities — scoped to the calling actor
   const entityList = Array.from(relatedEntities.keys());
   const placeholders = entityList.map(() => '?').join(',');
+  const visible = visibleFactsWhere(scope);
   const graphRows = db.query(`
     SELECT id, entity, key, value, category, decay_class as decayClass,
            importance, created_at as createdAt
     FROM facts
     WHERE entity IN (${placeholders})
-      AND (expires_at IS NULL OR expires_at > strftime('%s', 'now'))
+      AND ${visible.sql}
     ORDER BY importance DESC
     LIMIT 50
-  `).all(...entityList) as Array<{
+  `).all(...entityList, ...visible.params) as Array<{
     id: string;
     entity: string;
     key: string | null;
@@ -250,16 +283,18 @@ export function searchFactsGraphBoosted(
 /**
  * Extract entity names from a query string.
  * Simple heuristic: capitalized words, quoted strings, known entities.
+ * The known-entity list is restricted to facts visible in the actor's scope.
  */
-export function extractQueryEntities(query: string): string[] {
+export function extractQueryEntities(query: string, scope: ScopePredicate): string[] {
   const db = getDatabase();
   const words = query.split(/\s+/);
 
-  // Check which words match known entities in facts
+  // Check which words match known entities in facts visible to this scope
   const knownEntities = new Set<string>();
+  const visible = visibleFactsWhere(scope);
   const entityRows = db.query(
-    'SELECT DISTINCT entity FROM facts'
-  ).all() as { entity: string }[];
+    `SELECT DISTINCT entity FROM facts WHERE ${visible.sql}`
+  ).all(...visible.params) as { entity: string }[];
 
   const entitySet = new Set(entityRows.map(r => r.entity.toLowerCase()));
 

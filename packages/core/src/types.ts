@@ -112,7 +112,7 @@ export interface RuntimeDirectories {
   sources: Record<RuntimePathKey, RuntimePathSource>;
 }
 
-export type EmbeddingProvider = 'openai';
+export type EmbeddingProvider = 'openai' | 'deterministic';
 
 export interface MemoryConfig {
   enabled: boolean;

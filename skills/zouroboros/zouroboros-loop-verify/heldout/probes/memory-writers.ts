@@ -13,7 +13,7 @@ if (role === 'child') {
   const cfg = { ...DEFAULT_CONFIG.memory, dbPath: db, vectorEnabled: false, autoCapture: false };
   initDatabase(cfg); let errors = 0;
   for (let i = 0; i < Number(n); i++) {
-    try { await storeFact({ entity: `heldout-${idx}`, key: `k${i}`, value: `writer ${idx} item ${i}`, category: 'fact', source: 'heldout' }, cfg); }
+    try { await storeFact({ actor: 'shared', entity: `heldout-${idx}`, key: `k${i}`, value: `writer ${idx} item ${i}`, category: 'fact', source: 'heldout' }, cfg); }
     catch { errors++; }
   }
   console.log(JSON.stringify({ errors })); process.exit(0);

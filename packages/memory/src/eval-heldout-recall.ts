@@ -211,15 +211,15 @@ function evalConfig(dbPath: string): MemoryConfig {
 
 async function seedBank(config: MemoryConfig): Promise<void> {
   for (const f of MM_FACTS) {
-    await storeFact({ entity: f.entity, key: f.key, value: f.value, persona: f.persona, importance: f.importance, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
+    await storeFact({ actor: f.persona ?? 'shared', entity: f.entity, key: f.key, value: f.value, persona: f.persona, importance: f.importance, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
   }
   for (const o of ONEOFF_FACTS) {
-    await storeFact({ entity: o.entity, key: 'fact', value: o.value, importance: 0.5, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
+    await storeFact({ actor: 'shared', entity: o.entity, key: 'fact', value: o.value, importance: 0.5, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
   }
   // Update groups: stale fact first with HIGHER importance, fresh fact second.
   for (const g of UPDATE_GROUPS) {
-    await storeFact({ entity: g.entity, key: 'state', value: g.oldValue, importance: 0.85, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
-    await storeFact({ entity: g.entity, key: 'state', value: g.newValue, importance: 0.8, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
+    await storeFact({ actor: 'shared', entity: g.entity, key: 'state', value: g.oldValue, importance: 0.85, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
+    await storeFact({ actor: 'shared', entity: g.entity, key: 'state', value: g.newValue, importance: 0.8, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
   }
   // Contested groups + pending conflict rows (same DDL as conflict-resolver.ts).
   const db = getDatabase();
@@ -235,8 +235,8 @@ async function seedBank(config: MemoryConfig): Promise<void> {
     );
   `);
   for (const g of CONTESTED_GROUPS) {
-    const a = await storeFact({ entity: g.entity, key: 'claim', value: g.valueA, importance: 0.7, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
-    const b = await storeFact({ entity: g.entity, key: 'claim', value: g.valueB, importance: 0.7, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
+    const a = await storeFact({ actor: 'shared', entity: g.entity, key: 'claim', value: g.valueA, importance: 0.7, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
+    const b = await storeFact({ actor: 'shared', entity: g.entity, key: 'claim', value: g.valueB, importance: 0.7, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
     db.run(
       `INSERT INTO fact_conflicts (id, fact_id, conflicting_fact_id, conflict_type, resolution) VALUES (?, ?, ?, 'semantic', 'pending')`,
       [randomUUID(), a.id, b.id],
@@ -245,7 +245,7 @@ async function seedBank(config: MemoryConfig): Promise<void> {
 }
 
 function baselineAnswer(q: EvalQuestion): ArmAnswer {
-  const hits = searchFacts(q.searchTerm, { persona: q.persona, limit: 3 });
+  const hits = searchFacts(q.searchTerm, { actor: q.persona ?? 'shared', limit: 3 });
   if (hits.length === 0) return { answer: '(no result)', path: 'retrieval-fallback', abstained: false };
   return { answer: hits[0].value, path: 'retrieval-fallback', abstained: false };
 }

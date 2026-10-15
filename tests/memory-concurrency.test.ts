@@ -16,7 +16,7 @@ const writer = `
   initDatabase(config);
   let errors = 0;
   for (let i = 0; i < Number(n); i++) {
-    try { await storeFact({ entity: 'concurrency-' + id, value: 'writer ' + id + ' item ' + i, category: 'fact', source: 'test' }, config); }
+    try { await storeFact({ actor: 'shared', entity: 'concurrency-' + id, value: 'writer ' + id + ' item ' + i, category: 'fact', source: 'test' }, config); }
     catch { errors++; }
   }
   console.log(errors);

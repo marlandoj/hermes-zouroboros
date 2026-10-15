@@ -139,7 +139,7 @@ test('zouroboros umbrella: doctor, skill index and exact read-only shortcuts aga
   const zmem = join(skillDir('zo-memory-system'), 'scripts/zmem.ts');
   // A hostile inherited memory DB is ignored: the shortcut reads the profile database only.
   const hostile = { ZO_MEMORY_DB: join(root, 'host.db'), ZOUROBOROS_MEMORY_DB: join(root, 'host2.db') };
-  expect(run(zmem, ['store', '--entity', 'project.widgets', '--value', 'Use copper widgets']).code).toBe(0);
+  expect(run(zmem, ['store', '--actor', 'shared', '--entity', 'project.widgets', '--value', 'Use copper widgets']).code).toBe(0);
   expect(run(umbrella, ['shortcut', 'search memory for copper'], hostile).stdout).toContain('Use copper widgets');
   expect(existsSync(hostile.ZO_MEMORY_DB)).toBe(false);
   expect(JSON.parse(run(umbrella, ['shortcut', 'swarm status']).stdout)[0]).toMatchObject({ id: 'hermes-vps', ok: true });

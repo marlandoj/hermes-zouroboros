@@ -45,7 +45,40 @@ export {
   deleteFact,
   touchFact,
   cleanupExpiredFacts,
+  forgetFact,
+  restoreFact,
+  listForgottenFacts,
+  purgeForgottenFacts,
+  sweepDecay,
+  scoreRetention,
+  DEFAULT_RETENTION_THRESHOLD,
 } from './facts.js';
+
+// Scope (Track 1 intelligence plane choke point)
+export {
+  resolveScope,
+  requireActor,
+  scopeSql,
+  recordAudit,
+  newCallId,
+  MissingActorError,
+  type ScopePredicate,
+} from './scope.js';
+
+// Promotion pipeline (Track 1)
+export {
+  getPromotionStage,
+  advancePromotion,
+  sweepPromotions,
+  listReviewQueue,
+  resolveReview,
+  extractionRules,
+  findContradictions,
+  PromotionStateError,
+  type PromotionStage,
+  type ReviewDecision,
+  type ReviewQueueItem,
+} from './promotion.js';
 
 // Episodes
 export {

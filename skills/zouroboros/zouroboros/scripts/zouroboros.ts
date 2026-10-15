@@ -21,7 +21,9 @@ const WORKFLOWS: Record<OperatorShortcutId, string[]> = {
   status: [skillScript('zouroboros', 'zouroboros.ts'), 'doctor'],
   doctor: [skillScript('zouroboros', 'zouroboros.ts'), 'doctor'],
   'governance-verify': [skillScript('zouroboros-governance', 'constitution-gate.ts'), 'verify-docs'],
-  'memory-search': [skillScript('zo-memory-system', 'zmem.ts'), 'search'],
+  // Track 1 actor scoping: the operator shortcut searches the cross-persona
+  // shared pool; narrower persona views go through zmem directly.
+  'memory-search': [skillScript('zo-memory-system', 'zmem.ts'), 'search', '--actor', 'shared'],
   'swarm-status': [skillScript('zo-swarm-executors', 'executors.ts'), 'doctor'],
 };
 

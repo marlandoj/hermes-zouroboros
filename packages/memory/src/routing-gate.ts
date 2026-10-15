@@ -18,6 +18,7 @@ import { randomUUID } from 'crypto';
 import { getMemoryDbPath } from 'zouroboros-core';
 import { searchFactsHybrid } from './facts.js';
 import { searchFactsGraphBoosted, extractQueryEntities } from './graph.js';
+import { resolveScope } from './scope.js';
 import type { MemorySearchResult } from 'zouroboros-core';
 
 type MemoryConfig = import('zouroboros-core').MemoryConfig;
@@ -35,10 +36,11 @@ export interface RoutingDecision {
 }
 
 export interface RouteOptions {
+  /** Required caller identity (fail-closed; see scope.ts). */
+  actor: string;
   limit?: number;
   vectorWeight?: number;
   rerank?: boolean;
-  persona?: string;
   sessionId?: string;
 }
 
@@ -74,6 +76,17 @@ function ensureRoutingTable(): boolean {
       `CREATE INDEX IF NOT EXISTS idx_memory_routing_log_created ON memory_routing_log(created_at DESC);"`,
       { encoding: 'utf-8', timeout: 5000 }
     );
+    // Track 1: actor column on pre-existing deployed tables. ALTER fails
+    // harmlessly when the column already exists (fresh tables get it below
+    // via the same ALTER on first ensure).
+    try {
+      execSync(
+        `sqlite3 "${db}" "ALTER TABLE memory_routing_log ADD COLUMN actor TEXT"`,
+        { encoding: 'utf-8', timeout: 5000, stdio: ['pipe', 'pipe', 'pipe'] }
+      );
+    } catch {
+      // duplicate column — already migrated
+    }
     _ensuredPaths.add(db);
     return true;
   } catch {
@@ -122,7 +135,7 @@ export function logMemoryRoute(
   decision: RoutingDecision,
   latencyMs: number,
   hitCount: number,
-  persona?: string,
+  actor?: string,
   sessionId?: string,
 ): void {
   if (!ensureRoutingTable()) return;
@@ -130,12 +143,14 @@ export function logMemoryRoute(
     const id = randomUUID();
     const safeQuery = query.replace(/'/g, "''").slice(0, 500);
     const safeReason = decision.reason.replace(/'/g, "''").slice(0, 200);
-    const safePersona = (persona || '').replace(/'/g, "''").slice(0, 100);
+    // The actor doubles as the persona column value so pre-Track-1 analysis
+    // queries keep working; the dedicated actor column is authoritative.
+    const safeActor = (actor || '').replace(/'/g, "''").slice(0, 100);
     const safeSession = (sessionId || '').replace(/'/g, "''").slice(0, 100);
     execSync(
       `sqlite3 "${getDB()}" "` +
-      `INSERT INTO memory_routing_log(id,query,classified_kind,confidence,reason,latency_ms,hit_count,persona,session_id) ` +
-      `VALUES('${id}','${safeQuery}','${decision.kind}',${decision.confidence},'${safeReason}',${latencyMs},${hitCount},'${safePersona}','${safeSession}')"`,
+      `INSERT INTO memory_routing_log(id,query,classified_kind,confidence,reason,latency_ms,hit_count,persona,actor,session_id) ` +
+      `VALUES('${id}','${safeQuery}','${decision.kind}',${decision.confidence},'${safeReason}',${latencyMs},${hitCount},'${safeActor}','${safeActor}','${safeSession}')"`,
       { encoding: 'utf-8', timeout: 5000 }
     );
   } catch {
@@ -156,20 +171,21 @@ export function logMemoryRoute(
 export async function routeMemoryQuery(
   query: string,
   config: MemoryConfig,
-  options: RouteOptions = {},
+  options: RouteOptions,
 ): Promise<MemorySearchResult[]> {
+  const scope = resolveScope(options.actor, 'routeMemoryQuery');
   const decision = classifyMemoryQuery(query);
   const start = Date.now();
   let results = await searchFactsHybrid(query, config, {
+    actor: scope.actor,
     limit: options.limit,
     vectorWeight: options.vectorWeight,
     rerank: options.rerank,
-    persona: options.persona,
   });
   if (config.graphBoost !== false) {
     try {
-      const queryEntities = extractQueryEntities(query);
-      results = searchFactsGraphBoosted(results, queryEntities, {
+      const queryEntities = extractQueryEntities(query, scope);
+      results = searchFactsGraphBoosted(results, queryEntities, scope, {
         limit: options.limit ?? 10,
       });
     } catch {
@@ -177,7 +193,7 @@ export async function routeMemoryQuery(
     }
   }
   const latency = Date.now() - start;
-  logMemoryRoute(query, decision, latency, results.length, options.persona, options.sessionId);
+  logMemoryRoute(query, decision, latency, results.length, scope.actor, options.sessionId);
   return results;
 }
 
@@ -193,6 +209,7 @@ export interface RoutingLogEntry {
   latencyMs: number;
   hitCount: number;
   persona: string;
+  actor: string;
   sessionId: string;
   createdAt: number;
 }
@@ -201,7 +218,7 @@ export function getRecentRoutingDecisions(limit = 100): RoutingLogEntry[] {
   if (!ensureRoutingTable()) return [];
   try {
     const out = execSync(
-      `sqlite3 -separator '|' "${getDB()}" "SELECT id,query,classified_kind,confidence,reason,latency_ms,hit_count,persona,session_id,created_at FROM memory_routing_log ORDER BY created_at DESC LIMIT ${limit}"`,
+      `sqlite3 -separator '|' "${getDB()}" "SELECT id,query,classified_kind,confidence,reason,latency_ms,hit_count,persona,actor,session_id,created_at FROM memory_routing_log ORDER BY created_at DESC LIMIT ${limit}"`,
       { encoding: 'utf-8', timeout: 5000 }
     ).trim();
     if (!out) return [];
@@ -216,8 +233,9 @@ export function getRecentRoutingDecisions(limit = 100): RoutingLogEntry[] {
         latencyMs: parseInt(p[5] ?? '0', 10) || 0,
         hitCount: parseInt(p[6] ?? '0', 10) || 0,
         persona: p[7] ?? '',
-        sessionId: p[8] ?? '',
-        createdAt: parseInt(p[9] ?? '0', 10) || 0,
+        actor: p[8] ?? '',
+        sessionId: p[9] ?? '',
+        createdAt: parseInt(p[10] ?? '0', 10) || 0,
       };
     });
   } catch {
