@@ -15,6 +15,10 @@ import { governedAsk } from "../../../zouroboros/ask-governor/scripts/client.ts"
 import { settings } from "../../../../integration/profile.ts";
 
 const ZMEM = new URL("../../../zouroboros/zo-memory-system/scripts/zmem.ts", import.meta.url).pathname;
+// Track 1 actor scoping: deep-research reads and writes profile memory under
+// the shared pool so operator-stored facts are visible and runs stay visible
+// to every persona (fail-closed memory APIs require an explicit identity).
+const MEMORY_ACTOR = "shared";
 
 // ---------- args ----------
 const argv = process.argv.slice(2);
@@ -171,7 +175,7 @@ function gatherInternal(plan: Plan): Source[] {
   for (const subQ of plan.subQuestions) {
     const hits = new Map<string, { fact: { id: string; entity: string; key?: string; value: string }; count: number }>();
     for (const word of new Set([...keywords(plan.query), ...keywords(subQ)])) {
-      const res = spawnSync(process.execPath, [ZMEM, "search", word, "--limit", String(MAX_INTERNAL * 2)], { encoding: "utf8", timeout: 60_000 });
+      const res = spawnSync(process.execPath, [ZMEM, "search", word, "--actor", MEMORY_ACTOR, "--limit", String(MAX_INTERNAL * 2)], { encoding: "utf8", timeout: 60_000 });
       if (res.status !== 0) { log(`internal: memory search failed (soft) for "${word}"`); continue; }
       let facts: { id: string; entity: string; key?: string; value: string }[] = [];
       try { facts = JSON.parse(res.stdout); } catch { continue; }
@@ -325,7 +329,7 @@ function stagePersist(plan: Plan, sources: Source[]) {
   if (!DO_PERSIST) { log("persist: disabled"); return; }
   if (!existsSync(ZMEM)) { log("persist: zo-memory-system skill not found — skipping (soft)"); return; }
   const val = `Deep research run on "${plan.query}" (${plan.domain}): ${sources.length} sources across ${plan.subQuestions.length} sub-questions. Report: ${artPath("report.md")}`;
-  const res = spawnSync(process.execPath, [ZMEM, "store", "--entity", "deep-research", "--key", slug, "--value", val, "--decay", "stable", "--category", "project"], { encoding: "utf8", timeout: 60_000 });
+  const res = spawnSync(process.execPath, [ZMEM, "store", "--actor", MEMORY_ACTOR, "--entity", "deep-research", "--key", slug, "--value", val, "--decay", "stable", "--category", "project"], { encoding: "utf8", timeout: 60_000 });
   if (res.status === 0) log("persist: run stored to profile memory");
   else log(`persist: memory store non-zero (soft) — ${(res.stderr || "").slice(0, 120)}`);
 }

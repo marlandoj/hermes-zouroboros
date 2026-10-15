@@ -123,13 +123,11 @@ function initSchema(db: Database): void {
   db.run(`CREATE INDEX IF NOT EXISTS idx_cost_ledger_ts ON cost_ledger(ts)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_cost_ledger_source ON cost_ledger(source)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_cost_ledger_model ON cost_ledger(model)`);
+  // Existing ledgers must gain the column before its index is created (F-008).
+  const cols = db.query(`PRAGMA table_info(cost_ledger)`).all() as Array<{ name: string }>;
+  const have = new Set(cols.map(c => c.name));
+  if (!have.has('persona')) db.run(`ALTER TABLE cost_ledger ADD COLUMN persona TEXT`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_cost_ledger_persona ON cost_ledger(persona)`);
-  // Migration for existing databases (F-008: persona telemetry)
-  try {
-    const cols = db.query(`PRAGMA table_info(cost_ledger)`).all() as Array<{ name: string }>;
-    const have = new Set(cols.map(c => c.name));
-    if (!have.has('persona')) db.run(`ALTER TABLE cost_ledger ADD COLUMN persona TEXT`);
-  } catch {}
 
   migrateSwarmRolesSOP(db);
   seedDefaultRoles(db);

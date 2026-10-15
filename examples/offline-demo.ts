@@ -44,16 +44,16 @@ try {
   console.log('Local checks only; provider authentication is separate.');
 
   console.log('\n[2/4] SAVE A DECISION');
-  console.log('$ bun integration/cli.ts memory store --entity demo \\');
+  console.log('$ bun integration/cli.ts memory store --actor shared --entity demo \\');
   console.log('    --key choice --value "Use copper widgets"');
-  const stored = cli(['memory', 'store', '--entity', 'demo', '--key', 'choice', '--value', 'Use copper widgets']);
+  const stored = cli(['memory', 'store', '--actor', 'shared', '--entity', 'demo', '--key', 'choice', '--value', 'Use copper widgets']);
   assert.ok(stored.includes('Stored demo.choice = Use copper widgets'));
   console.log('Stored demo.choice = Use copper widgets');
 
   console.log('\n[3/4] RECALL IT THROUGH MCP');
   await client.connect(transport);
-  console.log('MCP > memory_search({"query":"copper"})');
-  const found = await call('memory_search', { query: 'copper' });
+  console.log('MCP > memory_search({"actor":"shared","query":"copper"})');
+  const found = await call('memory_search', { actor: 'shared', query: 'copper' });
   assert.ok(Array.isArray(found));
   const fact = found.find(item => item.entity === 'demo' && item.key === 'choice');
   assert.equal(fact?.value, 'Use copper widgets');

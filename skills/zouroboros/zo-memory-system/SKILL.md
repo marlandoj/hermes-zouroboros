@@ -50,8 +50,8 @@ inherited from the environment, so it cannot write into another installation's m
 
 ```bash
 Z="${HERMES_SKILL_DIR}/scripts/zmem.ts"
-bun "$Z" store --entity project.api --key auth --value "Use short-lived tokens with refresh" --category decision
-bun "$Z" search "auth tokens" --limit 5
+bun "$Z" store --actor shared --entity project.api --key auth --value "Use short-lived tokens with refresh" --category decision
+bun "$Z" search "auth tokens" --actor shared --limit 5
 bun "$Z" episode --summary "Migrated the API to v2" --outcome success --entities project.api,migration
 bun "$Z" episodes --since 7d --outcome failure
 bun "$Z" stats
@@ -60,6 +60,9 @@ bun "$Z" where        # prints the database path in use
 
 All commands print JSON on stdout. Options:
 
+- `--actor`: REQUIRED caller identity for `store`/`search` (persona slug). Fail-closed: calls
+  without an actor are rejected. Visibility = own persona + the shared pool; use `shared`
+  only for deliberately cross-persona facts.
 - `--category`: `preference | fact | decision | convention | reference | project | other` (default `fact`)
 - `--decay`: `permanent | stable | active | session | checkpoint` (default `stable`)
 - `--outcome`: `success | failure | resolved | ongoing`

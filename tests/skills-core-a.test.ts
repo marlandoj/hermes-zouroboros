@@ -41,7 +41,7 @@ function fakeHermes(body: string) {
 test('zo-memory-system writes only the profile database, shared with the MCP server', async () => {
   const zmem = skill('zo-memory-system', 'zmem.ts');
   const hostile = { ZO_MEMORY_DB: join(root, 'host.db'), ZOUROBOROS_MEMORY_DB: join(root, 'host2.db') };
-  const stored = run(zmem, ['store', '--entity', 'project.widgets', '--key', 'metal', '--value', 'Use copper widgets', '--category', 'decision'], hostile);
+  const stored = run(zmem, ['store', '--actor', 'shared', '--entity', 'project.widgets', '--key', 'metal', '--value', 'Use copper widgets', '--category', 'decision'], hostile);
   expect(stored.code).toBe(0);
   expect(JSON.parse(stored.stdout).value).toBe('Use copper widgets');
   expect(run(zmem, ['where'], hostile).stdout.trim()).toBe(join(root, 'data', 'memory.db'));
@@ -53,17 +53,17 @@ test('zo-memory-system writes only the profile database, shared with the MCP ser
   const episodes = JSON.parse(run(zmem, ['episodes', '--since', '1d']).stdout);
   expect(episodes.map((e: { summary: string }) => e.summary)).toEqual(['Shipped copper widgets']);
   expect(JSON.parse(run(zmem, ['stats']).stdout).database).toMatchObject({ facts: 1, episodes: 1 });
-  expect(run(zmem, ['store', '--entity', 'x', '--value', 'y', '--decay', 'forever']).code).toBe(1);
+  expect(run(zmem, ['store', '--actor', 'shared', '--entity', 'x', '--value', 'y', '--decay', 'forever']).code).toBe(1);
 
   const transport = new StdioClientTransport({ command: process.execPath, args: [join(repo, 'integration/mcp.ts')], env, stderr: 'pipe' });
   const client = new Client({ name: 'skills-core-a', version: '1.0.0' });
   try {
     await client.connect(transport);
-    const found = await client.callTool({ name: 'memory_search', arguments: { query: 'copper' } });
+    const found = await client.callTool({ name: 'memory_search', arguments: { actor: 'shared', query: 'copper' } });
     expect(JSON.stringify(found)).toContain('Use copper widgets');
   } finally { await client.close(); }
 
-  const noProfile = run(zmem, ['search', 'copper'], { HERMES_ZOUROBOROS_HOME: join(root, 'missing') });
+  const noProfile = run(zmem, ['search', 'copper', '--actor', 'shared'], { HERMES_ZOUROBOROS_HOME: join(root, 'missing') });
   expect(noProfile.code).toBe(1);
   expect(noProfile.stderr).toContain('Run init first');
 }, 30_000);

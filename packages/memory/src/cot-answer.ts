@@ -158,7 +158,7 @@ export async function answerWithCoT(
   question: string,
   results: MemorySearchResult[],
   config: MemoryConfig,
-  options?: { contextCharLimit?: number; disposition?: Disposition },
+  options?: { contextCharLimit?: number; disposition?: Disposition; actor?: string },
 ): Promise<CotAnswerResult> {
   const model = config.cot?.model ?? DEFAULT_MODEL;
   const charLimit = options?.contextCharLimit ?? config.reranker?.contextCharLimit ?? DEFAULT_CHAR_LIMIT;
@@ -197,12 +197,14 @@ Think step by step, then give your final answer on a new line starting with "ANS
     };
   }
 
-  if (enableMultiHop && (raw.includes('Not specified') || raw.includes('not enough'))) {
+  // The multi-hop refinement re-queries memory, which needs a scoped actor.
+  // Fail closed: without an actor identity, skip the refinement hop.
+  if (enableMultiHop && options?.actor && (raw.includes('Not specified') || raw.includes('not enough'))) {
     try {
       const refinedResults = await routeMemoryQuery(
         `${question} ${raw.slice(0, 200)}`,
         config,
-        { limit: 5 },
+        { actor: options.actor, limit: 5 },
       );
       if (refinedResults.length > 0) {
         const refinedContext = buildContext(refinedResults, charLimit);

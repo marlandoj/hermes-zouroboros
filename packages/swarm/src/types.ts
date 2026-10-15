@@ -274,11 +274,13 @@ export interface ACPModelSelection {
 /**
  * Wayfinder local skill suggester, shadow only.
  *
- * Sibling of `mcpConfig` on the executor registry `acp` block. The factory never
- * injects a suggestion into a task prompt: it ranks the skill catalog out of band
- * and appends the pick to the shadow log. `mode` exists so an accidental
- * `live` in the registry is rejected at the type layer and at the seam, rather
- * than silently changing prompts.
+ * Sibling of `mcpConfig` on the executor registry `acp` block. In `shadow`
+ * mode the factory never injects a suggestion into a task prompt: it ranks
+ * the skill catalog out of band and appends the pick to the shadow log.
+ * `canary` / `live` allow the pick to be injected into the task prompt, but
+ * only when `WAYFINDER_LIVE_INJECT=1` is present in the environment — without
+ * it they degrade to shadow. An unrecognized mode is rejected at the type
+ * layer and at the seam, rather than silently changing prompts.
  */
 export interface WayfinderShadowConfig {
   /** Absent or false means no ranking and no child process. */
@@ -302,7 +304,7 @@ export interface WayfinderShadowConfig {
   canaryHarness?: string;
   /** Colon-separated catalog roots; the first root wins on duplicate names. */
   skillsRoots?: string[];
-  /** Wall-clock bound for the detached worker. It never blocks the task. */
+  /** Wall-clock bound for the ranking worker. Shadow never blocks the task on it; live injection awaits it up to this bound. */
   timeoutMs?: number;
   /** Wayfinder state directory for modes, logs and backups. */
   home?: string;
@@ -311,7 +313,6 @@ export interface WayfinderShadowConfig {
 export interface ACPMcpConfig {
   configPath?: string;
   includeShared?: boolean;
-  includeZo?: boolean;
   includeMemoryBriefing?: boolean;
 }
 

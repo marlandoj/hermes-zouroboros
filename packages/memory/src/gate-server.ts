@@ -208,9 +208,9 @@ async function searchAny(terms: string[], persona: string, message: string): Pro
   const semanticQuery = (message.trim() || queries.join(' ')).slice(0, SEMANTIC_QUERY_MAX_CHARS);
   const [perTerm, semantic] = await Promise.all([
     Promise.all(queries.map((q) =>
-      searchFactsHybrid(q, exactOnlyConfig, { limit: MAX_RESULTS, persona }))),
+      searchFactsHybrid(q, exactOnlyConfig, { limit: MAX_RESULTS, actor: persona }))),
     memoryConfig.vectorEnabled
-      ? searchFactsHybrid(semanticQuery, semanticConfig, { limit: MAX_RESULTS, persona })
+      ? searchFactsHybrid(semanticQuery, semanticConfig, { limit: MAX_RESULTS, actor: persona })
       : Promise.resolve([] as MemorySearchResult[]),
   ]);
 
@@ -400,12 +400,12 @@ async function searchBriefingFacts(
   const BRIEFING_QUERY_MAX_CHARS = 1000;
 
   const calls: Array<Promise<MemorySearchResult[]>> = terms.map((term) =>
-    searchFactsHybrid(term, exactOnlyConfig, { limit: BRIEFING_LIMIT, persona }),
+    searchFactsHybrid(term, exactOnlyConfig, { limit: BRIEFING_LIMIT, actor: persona }),
   );
   calls.push(
     searchFactsHybrid(prompt.slice(0, BRIEFING_QUERY_MAX_CHARS), semanticConfig, {
       limit: BRIEFING_LIMIT,
-      persona,
+      actor: persona,
     }),
   );
 

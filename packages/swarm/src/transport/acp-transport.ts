@@ -35,7 +35,18 @@ import {
   prepareFilesystemContainedSpawn,
   type AdapterSpawnSpec,
 } from './agent-containment.js';
-import { readManagedFactoryBoundary, prepareManagedFactorySpawn } from './factory-systemd-containment.js';
+import { readManagedFactoryBoundary, prepareManagedFactorySpawn, assertManagedFactorySessionMode } from './factory-systemd-containment.js';
+import {
+  DecisionGate,
+  resolveDecisionOrigin,
+  type HumanApprover,
+  type TierPolicy,
+} from '../approval-tiers.js';
+import {
+  resolveDecisionRecordStore,
+  type DecisionRecordStore,
+  type ProposedAction,
+} from '../decision-record.js';
 const managedAdapters = new WeakSet<ChildProcess>();
 
 // Env vars to strip before spawning the ACP adapter (session detection suppression)
@@ -58,9 +69,13 @@ export function replayPathSegment(value: string): string {
 
 export type { AdapterSpawnSpec } from './agent-containment.js';
 
-interface ExecutorResourceCgroup {
-  memoryDir: string;
-  pidsDir: string;
+export interface ExecutorResourceCgroup {
+  mode: 'cgroup-v1' | 'cgroup-v2' | 'process-tree';
+  memoryDir: string | null;
+  pidsDir: string | null;
+  memoryLimitMib?: number;
+  processLimit?: number;
+  degradedReason?: string;
   killAll(signal: NodeJS.Signals): void;
   cleanup(): boolean;
 }
@@ -94,7 +109,13 @@ function cgroupTaskPids(dir: string): number[] {
   }
 }
 
-function createExecutorResourceCgroup(env: Record<string, string>): ExecutorResourceCgroup | null {
+export function createExecutorResourceCgroup(
+  env: Record<string, string>,
+  options: {
+    cgroupRoot?: string;
+    logger?: Pick<Console, 'warn'>;
+  } = {},
+): ExecutorResourceCgroup | null {
   if (env.SWARM_EXEC_RESOURCE_GUARD_REQUIRED !== '1') return null;
   const memoryLimitMib = guardedInteger(
     env.SWARM_EXEC_MEMORY_LIMIT_MIB,
@@ -104,8 +125,84 @@ function createExecutorResourceCgroup(env: Record<string, string>): ExecutorReso
   );
   const processLimit = guardedInteger(env.SWARM_EXEC_PROCESS_LIMIT, 'SWARM_EXEC_PROCESS_LIMIT', 16, 512);
   const token = `zouroboros-${process.pid}-${randomUUID()}`;
-  const memoryDir = join('/sys/fs/cgroup/memory', token);
-  const pidsDir = join('/sys/fs/cgroup/pids', token);
+  const cgroupRoot = options.cgroupRoot ?? '/sys/fs/cgroup';
+  const logger = options.logger ?? console;
+  const degrade = (reason: string): ExecutorResourceCgroup => {
+    logger.warn(
+      `[ACP resource guard] kernel cgroups unavailable (${reason}); ` +
+      `falling back to process-tree monitoring for the ${memoryLimitMib} MiB / ${processLimit} process limits. ` +
+      'This degradation is explicit: no kernel cgroup will be created.',
+    );
+    return {
+      mode: 'process-tree',
+      memoryDir: null,
+      pidsDir: null,
+      memoryLimitMib,
+      processLimit,
+      degradedReason: reason,
+      killAll() {},
+      cleanup() {
+        return true;
+      },
+    };
+  };
+
+  const controllersPath = join(cgroupRoot, 'cgroup.controllers');
+  if (existsSync(controllersPath)) {
+    const controllers = readFileSync(controllersPath, 'utf8').trim().split(/\s+/).filter(Boolean);
+    const missing = ['memory', 'pids'].filter(controller => !controllers.includes(controller));
+    if (missing.length > 0) {
+      return degrade(`cgroup v2 controllers not delegated: ${missing.join(', ')}`);
+    }
+
+    const unifiedDir = join(cgroupRoot, token);
+    let created = false;
+    try {
+      mkdirSync(unifiedDir, { mode: 0o700 });
+      created = true;
+      if (!existsSync(join(unifiedDir, 'memory.max')) || !existsSync(join(unifiedDir, 'pids.max'))) {
+        const subtreeControl = join(cgroupRoot, 'cgroup.subtree_control');
+        for (const controller of ['memory', 'pids']) {
+          try {
+            writeFileSync(subtreeControl, `+${controller}`);
+          } catch {}
+        }
+      }
+      writeFileSync(join(unifiedDir, 'memory.max'), String(memoryLimitMib * 1024 * 1024));
+      writeFileSync(join(unifiedDir, 'pids.max'), String(processLimit));
+    } catch (error) {
+      if (created) {
+        try { rmdirSync(unifiedDir); } catch {}
+      }
+      throw new Error(`failed to establish executor kernel cgroups: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    return {
+      mode: 'cgroup-v2',
+      memoryDir: unifiedDir,
+      pidsDir: unifiedDir,
+      memoryLimitMib,
+      processLimit,
+      killAll(signal) {
+        for (const pid of cgroupTaskPids(unifiedDir)) {
+          try { process.kill(pid, signal); } catch {}
+        }
+      },
+      cleanup() {
+        try {
+          rmdirSync(unifiedDir);
+          return true;
+        } catch (error) {
+          return (error as NodeJS.ErrnoException).code === 'ENOENT';
+        }
+      },
+    };
+  }
+
+  const memoryDir = join(cgroupRoot, 'memory', token);
+  const pidsDir = join(cgroupRoot, 'pids', token);
+  if (!existsSync(join(cgroupRoot, 'memory')) || !existsSync(join(cgroupRoot, 'pids'))) {
+    return degrade('neither a cgroup v2 unified hierarchy nor cgroup v1 memory/pids hierarchies are available');
+  }
   let memoryCreated = false;
   let pidsCreated = false;
   try {
@@ -125,8 +222,11 @@ function createExecutorResourceCgroup(env: Record<string, string>): ExecutorReso
     throw new Error(`failed to establish executor kernel cgroups: ${error instanceof Error ? error.message : String(error)}`);
   }
   return {
+    mode: 'cgroup-v1',
     memoryDir,
     pidsDir,
+    memoryLimitMib,
+    processLimit,
     killAll(signal) {
       const pids = new Set([...cgroupTaskPids(memoryDir), ...cgroupTaskPids(pidsDir)]);
       for (const pid of pids) {
@@ -151,6 +251,26 @@ export function buildCgroupGuardedAdapterSpawn(
   spawnSpec: AdapterSpawnSpec,
   cgroup: Pick<ExecutorResourceCgroup, 'memoryDir' | 'pidsDir'>,
 ): AdapterSpawnSpec {
+  if (!cgroup.memoryDir || !cgroup.pidsDir) return spawnSpec;
+  if (cgroup.memoryDir === cgroup.pidsDir) {
+    const launcher = [
+      'printf "%s\\n" "$$" > "$1" || exit 125',
+      'shift',
+      'exec "$@"',
+    ].join('\n');
+    return {
+      ...spawnSpec,
+      command: '/bin/sh',
+      args: [
+        '-c',
+        launcher,
+        'zouroboros-resource-launcher',
+        join(cgroup.memoryDir, 'cgroup.procs'),
+        spawnSpec.command,
+        ...spawnSpec.args,
+      ],
+    };
+  }
   const launcher = [
     'printf "%s\\n" "$$" > "$1" || exit 125',
     'printf "%s\\n" "$$" > "$2" || exit 125',
@@ -262,14 +382,19 @@ export function processTreeUsage(
 
 export function readExecutorResourceUsage(
   rootPid: number,
-  cgroup: Pick<ExecutorResourceCgroup, 'memoryDir' | 'pidsDir'> | null,
+  cgroup: {
+    memoryDir: string | null;
+    pidsDir: string | null;
+    mode?: ExecutorResourceCgroup['mode'];
+  } | null,
   readText: (path: string) => string = path => readFileSync(path, 'utf8'),
 ): ExecutorResourceUsage {
-  if (cgroup) {
+  if (cgroup?.memoryDir && cgroup?.pidsDir) {
     try {
+      const unified = cgroup.mode === 'cgroup-v2' || cgroup.memoryDir === cgroup.pidsDir;
       return {
         memory_bytes: parseNonNegativeInteger(
-          readText(join(cgroup.memoryDir, 'memory.usage_in_bytes')),
+          readText(join(cgroup.memoryDir, unified ? 'memory.current' : 'memory.usage_in_bytes')),
           'cgroup memory usage',
         ),
         process_count: parseNonNegativeInteger(
@@ -390,6 +515,7 @@ class SwarmClient implements Client {
 
   constructor(
     queue: SessionUpdate[] & { _notify?: () => void },
+    private decisionGate: DecisionGate | undefined,
     onUpdate?: (update: SessionUpdate) => void,
     private recorder?: FileCassetteRecorder,
     private onActivity?: () => void,
@@ -489,7 +615,10 @@ class SwarmClient implements Client {
   }
 
   async requestPermission(params: RequestPermissionRequest): Promise<RequestPermissionResponse> {
-    return selectAcpPermissionOption(params);
+    // Decision-factory enforcement point: every ACP permission request is
+    // proposed, tiered, and recorded BEFORE any allow option can be selected.
+    // No gate, a throwing gate, or a denial all resolve to 'cancelled'.
+    return gatedAcpPermission(this.decisionGate, params);
   }
 
   async writeTextFile(_params: any) { return {}; }
@@ -645,6 +774,57 @@ export function selectAcpPermissionOption(
   return { outcome: { outcome: 'selected', optionId: option.optionId } };
 }
 
+/** Translate an ACP permission request into a decision-factory proposal. */
+export function proposedActionFromPermissionRequest(
+  params: RequestPermissionRequest,
+): { action: ProposedAction; kind?: string } {
+  const toolCall = (params.toolCall ?? {}) as {
+    toolCallId?: unknown;
+    title?: unknown;
+    kind?: unknown;
+    rawInput?: unknown;
+    locations?: Array<{ path?: unknown }>;
+  };
+  const tool = typeof toolCall.title === 'string' && toolCall.title.trim()
+    ? toolCall.title
+    : typeof toolCall.kind === 'string' && toolCall.kind.trim()
+      ? toolCall.kind
+      : 'unknown-tool';
+  const kind = typeof toolCall.kind === 'string' ? toolCall.kind : undefined;
+  const location = toolCall.locations?.find(l => typeof l?.path === 'string')?.path;
+  const target = typeof location === 'string' ? location : readPathFromArgs(toolCall.rawInput);
+  return {
+    action: {
+      kind: 'tool_call',
+      tool,
+      ...(target ? { target } : {}),
+      summary: `ACP permission request: ${tool}${kind ? ` (${kind})` : ''}${target ? ` → ${target}` : ''}`,
+      ...(toolCall.rawInput !== undefined ? { rawInput: toolCall.rawInput } : {}),
+    },
+    ...(kind ? { kind } : {}),
+  };
+}
+
+/**
+ * The structural permission seam: record and tier verdict first, allow option
+ * second. Fail closed on every ambiguity — a missing gate, a throwing gate,
+ * or a denial all return 'cancelled', and the adapter never gets the tool.
+ */
+export function gatedAcpPermission(
+  gate: DecisionGate | undefined,
+  params: RequestPermissionRequest,
+): RequestPermissionResponse {
+  if (!gate) return { outcome: { outcome: 'cancelled' } };
+  try {
+    const { action, kind } = proposedActionFromPermissionRequest(params);
+    const record = gate.decide(action, kind);
+    if (record.outcome !== 'approved') return { outcome: { outcome: 'cancelled' } };
+    return selectAcpPermissionOption(params);
+  } catch {
+    return { outcome: { outcome: 'cancelled' } };
+  }
+}
+
 /**
  * Extract token usage from an ACP prompt result. The SDK `Usage` field is
  * @experimental (v0.18.0) and may be absent. A count of 0 is treated as absent
@@ -680,11 +860,20 @@ export interface ACPTransportConfig {
   mcpConfig?: {
     configPath?: string;
     includeShared?: boolean;
-    includeZo?: boolean;
     includeMemoryBriefing?: boolean;
   };
-  /** Local skill suggestion in shadow mode. Off unless explicitly enabled. */
+  /** Local skill suggestion, staged: shadow (observe only), canary, or live injection. Off unless explicitly enabled. */
   wayfinder?: WayfinderShadowConfig;
+  /**
+   * Decision-factory overrides. Enforcement itself is structural and cannot
+   * be disabled here — this only swaps the record store, the tier policy, or
+   * wires a human approver for the human tier.
+   */
+  decisions?: {
+    store?: DecisionRecordStore;
+    policy?: TierPolicy;
+    humanApprover?: HumanApprover;
+  };
 }
 
 type JsonMcpServer = {
@@ -771,7 +960,6 @@ export function loadAcpMcpServers(
 ): McpServer[] {
   if (!config) return [];
 
-  const env = options.env ?? (process.env as Record<string, string>);
   const servers: McpServer[] = [];
   if (config.includeShared !== false) {
     const configPath = findMcpConfigPath(
@@ -790,30 +978,11 @@ export function loadAcpMcpServers(
     }
   }
 
-  if (config.includeZo) {
-    const token = [env.ZO_CLIENT_IDENTITY_TOKEN, env.ZO_API_KEY, env.ZO_MCP_API_KEY]
-      .find(value => value?.trim());
-    if (!token) {
-      console.warn(
-        '[ACP MCP] Skipping optional Zo server: no ZO_CLIENT_IDENTITY_TOKEN, ZO_API_KEY, or ZO_MCP_API_KEY is available',
-      );
-      return servers;
-    }
-    const url = new URL(env.ZO_MCP_URL ?? 'https://api.zo.computer/mcp');
-    const conversationId = env.ZO_CONVERSATION_ID ?? env.ZO_MCP_CONVERSATION_ID;
-    if (conversationId && !url.searchParams.has('conversation_id')) {
-      url.searchParams.set('conversation_id', conversationId);
-    }
-    servers.push({
-      type: 'http',
-      name: 'zo',
-      url: url.toString(),
-      headers: [
-        { name: 'Authorization', value: `Bearer ${token}` },
-        { name: 'Content-Type', value: 'application/json' },
-      ],
-    });
-  }
+  // The optional legacy-host MCP server injection was removed outright
+  // (governance review 2026-10-14, operator's order): the upstream host is
+  // retired, so that server entry — which carried a bearer token to a dead
+  // endpoint — is gone. Synthetic qualification canaries test the route with
+  // the remaining servers.
 
   return servers;
 }
@@ -823,7 +992,7 @@ export async function buildAcpPrompt(
   config: ACPTransportConfig['mcpConfig'],
   env: Record<string, string>,
 ): Promise<string> {
-  if (!config?.includeMemoryBriefing) return task.task;
+  if (!config?.includeMemoryBriefing || env.SWARM_SYNTHETIC_CANARY === '1') return task.task;
   const baseUrl = (env.MEMORY_GATE_URL ?? 'http://localhost:7820').replace(/\/$/, '');
   const gateUrl = baseUrl.endsWith('/gate') ? baseUrl : `${baseUrl}/gate`;
   try {
@@ -888,7 +1057,6 @@ export function dispatchWayfinderShadow(
   });
   child.on('error', () => {});
   child.on('exit', () => {});
-
   child.unref();
 
   return {
@@ -942,6 +1110,7 @@ function wayfinderRankSetup(
   // off it, so a task that dies before the child finishes is still resolvable.
   const invocationId = randomUUID();
   const script = wayfinderRankScript({
+    python: wayfinderPython(env),
     entrypoint,
     harness,
     stateHome,
@@ -964,7 +1133,17 @@ function wayfinderRankSetup(
   };
 }
 
-
+/** A ranking resolved synchronously for prompt injection. */
+export interface WayfinderLivePick {
+  pick: string;
+  pickPath?: string;
+  invocationId: string;
+  rowPath: string;
+  harness: string;
+  engineDir: string;
+  stateHome: string;
+  roots: string;
+}
 
 /**
  * Whether live injection is armed for this dispatch. Pure and testable.
@@ -991,18 +1170,6 @@ export function wayfinderInjectionArmed(
 export function formatWayfinderPromptSuffix(pick: { pick: string; pickPath?: string }): string {
   const where = pick.pickPath ? ` (${pick.pickPath})` : '';
   return `\n\n[WAYFINDER SUGGESTION]\nRelevant skill for this task: ${pick.pick}${where}. Consider reading its SKILL.md if it applies to the task.`;
-}
-
-/** A ranking resolved synchronously for prompt injection. */
-export interface WayfinderLivePick {
-  pick: string;
-  pickPath?: string;
-  invocationId: string;
-  rowPath: string;
-  harness: string;
-  engineDir: string;
-  stateHome: string;
-  roots: string;
 }
 
 /**
@@ -1060,17 +1227,20 @@ export async function resolveWayfinderLivePick(
 /**
  * The exact program the detached child runs.
  *
-
-
-/**
- * The exact program the detached child runs.
- *
  * The prompt event travels in argv via `--event-json` rather than stdin. The hook
  * harnesses read stdin, but a non-hook caller has no stdin to hand over: creating a
  * pipe here would mean owning a file descriptor for a process that is deliberately
  * not waited on, which is how deadlocks get in. argv costs one shell argument and
  * removes the entire class of pipe-lifetime failure.
  */
+/**
+ * Interpreter for the Wayfinder engine. The engine needs flashrank, which hosts
+ * usually install in a dedicated venv rather than the system python3.
+ */
+export function wayfinderPython(env: Record<string, string | undefined>): string {
+  return (env.WAYFINDER_PYTHON ?? '').trim() || 'python3';
+}
+
 export function wayfinderRankScript(options: {
   entrypoint: string;
   harness: string;
@@ -1080,8 +1250,10 @@ export function wayfinderRankScript(options: {
   timeoutMs: number;
   invocationId: string;
   event: { prompt: string; session_id: string; cwd: string };
+  python?: string;
 }): string {
   const { entrypoint, harness, stateHome, roots, cwd, timeoutMs, invocationId, event } = options;
+  const python = options.python?.trim() && options.python.trim() !== 'python3' ? shellQuote(options.python.trim()) : 'python3';
   const seconds = Math.max(1, Math.ceil(timeoutMs / 1000));
   return [
     'set -u',
@@ -1090,9 +1262,9 @@ export function wayfinderRankScript(options: {
     `cd ${shellQuote(cwd)} || exit 0`,
     `EVENT=${shellQuote(JSON.stringify({ ...event, invocation_id: invocationId }))}`,
     'if command -v timeout >/dev/null 2>&1; then',
-    `  timeout ${seconds} python3 ${shellQuote(entrypoint)} log --harness ${shellQuote(harness)} --event-json "$EVENT" --invocation-id ${shellQuote(invocationId)}`,
+    `  timeout ${seconds} ${python} ${shellQuote(entrypoint)} log --harness ${shellQuote(harness)} --event-json "$EVENT" --invocation-id ${shellQuote(invocationId)}`,
     'else',
-    `  python3 ${shellQuote(entrypoint)} log --harness ${shellQuote(harness)} --event-json "$EVENT" --invocation-id ${shellQuote(invocationId)}`,
+    `  ${python} ${shellQuote(entrypoint)} log --harness ${shellQuote(harness)} --event-json "$EVENT" --invocation-id ${shellQuote(invocationId)}`,
     'fi',
     'exit 0',
   ].join('\n');
@@ -1259,7 +1431,7 @@ export function labelWayfinderSuggestion(
   ];
   if (outcome.readSkills.length > 0) args.push('--detail', outcome.readSkills.join(','));
   try {
-    const child = spawn('python3', args, {
+    const child = spawn(wayfinderPython(process.env), args, {
       env: { ...process.env, WAYFINDER_HOME: suggestion.stateHome, PYTHONDONTWRITEBYTECODE: '1' },
       detached: true,
       stdio: ['ignore', 'ignore', 'ignore'],
@@ -1372,6 +1544,10 @@ export class ACPTransport implements ExecutorTransport {
     // The managed capability verifies the actual nondelegated kernel limits.
     // It cannot be selected with a worker environment flag.
     const cgroup = managed ? null : createExecutorResourceCgroup(env);
+    if (cgroup?.mode === 'process-tree') {
+      env.SWARM_EXEC_RESOURCE_GUARD_MODE = 'process-tree-degraded';
+      env.SWARM_EXEC_RESOURCE_GUARD_DEGRADED_REASON = cgroup.degradedReason ?? 'kernel cgroups unavailable';
+    }
     const guardedSpawnSpec = cgroup ? buildCgroupGuardedAdapterSpawn(containedSpawnSpec, cgroup) : containedSpawnSpec;
     let adapter: ChildProcess;
     try {
@@ -1438,19 +1614,163 @@ export class ACPTransport implements ExecutorTransport {
     const startTime = Date.now();
     const env = this.buildEnv(options);
     env.SWARM_EXECUTOR_ID = this.entry.id;
-    // Dispatched here, not inside buildAcpPrompt: the ranking is a fire-and-forget
-    // side observation, and the caller needs the handle afterwards to label it.
-    const wayfinderSuggestion = dispatchWayfinderShadow(task, this.config.wayfinder, env, process.cwd());
+
+    // Decision factory: the executor dispatch is itself a decision. One coarse
+    // `delegated` record is created and approved BEFORE any adapter spawns;
+    // denial fails the task with no spawn. Both lanes traverse this one seam —
+    // the factory lane is recognized by its containment env markers (locked Q4).
+    const traceId = options.env?.ZO_TRACE_ID ?? process.env.ZO_TRACE_ID;
+    const decisionOrigin = resolveDecisionOrigin(env);
+    let decisionStore: DecisionRecordStore | undefined;
+    let dispatchRecord: ReturnType<DecisionGate['decide']> | undefined;
+    try {
+      decisionStore = this.config.decisions?.store ?? resolveDecisionRecordStore(env);
+      const dispatchGate = new DecisionGate({
+        store: decisionStore,
+        actor: task.persona,
+        origin: decisionOrigin,
+        authority: 'delegate',
+        policy: this.config.decisions?.policy,
+        granularity: 'coarse',
+        ...(traceId ? { traceId } : {}),
+        taskId: task.id,
+        ...(this.config.decisions?.humanApprover ? { humanApprover: this.config.decisions.humanApprover } : {}),
+      });
+      dispatchRecord = dispatchGate.decide({
+        kind: 'executor_dispatch',
+        tool: this.entry.id,
+        target: options.workdir ?? getWorkspaceRoot(),
+        summary: `dispatch task ${task.id} to executor '${this.entry.id}' as persona '${task.persona}' (${decisionOrigin} lane)`,
+      });
+    } catch (error) {
+      doneResolve();
+      return {
+        task,
+        success: false,
+        error: `decision factory refused executor dispatch (fail closed): ${error instanceof Error ? error.message : String(error)}`,
+        durationMs: Date.now() - startTime,
+        retries: 0,
+      };
+    }
+    if (!decisionStore || !dispatchRecord || dispatchRecord.outcome !== 'approved') {
+      doneResolve();
+      return {
+        task,
+        success: false,
+        error: dispatchRecord
+          ? `decision factory denied executor dispatch (decision ${dispatchRecord.decision_id}): ${dispatchRecord.reason}`
+          : 'decision factory produced no dispatch record (fail closed)',
+        durationMs: Date.now() - startTime,
+        retries: 0,
+      };
+    }
+    // Per-tool permission gate for this session, delegated by the approved
+    // dispatch record. Factory-origin sessions record coarsely (events on the
+    // parent record for approvals; denials always get a full record); swarm
+    // sessions record one fine-grained record per tool decision.
+    const toolGate = new DecisionGate({
+      store: decisionStore,
+      actor: task.persona,
+      origin: decisionOrigin,
+      authority: 'delegate',
+      policy: this.config.decisions?.policy,
+      granularity: decisionOrigin === 'factory' ? 'coarse' : 'fine',
+      parentDecisionId: dispatchRecord.decision_id,
+      ...(traceId ? { traceId } : {}),
+      taskId: task.id,
+      ...(this.config.allowedTools?.length ? { allowedTools: this.config.allowedTools } : {}),
+      ...(this.config.decisions?.humanApprover ? { humanApprover: this.config.decisions.humanApprover } : {}),
+    });
+    // Wayfinder, staged: shadow ranks out of band and never touches the prompt.
+    // canary/live resolve the pick synchronously and inject it into the prompt,
+    // but only with WAYFINDER_LIVE_INJECT=1 — without the flag, or on a
+    // non-canary harness in canary mode, they degrade to the shadow path.
+    // WAYFINDER_DRY_RUN=1 resolves the pick and logs it without injecting.
+    const wfConfig = this.config.wayfinder;
+    const wfLiveArmed = wayfinderInjectionArmed(wfConfig, env);
+    let wayfinderSuggestion: WayfinderSuggestion | undefined;
+    let wayfinderPromptSuffix: string | undefined;
+    if (!wfLiveArmed) {
+      // Dispatched here, not inside buildAcpPrompt: the ranking is a fire-and-forget
+      // side observation, and the caller needs the handle afterwards to label it.
+      wayfinderSuggestion = dispatchWayfinderShadow(task, wfConfig, env, process.cwd());
+    } else {
+      const livePick = await resolveWayfinderLivePick(task, wfConfig, env, process.cwd());
+      if (livePick) {
+        wayfinderSuggestion = {
+          invocationId: livePick.invocationId,
+          harness: livePick.harness,
+          taskId: task.id,
+          engineDir: livePick.engineDir,
+          stateHome: livePick.stateHome,
+          roots: livePick.roots,
+          rowPath: livePick.rowPath,
+        };
+        if (env.WAYFINDER_DRY_RUN === '1') {
+          process.stderr.write(`[wayfinder] dry-run: would inject pick '${livePick.pick}' for task ${task.id}\n`);
+        } else {
+          wayfinderPromptSuffix = formatWayfinderPromptSuffix(livePick);
+        }
+      }
+    }
     const adapter = this.spawnAdapter(env, options.workdir ?? getWorkspaceRoot());
+
+    // Mirror the containment prestage degradation into the session stream:
+    // spawnAdapter's env carries the stamp prepareFilesystemContainedSpawn
+    // recorded when the user namespace had to be prestaged by a privileged
+    // helper (nested-userns containers). Never silent.
+    if (env.SWARM_EXEC_CONTAINMENT_MODE === 'prestaged-userns') {
+      const degradedMessage =
+        `[ACP containment] user namespace prestaged by a privileged helper ` +
+        `(${env.SWARM_EXEC_CONTAINMENT_DEGRADED_REASON ?? 'dropped-uid user namespace setup unavailable'}).`;
+      const update: SessionUpdate = { type: 'progress', content: degradedMessage, timestamp: Date.now() };
+      queue.push(update);
+      queue._notify?.();
+      try {
+        options.onUpdate?.(update);
+      } catch {
+        // Observation is untrusted and must never fail the session.
+      }
+    }
 
     let stderrOutput = '';
     adapter.stderr?.on('data', (d: Buffer) => { stderrOutput += d.toString(); });
+
+    const resourceGroup = adapterResourceGroups.get(adapter);
+    let resourceLimitExceeded: string | undefined;
+    let resourceMonitor: ReturnType<typeof setInterval> | undefined;
+    if (resourceGroup?.mode === 'process-tree' && adapter.pid) {
+      const degradedMessage =
+        `[ACP resource guard] kernel cgroups unavailable (${resourceGroup.degradedReason ?? 'controllers not delegated'}); ` +
+        `process-tree monitoring enforces the ${resourceGroup.memoryLimitMib} MiB / ${resourceGroup.processLimit} process limits.`;
+      const update: SessionUpdate = { type: 'progress', content: degradedMessage, timestamp: Date.now() };
+      queue.push(update);
+      queue._notify?.();
+      try {
+        options.onUpdate?.(update);
+      } catch {
+        // Observation is untrusted and must never fail the session.
+      }
+      const rootPid = adapter.pid;
+      const memoryLimitBytes = (resourceGroup.memoryLimitMib ?? 0) * 1024 * 1024;
+      const processLimit = resourceGroup.processLimit ?? Number.MAX_SAFE_INTEGER;
+      resourceMonitor = setInterval(() => {
+        if (resourceLimitExceeded) return;
+        const usage = readExecutorResourceUsage(rootPid, null);
+        if (usage.memory_bytes > memoryLimitBytes || usage.process_count > processLimit) {
+          resourceLimitExceeded =
+            `process-tree resource limit exceeded: memory=${Math.ceil(usage.memory_bytes / 1024 / 1024)} MiB ` +
+            `(limit ${resourceGroup.memoryLimitMib} MiB), processes=${usage.process_count} (limit ${resourceGroup.processLimit})`;
+          terminateAdapterGroup(adapter, 'SIGKILL');
+        }
+      }, 250);
+      resourceMonitor.unref?.();
+    }
 
     const input = Writable.toWeb(adapter.stdin!) as WritableStream<Uint8Array>;
     const output = Readable.toWeb(adapter.stdout!) as unknown as ReadableStream<Uint8Array>;
     const stream = ndJsonStream(input, output);
 
-    const traceId = options.env?.ZO_TRACE_ID ?? process.env.ZO_TRACE_ID;
     const traceRecording = traceId && process.env.ZOUROBOROS_TRACE_RECORD !== '0';
     const replayRoot = process.env.ZOUROBOROS_REPLAY_ROOT
       ?? join(process.env.HOME ?? '/tmp', '.zouroboros', 'replay');
@@ -1478,10 +1798,13 @@ export class ACPTransport implements ExecutorTransport {
           modelSelection.providerSeparator,
         )
       : undefined;
+    let settled = false;
     let idleTimedOut = false;
     let idleTimeoutHandle: ReturnType<typeof setTimeout> | undefined;
     const resetIdleTimeout = () => {
-      if (!options.idleTimeoutMs || options.idleTimeoutMs <= 0) return;
+      // Late updates (e.g. usage) can arrive after the prompt settles; re-arming then
+      // would hold the process open and later SIGTERM an adapter that already finished.
+      if (settled || !options.idleTimeoutMs || options.idleTimeoutMs <= 0) return;
       if (idleTimeoutHandle) clearTimeout(idleTimeoutHandle);
       idleTimeoutHandle = setTimeout(() => {
         idleTimedOut = true;
@@ -1497,7 +1820,7 @@ export class ACPTransport implements ExecutorTransport {
         // Observation is untrusted and must never fail the session.
       }
     };
-    const client = new SwarmClient(queue, onUpdate, recorder, resetIdleTimeout);
+    const client = new SwarmClient(queue, toolGate, onUpdate, recorder, resetIdleTimeout);
     const connection = new ClientSideConnection((_agent: Agent) => client, stream);
 
     // Total timeout and no-progress timeout enforcement.
@@ -1509,7 +1832,6 @@ export class ACPTransport implements ExecutorTransport {
     }, options.timeoutMs);
     resetIdleTimeout();
 
-    let settled = false;
     // Set the instant the child adapter dies, independent of promise settlement.
     // Lets the catch below deterministically attribute a session failure to
     // adapter death even when the ACP SDK's own stream-closed rejection wins the
@@ -1561,6 +1883,9 @@ export class ACPTransport implements ExecutorTransport {
             mcpServers: managedAdapters.has(adapter) ? [] : loadAcpMcpServers(this.config.mcpConfig, { workdir: cwd, env }),
           });
           sessionId = sessionResult.sessionId;
+          toolGate.bindSession(sessionId);
+          // The managed boundary pins Codex's ACP mode; a fallback to any other mode fails closed before a prompt.
+          if (managedAdapters.has(adapter)) assertManagedFactorySessionMode(sessionResult);
 
           if (
             modelSelection &&
@@ -1628,11 +1953,17 @@ export class ACPTransport implements ExecutorTransport {
           }
 
           // Phase 3: Prompt
+          // Live wayfinder injection appends the resolved skill suggestion;
+          // the shadow path never reaches here with a suffix set.
+          const basePromptText = managedAdapters.has(adapter)
+            ? task.task
+            : await buildAcpPrompt(task, this.config.mcpConfig, env);
+          const promptText = wayfinderPromptSuffix ? basePromptText + wayfinderPromptSuffix : basePromptText;
           return connection.prompt({
             sessionId,
             prompt: [{
               type: 'text',
-              text: managedAdapters.has(adapter) ? task.task : await buildAcpPrompt(task, this.config.mcpConfig, env),
+              text: promptText,
             }],
           });
         })(),
@@ -1740,7 +2071,9 @@ export class ACPTransport implements ExecutorTransport {
       return {
         task,
         success: false,
-        error: idleTimedOut
+        error: resourceLimitExceeded
+          ? `ACP executor resource limit exceeded: ${resourceLimitExceeded}${resourceDetail}: ${err.message ?? String(err)}\n${stderrOutput}`
+          : idleTimedOut
           ? `ACP session idle timed out after ${options.idleTimeoutMs}ms without an update`
           : timedOut
             ? `ACP session timed out after ${options.timeoutMs}ms`
@@ -1751,6 +2084,7 @@ export class ACPTransport implements ExecutorTransport {
         retries: 0,
       };
     } finally {
+      if (resourceMonitor) clearInterval(resourceMonitor);
       if (idleTimeoutHandle) clearTimeout(idleTimeoutHandle);
       if (onProcExit) adapter.off('exit', onProcExit);
       if (onProcError) adapter.off('error', onProcError);

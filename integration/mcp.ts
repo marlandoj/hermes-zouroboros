@@ -3,7 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { DEFAULT_CONFIG } from 'zouroboros-core';
-import { initDatabase, closeDatabase, storeFact, searchFacts, getFact, getDbStats } from 'zouroboros-memory';
+import { initDatabase, closeDatabase, storeFact, searchFacts, getFact, getDbStats, requireActor } from 'zouroboros-memory';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -26,18 +26,24 @@ server.tool('workshop_status', 'Inspect local Zouroboros memory and execution mo
   memory: getDbStats(memoryConfig), swarmExecution: process.env.HERMES_ZOUROBOROS_ALLOW_SWARM === '1',
   factoryConfigured: Boolean(process.env.HERMES_ZOUROBOROS_BOARD_DIR && process.env.HERMES_ZOUROBOROS_MANIFEST),
 }));
-server.tool('memory_store', 'Store a work fact or decision in the shared SQLite memory. Do not store credentials.', {
+// Track 1 actor cutover: every memory tool requires a caller identity. The
+// schema keeps `actor` optional so pre-cutover clients reach requireActor and
+// fail closed with the MISSING_ACTOR code instead of an opaque schema error.
+server.tool('memory_store', 'Store a work fact or decision in SQLite memory under the calling actor. Requires a caller identity (actor); calls without one are rejected (MISSING_ACTOR). Do not store credentials.', {
+  actor: z.string().max(200).optional().describe('REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Use "shared" only for deliberately cross-persona facts.'),
   entity: z.string().min(1).max(200), key: z.string().max(200).optional(), value: z.string().min(1).max(20000),
-}, async input => result(await storeFact({ ...input, category: 'fact', source: 'hermes-zouroboros' }, memoryConfig)));
-server.tool('memory_search', 'Find shared work facts by keyword, optionally restricted to an exact ID that also matches the query and is unexpired. No remote embedding API is called.', {
+}, async ({ actor, ...input }) => result(await storeFact({ actor: requireActor(actor, 'memory_store'), ...input, category: 'fact', source: 'hermes-zouroboros' }, memoryConfig)));
+server.tool('memory_search', 'Find work facts by keyword within the calling actor\'s scope (own persona + shared pool), optionally restricted to an exact ID that also matches the query and is unexpired. Requires a caller identity (actor); calls without one are rejected (MISSING_ACTOR). No remote embedding API is called.', {
+  actor: z.string().max(200).optional().describe('REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Visibility = own persona + shared pool.'),
   query: z.string().min(1).max(2000), limit: z.number().int().min(1).max(30).default(10),
   id: z.string().min(1).max(200).optional(),
-}, async ({ query, limit, id }) => {
-  if (id === undefined) return result(searchFacts(query, { limit }));
-  // searchFacts filters by ID before its result cap, with the same keyword and
-  // expiry semantics. getFact alone intentionally includes expired rows.
-  const match = searchFacts(query, { id, limit: 1 }).length > 0;
-  const fact = match ? getFact(id) : null;
+}, async ({ actor, query, limit, id }) => {
+  const caller = requireActor(actor, 'memory_search');
+  if (id === undefined) return result(searchFacts(query, { actor: caller, limit }));
+  // searchFacts filters by ID before its result cap, with the same keyword,
+  // scope and expiry semantics. getFact alone intentionally includes expired rows.
+  const match = searchFacts(query, { actor: caller, id, limit: 1 }).length > 0;
+  const fact = match ? getFact(id, { actor: caller }) : null;
   return result(fact ? [fact] : []);
 });
 server.tool('swarm_prepare', 'Validate a task DAG and save an operator-reviewable campaign. Does not execute tasks.', {

@@ -393,6 +393,9 @@ function createLiveDependencies(): RagShadowDependencies {
         memoryInitialized = true;
       }
       const results = await memory.routeMemoryQuery(query, config, {
+        // Track 1 actor scoping: pre-cutover writes in this distribution land
+        // under the 'shared' persona, so the shadow reads the shared pool.
+        actor: 'shared',
         limit,
         rerank: false,
         sessionId: 'rag-health-shadow',

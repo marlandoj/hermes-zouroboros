@@ -22,8 +22,8 @@ type Outcome = typeof OUTCOME[number];
 const out = console.log.bind(console);
 
 const usage = `zmem — Zouroboros memory (portable profile store)
-  store --entity E [--key K] --value V [--category C] [--decay D]
-  search <query> [--limit N]
+  store --actor A --entity E [--key K] --value V [--category C] [--decay D]
+  search <query> --actor A [--limit N]
   episode --summary S --outcome success|failure|resolved|ongoing [--entities a,b] [--duration-ms N]
   episodes [--since 7d|ISO] [--until ISO] [--outcome O] [--limit N]
   stats
@@ -66,7 +66,7 @@ async function main(argv: string[]): Promise<number> {
   const { values, positionals } = parseArgs({
     args: rest, allowPositionals: true, strict: true,
     options: {
-      entity: { type: 'string' }, key: { type: 'string' }, value: { type: 'string' },
+      actor: { type: 'string' }, entity: { type: 'string' }, key: { type: 'string' }, value: { type: 'string' },
       category: { type: 'string' }, decay: { type: 'string' }, limit: { type: 'string' },
       summary: { type: 'string' }, outcome: { type: 'string' }, entities: { type: 'string' },
       'duration-ms': { type: 'string' }, since: { type: 'string' }, until: { type: 'string' },
@@ -80,8 +80,10 @@ async function main(argv: string[]): Promise<number> {
     switch (command) {
       case 'store': {
         if (!values.entity || !values.value) throw new Error('store requires --entity and --value');
+        // Fail-closed (Track 1): memory access carries a caller identity.
+        if (!values.actor) throw new Error('store requires --actor (use "shared" only for deliberately cross-persona facts)');
         const entry = await storeFact({
-          entity: values.entity, key: values.key, value: values.value, source: 'hermes-zouroboros:zo-memory-system',
+          actor: values.actor, entity: values.entity, key: values.key, value: values.value, source: 'hermes-zouroboros:zo-memory-system',
           category: choice<Category>(values.category, CATEGORY, 'category') ?? 'fact',
           decay: choice<Decay>(values.decay, DECAY, 'decay'),
         }, config);
@@ -91,7 +93,8 @@ async function main(argv: string[]): Promise<number> {
       case 'search': {
         const query = positionals.join(' ').trim();
         if (!query) throw new Error('search requires a query');
-        out(JSON.stringify(searchFacts(query, { limit: limitOf(values.limit, 10) }).map(({ id, entity, key, value, decay }) => ({ id, entity, key, value, decay }))));
+        if (!values.actor) throw new Error('search requires --actor (visibility = own persona + shared pool)');
+        out(JSON.stringify(searchFacts(query, { actor: values.actor, limit: limitOf(values.limit, 10) }).map(({ id, entity, key, value, decay }) => ({ id, entity, key, value, decay }))));
         return 0;
       }
       case 'episode': {

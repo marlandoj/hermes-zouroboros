@@ -720,8 +720,8 @@
       "sourcePath": "Skills/deep-research/scripts/research.ts",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "f568ec270f15ec64e6dd85edf856c55aa52d92debd8ad4324efde6049871b3da",
-      "distributedSha256": "b96525a91dd535196b38344720734613e6e1b7dc766782f08b613f4943bd8c0b",
-      "adaptation": "Decay vocabulary unification (7f92dc8): long/medium/short -> stable/active; reviewed 2026-10-13"
+      "distributedSha256": "3f173880d8121e305b0cf578e41847e0071cc1a0c5c1dd51504cb967fab4ab67",
+      "adaptation": "Track 1 actor cutover: memory access now carries a required --actor caller identity (fail-closed)"
     },
     {
       "path": "skills/research/deep-research/scripts/wiring.test.ts",
@@ -2952,8 +2952,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "abadeae4f1046a9bc0596cd29c5fecf4cabc8e5e3a7630fcdbc35e0955752628",
-      "adaptation": "Decay vocabulary unification (7f92dc8): long/medium/short -> stable/active; reviewed 2026-10-13"
+      "distributedSha256": "de04200cefa7443681cb45c4751aa87861762b84937b3bb6c540f336f40f91da",
+      "adaptation": "Track 1 actor cutover: memory access now carries a required --actor caller identity (fail-closed)"
     },
     {
       "path": "skills/zouroboros/zo-memory-system/SKILL.md",
@@ -2961,8 +2961,8 @@
       "sourcePath": "Skills/zo-memory-system/SKILL.md",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "086fa98b9b42d610644c6c2d8d4997ea2d0cf7d480c8ee3ba09b2281808e78e4",
-      "distributedSha256": "5a8958818cedb48864ae33e9c1f7b4965e205c54bffd4827fb4b35478cf223f9",
-      "adaptation": "Decay vocabulary unification (7f92dc8): long/medium/short -> stable/active; reviewed 2026-10-13"
+      "distributedSha256": "f708b0788d901e3643178c9d5dccd8dabc45bd0b95fbb164ea14b966ba200014",
+      "adaptation": "Track 1 actor cutover: memory access now carries a required --actor caller identity (fail-closed)"
     },
     {
       "path": "skills/zouroboros/zo-swarm-executors/references/bridge-protocol.md",
@@ -3348,8 +3348,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "a5ac56a6f15cc1078391d648baf80adef9fe11439707ae0b57e1ddfde3d4783d",
-      "adaptation": "Distribution-authored: loop verify phase (held-out probes, tamper check, test-level comparison, fail-closed verdicts)"
+      "distributedSha256": "a949665bd5abbec7901f72cc5d888568764232e585e41332eeb99db453646622",
+      "adaptation": "Track 1 actor cutover: memory access now carries a required --actor caller identity (fail-closed)"
     },
     {
       "path": "skills/zouroboros/zouroboros-loop-verify/heldout/probes/shell-payloads.sh",
@@ -3708,8 +3708,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "ff4c59f54b8fd19350cc4ccbe045488b999bb2f832f96bc8699356c0cb3a7648",
-      "adaptation": "Replaces the host install.ts/doctor.ts: skill index, read-only doctor (integration/cli.ts doctor + governance verify-docs + skill tree) and operator shortcuts resolved with zouroboros-core resolveOperatorShortcut against distribution commands."
+      "distributedSha256": "f5366ec8bb253de39093ca2d7c5f54088cafd111e9c2cbc27648069d42799542",
+      "adaptation": "Track 1 actor cutover: memory access now carries a required --actor caller identity (fail-closed)"
     },
     {
       "path": "skills/zouroboros/zouroboros/SKILL.md",

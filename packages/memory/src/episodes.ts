@@ -4,6 +4,7 @@
 
 import { randomUUID } from 'crypto';
 import { getDatabase } from './database.js';
+import { invalidateGraphCache } from './graph.js';
 import type { EpisodicMemory, TemporalQuery } from 'zouroboros-core';
 
 type Outcome = 'success' | 'failure' | 'resolved' | 'ongoing';
@@ -84,6 +85,10 @@ export function createEpisode(input: CreateEpisodeInput): EpisodicMemory {
   }
 
   syncEpisodeDocument(db, id, input.summary, metadata, input.entities);
+
+  // New entities/edges change the entity graph — drop the cached build so
+  // scoped traversals see the new episode immediately (was: 60s stale reads).
+  invalidateGraphCache();
 
   return {
     id,

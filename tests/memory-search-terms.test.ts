@@ -26,11 +26,13 @@ function unpack(value: any) {
   expect(value.isError).not.toBe(true);
   return JSON.parse(value.content[0].text);
 }
+// Track 1 actor cutover: every memory tool call declares its caller identity (fail-closed).
+const ACTOR = 'search-terms-fixture';
 async function store(client: Client, entity: string, value: string) {
-  return unpack(await client.callTool({ name: 'memory_store', arguments: { entity, key: 'note', value } }));
+  return unpack(await client.callTool({ name: 'memory_store', arguments: { actor: ACTOR, entity, key: 'note', value } }));
 }
 async function hits(client: Client, query: string, id?: string): Promise<string[]> {
-  const rows = unpack(await client.callTool({ name: 'memory_search', arguments: id ? { query, id } : { query } }));
+  const rows = unpack(await client.callTool({ name: 'memory_search', arguments: id ? { actor: ACTOR, query, id } : { actor: ACTOR, query } }));
   return rows.map((r: { entity: string }) => r.entity).sort();
 }
 

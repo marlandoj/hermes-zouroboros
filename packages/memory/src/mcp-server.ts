@@ -22,6 +22,7 @@ import { searchProcedures, getProcedure, getProcedureVersions, compareProcedureV
 import { applyDefense } from './defense.js';
 import { consolidateObservations, listObservations, getObservation, searchObservations } from './observations.js';
 import { defineMentalModel, readMentalModel, listMentalModels, refreshMentalModel, refreshDueMentalModels } from './mental-models.js';
+import { requireActor, resolveScope } from './scope.js';
 import type { MemoryConfig } from 'zouroboros-core';
 
 // ============================================================================
@@ -59,26 +60,29 @@ interface McpToolDefinition {
 const TOOLS: McpToolDefinition[] = [
   {
     name: 'memory_store',
-    description: 'Store a fact in memory with optional embedding generation',
+    description: 'Store a fact in memory with optional embedding generation. Requires a caller identity (actor); calls without one are rejected.',
     inputSchema: {
       type: 'object',
       properties: {
+        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Use "shared" only for deliberately cross-persona facts.' },
         entity: { type: 'string', description: 'The entity this fact is about' },
         value: { type: 'string', description: 'The fact content' },
         key: { type: 'string', description: 'Optional key for the fact' },
+        persona: { type: 'string', description: 'Persona the fact is stored under (defaults to the actor, never silently "shared")' },
         category: { type: 'string', enum: ['preference', 'fact', 'decision', 'convention', 'other', 'reference', 'project'] },
         decay: { type: 'string', enum: ['permanent', 'stable', 'active', 'session', 'checkpoint'] },
         importance: { type: 'number', description: 'Importance score (default 1.0)' },
       },
-      required: ['entity', 'value'],
+      required: ['actor', 'entity', 'value'],
     },
   },
   {
     name: 'memory_search',
-    description: 'Search facts by keyword or semantic similarity',
+    description: 'Search facts by keyword or semantic similarity. Requires a caller identity (actor); results are scoped to the actor plus the shared pool.',
     inputSchema: {
       type: 'object',
       properties: {
+        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Visibility = own persona + shared pool.' },
         query: { type: 'string', description: 'Search query' },
         entity: { type: 'string', description: 'Filter by entity' },
         category: { type: 'string', description: 'Filter by category' },
@@ -86,7 +90,7 @@ const TOOLS: McpToolDefinition[] = [
         mode: { type: 'string', enum: ['keyword', 'hybrid', 'deep'], description: 'Search mode (default hybrid): keyword (exact), hybrid (keyword + vector + graph RRF fusion), deep (hybrid + rerank + CoT answer)' },
         disposition: { type: 'object', description: 'Optional disposition knobs for deep-mode answering, each 0..1 (skepticism, literalism, empathy)', properties: { skepticism: { type: 'number' }, literalism: { type: 'number' }, empathy: { type: 'number' } } },
       },
-      required: ['query'],
+      required: ['actor', 'query'],
     },
   },
   {
@@ -122,16 +126,17 @@ const TOOLS: McpToolDefinition[] = [
   },
   {
     name: 'memory_graph',
-    description: 'Query the entity relationship graph',
+    description: 'Query the entity relationship graph. Requires a caller identity (actor); fact-derived entities are scoped to the actor.',
     inputSchema: {
       type: 'object',
       properties: {
+        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected.' },
         action: { type: 'string', enum: ['related', 'build'], description: 'Graph action' },
         entity: { type: 'string', description: 'Entity to find relations for' },
         depth: { type: 'number', description: 'Traversal depth (default 2)' },
         limit: { type: 'number', description: 'Max related entities (default 20)' },
       },
-      required: ['action'],
+      required: ['actor', 'action'],
     },
   },
   {
@@ -161,13 +166,14 @@ const TOOLS: McpToolDefinition[] = [
   },
   {
     name: 'memory_delete',
-    description: 'Delete a specific fact by ID. Cascades to embeddings, links, and activation.',
+    description: 'Delete a specific fact by ID. Cascades to embeddings, links, and activation. Requires a caller identity (actor); only facts within the actor scope can be deleted.',
     inputSchema: {
       type: 'object',
       properties: {
+        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected.' },
         id: { type: 'string', description: 'The fact UUID to delete' },
       },
-      required: ['id'],
+      required: ['actor', 'id'],
     },
   },
   {
@@ -239,19 +245,31 @@ async function handleToolCall(
 ): Promise<unknown> {
   switch (name) {
     case 'memory_store': {
+      // Fail-closed (operator decision Q2): no actor, no write.
+      const scope = resolveScope(requireActor(args.actor, 'memory_store'), 'memory_store');
       const result = await storeFact({
+        actor: scope.actor,
         entity: args.entity as string,
         value: args.value as string,
         key: args.key as string | undefined,
+        persona: args.persona as string | undefined,
         category: args.category as any,
         decay: args.decay as any,
         importance: args.importance as number | undefined,
         source: 'mcp',
       }, config);
-      return { stored: true, id: result.id, entity: result.entity };
+      return {
+        stored: true,
+        id: result.id,
+        entity: result.entity,
+        scope: { actor: scope.actor, personas: scope.personas },
+      };
     }
 
     case 'memory_search': {
+      // Fail-closed (operator decision Q2): no actor, no read.
+      const scope = resolveScope(requireActor(args.actor, 'memory_search'), 'memory_search');
+      const scopeMeta = { actor: scope.actor, personas: scope.personas };
       const mode = (args.mode as string) ?? 'hybrid';
       if (mode === 'deep') {
         const deepConfig: typeof config = {
@@ -260,24 +278,30 @@ async function handleToolCall(
           cot: { enabled: true, ...config.cot },
         };
         const hybridResults = await routeMemoryQuery(args.query as string, deepConfig, {
+          actor: scope.actor,
           limit: 10,
           rerank: true,
         });
         const answer = await answerWithCoT(args.query as string, hybridResults, deepConfig, {
+          actor: scope.actor,
           disposition: args.disposition as Disposition | undefined,
         });
-        return { results: hybridResults, answer };
+        return { results: hybridResults, answer, scope: scopeMeta };
       }
       if (mode === 'hybrid') {
-        return routeMemoryQuery(args.query as string, config, {
+        const results = await routeMemoryQuery(args.query as string, config, {
+          actor: scope.actor,
           limit: args.limit as number | undefined,
         });
+        return { results, scope: scopeMeta };
       }
-      return searchFacts(args.query as string, {
+      const results = searchFacts(args.query as string, {
+        actor: scope.actor,
         entity: args.entity as string | undefined,
         category: args.category as string | undefined,
         limit: args.limit as number | undefined,
       });
+      return { results, scope: scopeMeta };
     }
 
     case 'memory_episodes': {
@@ -317,9 +341,10 @@ async function handleToolCall(
     }
 
     case 'memory_graph': {
+      const scope = resolveScope(requireActor(args.actor, 'memory_graph'), 'memory_graph');
       const action = args.action as string;
-      if (action === 'build') return buildEntityGraph();
-      return getRelatedEntities(args.entity as string, {
+      if (action === 'build') return buildEntityGraph(scope);
+      return getRelatedEntities(args.entity as string, scope, {
         depth: args.depth as number | undefined,
         limit: args.limit as number | undefined,
       });
@@ -356,9 +381,10 @@ async function handleToolCall(
     }
 
     case 'memory_delete': {
+      const actor = requireActor(args.actor, 'memory_delete');
       const id = args.id as string;
       if (!id) throw new Error('id is required');
-      const deleted = deleteFact(id);
+      const deleted = deleteFact(id, { actor });
       if (!deleted) throw new Error(`Fact not found: ${id}`);
       return { deleted: true, id };
     }
