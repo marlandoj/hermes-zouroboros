@@ -73,11 +73,12 @@ function unpack(result: any) {
   return JSON.parse(result.content.filter((item: any) => item.type === 'text').map((item: any) => item.text).join('\n'));
 }
 const marker = { entity: 'hermes-zouroboros-installation', key: 'mcp-connection', value: 'hermes-zouroboros-installer-v1: shared MCP memory verified' };
+const probeActor = 'hermes-zouroboros-installer';
 const dbPath = join(dataHome, 'memory.db');
 // Receipt lookup must include expired rows. Never broaden this installer-owned
 // identity to other work facts or change memory_store's ordinary retention.
 const receiptWhere = 'entity = ? AND key = ? AND value = ? AND source = ? AND persona = ? AND category = ?';
-const receiptIdentity = [marker.entity, marker.key, marker.value, 'hermes-zouroboros', 'shared', 'fact'];
+const receiptIdentity = [marker.entity, marker.key, marker.value, 'hermes-zouroboros', probeActor, 'fact'];
 function existingReceipts() {
   checkState();
   const db = new Database(dbPath, { readonly: true });
@@ -112,17 +113,17 @@ try {
     const existing = existingReceipts();
     let id = existing[0]?.id;
     if (!id) {
-      const saved = unpack(await client.callTool({ name: 'memory_store', arguments: marker }));
+      const saved = unpack(await client.callTool({ name: 'memory_store', arguments: { ...marker, actor: probeActor } }));
       if (typeof saved.id !== 'string' || saved.entity !== marker.entity || saved.key !== marker.key || saved.value !== marker.value) throw new Error('Unexpected installation receipt store result');
       id = saved.id;
-      const stored = unpack(await client.callTool({ name: 'memory_search', arguments: { query: marker.value, id, limit: 1 } }));
+      const stored = unpack(await client.callTool({ name: 'memory_search', arguments: { query: marker.value, id, limit: 1, actor: probeActor } }));
       if (stored.length !== 1 || stored[0].id !== id || stored[0].entity !== marker.entity || stored[0].key !== marker.key || stored[0].value !== marker.value) throw new Error('Installation receipt MCP readback failed');
     }
     receipt = { id, matchingRecords: existing.length || 1, decay: 'permanent' };
     // Recover expired receipts locally before the unexpired-only MCP lookup.
     // Prove this selected ID on the current connection as well as after reconnect.
     makeReceiptPermanent(id);
-    const selected = unpack(await client.callTool({ name: 'memory_search', arguments: { query: marker.value, id, limit: 1 } }));
+    const selected = unpack(await client.callTool({ name: 'memory_search', arguments: { query: marker.value, id, limit: 1, actor: probeActor } }));
     if (selected.length !== 1 || selected[0].id !== id || selected[0].entity !== marker.entity || selected[0].key !== marker.key || selected[0].value !== marker.value || selected[0].decay !== 'permanent') throw new Error('Selected installation receipt MCP readback failed');
   }
 } finally { await client.close(); }
@@ -130,7 +131,7 @@ if (!checkOnly) {
   // Prove selected-ID retrieval after reconnect, independently of keyword ranking.
   client = await connect();
   try {
-    const found = unpack(await client.callTool({ name: 'memory_search', arguments: { query: marker.value, id: receipt!.id, limit: 1 } }));
+    const found = unpack(await client.callTool({ name: 'memory_search', arguments: { query: marker.value, id: receipt!.id, limit: 1, actor: probeActor } }));
     if (found.length !== 1 || found[0].id !== receipt!.id || found[0].entity !== marker.entity || found[0].key !== marker.key || found[0].value !== marker.value || found[0].decay !== 'permanent') throw new Error('Saved installation fact did not survive reconnection');
     status = unpack(await client.callTool({ name: 'workshop_status', arguments: {} }));
   } finally { await client.close(); }

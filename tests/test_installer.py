@@ -534,7 +534,7 @@ const server=config.mcp_servers.zouroboros;
 const client=new Client({name:'installer-retention-test',version:'1'});
 try {
   await client.connect(new StdioClientTransport({command:server.command,args:server.args,env:{...process.env,...server.env},stderr:'pipe'}));
-  const result=await client.callTool({name:'memory_store',arguments:{entity:'ordinary-fixture',key:'decision',value:'Keep copper widgets'}});
+  const result=await client.callTool({name:'memory_store',arguments:{entity:'ordinary-fixture',key:'decision',value:'Keep copper widgets',actor:'installer-test'}});
   if(result.isError) throw new Error('ordinary fact store failed');
 } finally { await client.close(); }
 '''
@@ -619,7 +619,7 @@ try {
         receipt=next(iter(rows().values()))
         if kind=='ordinary':
             stored=fixture.memory_calls([{'name':'memory_store','arguments':{
-                'entity':'ordinary-matching-'+str(i),'key':'decision','value':receipt['value']+' ordinary '+str(i)}} for i in range(30)])
+                'entity':'ordinary-matching-'+str(i),'key':'decision','value':receipt['value']+' ordinary '+str(i),'actor':'installer-test'}} for i in range(30)])
             self.assertEqual(len({row['id'] for row in stored}),30)
             # Make the original deterministically older; do not change ordinary
             # MCP-created timestamps, payloads, importance, or default lifetimes.
@@ -640,7 +640,7 @@ try {
         originals=rows()
         self.assertEqual(len(originals),31)
         # A bounded ordinary keyword search really hides the selected receipt.
-        found=fixture.memory_calls([{'name':'memory_search','arguments':{'query':receipt['value'],'limit':30}}])[0]
+        found=fixture.memory_calls([{'name':'memory_search','arguments':{'query':receipt['value'],'limit':30,'actor':'installer-test'}}])[0]
         self.assertEqual(len(found),30)
         self.assertNotIn(receipt['id'],[row['id'] for row in found])
         preserved=[fixture.config,fixture.credentials,fixture.data/'executors.json',fixture.data/'settings.json',fixture.data/'hermes/config.yaml']
