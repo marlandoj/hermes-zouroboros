@@ -21,6 +21,10 @@ const dryRun = args.includes('--dry-run');
 const graceIdx = args.indexOf('--grace-minutes');
 const graceMs =
   graceIdx >= 0 ? parseInt(args[graceIdx + 1]!, 10) * 60_000 : PROMOTION_GRACE_MS;
+// MEM-10: the operator declares the episode owner for the sweep. Defaults to
+// 'shared' explicitly (this is the operator's own maintenance command).
+const actorIdx = args.indexOf('--actor');
+const actor = actorIdx >= 0 ? args[actorIdx + 1]! : 'shared';
 
 function usage(): never {
   console.log(`
@@ -33,6 +37,7 @@ USAGE:
 OPTIONS:
   --grace-minutes N   Promotion grace period (default: ${PROMOTION_GRACE_MS / 60_000})
   --dry-run           Report what would promote without writing
+  --actor NAME        Persona promoted episodes are stored under (default: shared)
 `);
   process.exit(sub === 'help' || sub === '--help' ? 0 : 1);
 }
@@ -63,7 +68,7 @@ if (sub === 'promote') {
     );
     process.exit(0);
   }
-  const result = promoteObservations(memoryConfig, { graceMs });
+  const result = promoteObservations(memoryConfig, { graceMs, actor });
   console.log(
     `Promoted ${result.observationsPromoted} observation(s) into ${result.episodesCreated} episode(s) across ${result.groups} group(s).`,
   );

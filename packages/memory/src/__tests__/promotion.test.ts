@@ -206,3 +206,52 @@ describe('sweepPromotions (batch, idempotent)', () => {
     expect(again.rejected.length).toBe(1);
   });
 });
+
+describe('MEM-01: review queue scopes the contradicting side', () => {
+  test('cross-persona contradicting text is withheld, not leaked', async () => {
+    const { randomUUID } = await import('crypto');
+    const other = await storeFact(
+      { actor: 'persona-b', entity: 'secret.x', value: 'B-private contradicting text' },
+      TEST_CONFIG,
+    );
+    const mine = await storeFact(
+      { actor: 'persona-a', entity: 'secret.x', value: 'A text' },
+      TEST_CONFIG,
+    );
+    // Route mine to review contradicting the other-persona fact.
+    getDatabase().run(
+      `INSERT INTO fact_promotions (id, fact_id, stage, decided_by, contradiction_of)
+       VALUES (?, ?, 'review', 'tester', ?)`,
+      [randomUUID(), mine.id, other.id],
+    );
+
+    const queue = listReviewQueue({ actor: 'persona-a' });
+    expect(queue.length).toBe(1);
+    expect(queue[0].factId).toBe(mine.id);
+    // The contradiction link is visible (it explains the review), but the
+    // out-of-scope fact's text must not leak to this actor.
+    expect(queue[0].contradictionOf).toBe(other.id);
+    expect(queue[0].contradictingValue).toBeNull();
+  });
+
+  test('in-scope contradicting text remains visible', async () => {
+    const { randomUUID } = await import('crypto');
+    const shared = await storeFact(
+      { actor: 'shared', entity: 's.x', value: 'shared contradicting text' },
+      TEST_CONFIG,
+    );
+    const mine = await storeFact(
+      { actor: 'persona-a', entity: 's.x', value: 'A text' },
+      TEST_CONFIG,
+    );
+    getDatabase().run(
+      `INSERT INTO fact_promotions (id, fact_id, stage, decided_by, contradiction_of)
+       VALUES (?, ?, 'review', 'tester', ?)`,
+      [randomUUID(), mine.id, shared.id],
+    );
+
+    const queue = listReviewQueue({ actor: 'persona-a' });
+    expect(queue.length).toBe(1);
+    expect(queue[0].contradictingValue).toBe('shared contradicting text');
+  });
+});

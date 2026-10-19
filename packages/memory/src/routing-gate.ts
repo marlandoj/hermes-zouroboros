@@ -12,7 +12,7 @@
  * procedural search instead.
  */
 
-import { execSync } from 'child_process';
+import { Database } from 'bun:sqlite';
 import { existsSync } from 'fs';
 import { randomUUID } from 'crypto';
 import { getMemoryDbPath } from 'zouroboros-core';
@@ -54,12 +54,14 @@ export function _resetRoutingGateCache(): void {
 }
 
 function ensureRoutingTable(): boolean {
-  const db = getDB();
-  if (_ensuredPaths.has(db)) return true;
-  if (!existsSync(db)) return false;
+  const dbPath = getDB();
+  if (_ensuredPaths.has(dbPath)) return true;
+  if (!existsSync(dbPath)) return false;
+  let db: Database | null = null;
   try {
-    execSync(
-      `sqlite3 "${db}" "` +
+    db = new Database(dbPath);
+    db.exec('PRAGMA busy_timeout = 5000');
+    db.exec(
       `CREATE TABLE IF NOT EXISTS memory_routing_log (` +
       `id TEXT PRIMARY KEY, ` +
       `query TEXT NOT NULL, ` +
@@ -73,24 +75,19 @@ function ensureRoutingTable(): boolean {
       `created_at INTEGER DEFAULT (strftime('%s','now'))` +
       `); ` +
       `CREATE INDEX IF NOT EXISTS idx_memory_routing_log_kind ON memory_routing_log(classified_kind, created_at DESC); ` +
-      `CREATE INDEX IF NOT EXISTS idx_memory_routing_log_created ON memory_routing_log(created_at DESC);"`,
-      { encoding: 'utf-8', timeout: 5000 }
+      `CREATE INDEX IF NOT EXISTS idx_memory_routing_log_created ON memory_routing_log(created_at DESC);`
     );
-    // Track 1: actor column on pre-existing deployed tables. ALTER fails
-    // harmlessly when the column already exists (fresh tables get it below
-    // via the same ALTER on first ensure).
-    try {
-      execSync(
-        `sqlite3 "${db}" "ALTER TABLE memory_routing_log ADD COLUMN actor TEXT"`,
-        { encoding: 'utf-8', timeout: 5000, stdio: ['pipe', 'pipe', 'pipe'] }
-      );
-    } catch {
-      // duplicate column — already migrated
+    // Track 1: actor column on pre-existing deployed tables.
+    const cols = db.query('PRAGMA table_info(memory_routing_log)').all() as { name: string }[];
+    if (!cols.some(c => c.name === 'actor')) {
+      db.exec('ALTER TABLE memory_routing_log ADD COLUMN actor TEXT');
     }
-    _ensuredPaths.add(db);
+    _ensuredPaths.add(dbPath);
     return true;
   } catch {
     return false;
+  } finally {
+    db?.close();
   }
 }
 
@@ -130,6 +127,13 @@ export function classifyMemoryQuery(query: string): RoutingDecision {
 /**
  * Persist a routing decision. Best-effort — never throws.
  */
+/**
+ * Persist a routing decision. Best-effort — never throws.
+ *
+ * Uses bun:sqlite prepared statements with bound parameters. Caller-controlled
+ * text (query, reason, actor, session) is never interpolated into SQL and never
+ * touches a shell (MEM-09).
+ */
 export function logMemoryRoute(
   query: string,
   decision: RoutingDecision,
@@ -139,22 +143,32 @@ export function logMemoryRoute(
   sessionId?: string,
 ): void {
   if (!ensureRoutingTable()) return;
+  let db: Database | null = null;
   try {
-    const id = randomUUID();
-    const safeQuery = query.replace(/'/g, "''").slice(0, 500);
-    const safeReason = decision.reason.replace(/'/g, "''").slice(0, 200);
+    db = new Database(getDB());
+    db.exec('PRAGMA busy_timeout = 5000');
     // The actor doubles as the persona column value so pre-Track-1 analysis
     // queries keep working; the dedicated actor column is authoritative.
-    const safeActor = (actor || '').replace(/'/g, "''").slice(0, 100);
-    const safeSession = (sessionId || '').replace(/'/g, "''").slice(0, 100);
-    execSync(
-      `sqlite3 "${getDB()}" "` +
+    const actorValue = (actor || '').slice(0, 100);
+    db.query(
       `INSERT INTO memory_routing_log(id,query,classified_kind,confidence,reason,latency_ms,hit_count,persona,actor,session_id) ` +
-      `VALUES('${id}','${safeQuery}','${decision.kind}',${decision.confidence},'${safeReason}',${latencyMs},${hitCount},'${safeActor}','${safeActor}','${safeSession}')"`,
-      { encoding: 'utf-8', timeout: 5000 }
+      `VALUES(?,?,?,?,?,?,?,?,?,?)`
+    ).run(
+      randomUUID(),
+      query.slice(0, 500),
+      decision.kind,
+      decision.confidence,
+      decision.reason.slice(0, 200),
+      latencyMs,
+      hitCount,
+      actorValue,
+      actorValue,
+      (sessionId || '').slice(0, 100),
     );
   } catch {
     // best-effort logging; never break the search path
+  } finally {
+    db?.close();
   }
 }
 
@@ -216,30 +230,31 @@ export interface RoutingLogEntry {
 
 export function getRecentRoutingDecisions(limit = 100): RoutingLogEntry[] {
   if (!ensureRoutingTable()) return [];
+  let db: Database | null = null;
   try {
-    const out = execSync(
-      `sqlite3 -separator '|' "${getDB()}" "SELECT id,query,classified_kind,confidence,reason,latency_ms,hit_count,persona,actor,session_id,created_at FROM memory_routing_log ORDER BY created_at DESC LIMIT ${limit}"`,
-      { encoding: 'utf-8', timeout: 5000 }
-    ).trim();
-    if (!out) return [];
-    return out.split('\n').map(line => {
-      const p = line.split('|');
-      return {
-        id: p[0] ?? '',
-        query: p[1] ?? '',
-        kind: (p[2] ?? 'semantic') as MemoryQueryKind,
-        confidence: parseFloat(p[3] ?? '0') || 0,
-        reason: p[4] ?? '',
-        latencyMs: parseInt(p[5] ?? '0', 10) || 0,
-        hitCount: parseInt(p[6] ?? '0', 10) || 0,
-        persona: p[7] ?? '',
-        actor: p[8] ?? '',
-        sessionId: p[9] ?? '',
-        createdAt: parseInt(p[10] ?? '0', 10) || 0,
-      };
-    });
+    db = new Database(getDB());
+    db.exec('PRAGMA busy_timeout = 5000');
+    const rows = db.query(
+      `SELECT id,query,classified_kind,confidence,reason,latency_ms,hit_count,persona,actor,session_id,created_at ` +
+      `FROM memory_routing_log ORDER BY created_at DESC LIMIT ?`
+    ).all(Math.max(1, Math.floor(limit))) as Record<string, unknown>[];
+    return rows.map(r => ({
+      id: String(r.id ?? ''),
+      query: String(r.query ?? ''),
+      kind: (String(r.classified_kind ?? 'semantic') as MemoryQueryKind),
+      confidence: Number(r.confidence ?? 0) || 0,
+      reason: String(r.reason ?? ''),
+      latencyMs: Number(r.latency_ms ?? 0) || 0,
+      hitCount: Number(r.hit_count ?? 0) || 0,
+      persona: String(r.persona ?? ''),
+      actor: String(r.actor ?? ''),
+      sessionId: String(r.session_id ?? ''),
+      createdAt: Number(r.created_at ?? 0) || 0,
+    }));
   } catch {
     return [];
+  } finally {
+    db?.close();
   }
 }
 
@@ -262,24 +277,25 @@ export function getRoutingDistribution(sinceSeconds = 7 * 24 * 3600): RoutingDis
     },
   };
   if (!ensureRoutingTable()) return empty;
+  let db: Database | null = null;
   try {
     const cutoff = Math.floor(Date.now() / 1000) - sinceSeconds;
-    const out = execSync(
-      `sqlite3 -separator '|' "${getDB()}" "SELECT classified_kind, COUNT(*), AVG(hit_count), AVG(confidence) FROM memory_routing_log WHERE created_at >= ${cutoff} GROUP BY classified_kind"`,
-      { encoding: 'utf-8', timeout: 5000 }
-    ).trim();
-    if (!out) return empty;
+    db = new Database(getDB());
+    db.exec('PRAGMA busy_timeout = 5000');
+    const rows = db.query(
+      `SELECT classified_kind, COUNT(*), AVG(hit_count), AVG(confidence) ` +
+      `FROM memory_routing_log WHERE created_at >= ? GROUP BY classified_kind`
+    ).all(cutoff) as { classified_kind: string; 'COUNT(*)': number; 'AVG(hit_count)': number; 'AVG(confidence)': number }[];
     let total = 0;
-    for (const line of out.split('\n')) {
-      const [kind, count, avgHits, avgConf] = line.split('|');
-      const k = kind as MemoryQueryKind;
+    for (const row of rows) {
+      const k = row.classified_kind as MemoryQueryKind;
       if (k in empty.byKind) {
-        const c = parseInt(count ?? '0', 10) || 0;
+        const c = Math.floor(row['COUNT(*)'] ?? 0) || 0;
         total += c;
         empty.byKind[k] = {
           count: c,
-          avgHits: parseFloat(avgHits ?? '0') || 0,
-          avgConfidence: parseFloat(avgConf ?? '0') || 0,
+          avgHits: Number(row['AVG(hit_count)'] ?? 0) || 0,
+          avgConfidence: Number(row['AVG(confidence)'] ?? 0) || 0,
         };
       }
     }
@@ -287,5 +303,7 @@ export function getRoutingDistribution(sinceSeconds = 7 * 24 * 3600): RoutingDis
     return empty;
   } catch {
     return empty;
+  } finally {
+    db?.close();
   }
 }

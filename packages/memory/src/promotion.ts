@@ -24,7 +24,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { getDatabase } from './database.js';
+import { getDatabase, atomicWriteGroup } from './database.js';
 import { requireActor, resolveScope, scopeSql, recordAudit } from './scope.js';
 import { forgetFact, notForgottenSql } from './facts.js';
 
@@ -74,11 +74,14 @@ function recordStage(
   contradictionOf?: string | null,
 ): void {
   const db = getDatabase();
-  db.run(
-    `INSERT INTO fact_promotions (id, fact_id, stage, decided_by, contradiction_of) VALUES (?, ?, ?, ?, ?)`,
-    [randomUUID(), factId, stage, actor, contradictionOf ?? null],
-  );
-  recordAudit({ actor, scope: stage, action: 'promotion_stage', factId });
+  // MEM-12: stage insert and its mandatory audit are one atomic write group.
+  atomicWriteGroup(() => {
+    db.run(
+      `INSERT INTO fact_promotions (id, fact_id, stage, decided_by, contradiction_of) VALUES (?, ?, ?, ?, ?)`,
+      [randomUUID(), factId, stage, actor, contradictionOf ?? null],
+    );
+    recordAudit({ actor, scope: stage, action: 'promotion_stage', factId });
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -312,6 +315,10 @@ export function listReviewQueue(options: { actor: string; limit?: number }): Rev
   ensureConflictTable();
   const db = getDatabase();
   const predicate = scopeSql(scope, 'f.persona');
+  // MEM-01: the contradicting side gets its own actor predicate. A
+  // contradiction whose other fact sits outside the actor's scope still
+  // appears (LEFT JOIN preserved) but its text is withheld, never leaked.
+  const contraPredicate = scopeSql(scope, 'cf.persona');
 
   return db.query(`
     SELECT f.id as factId, f.entity, f.key, f.value,
@@ -325,7 +332,7 @@ export function listReviewQueue(options: { actor: string; limit?: number }): Rev
                    WHERE fact_id = f.id AND resolution = 'flagged') as contested
     FROM facts f
     JOIN fact_promotions fp ON fp.fact_id = f.id
-    LEFT JOIN facts cf ON cf.id = fp.contradiction_of
+    LEFT JOIN facts cf ON cf.id = fp.contradiction_of AND ${contraPredicate.sql}
     WHERE fp.stage = 'review'
       AND fp.id = (SELECT id FROM fact_promotions
                     WHERE fact_id = f.id
@@ -334,7 +341,7 @@ export function listReviewQueue(options: { actor: string; limit?: number }): Rev
       AND ${predicate.sql}
     ORDER BY fp.decided_at ASC
     LIMIT ?
-  `).all(...predicate.params, options.limit ?? 50).map((r: any) => ({
+  `).all(...contraPredicate.params, ...predicate.params, options.limit ?? 50).map((r: any) => ({
     ...r,
     contested: Boolean(r.contested),
   })) as ReviewQueueItem[];
@@ -385,12 +392,15 @@ export function resolveReview(
     merge: 'merged',
     flag: 'flagged',
   };
-  db.run(
-    `UPDATE fact_conflicts SET resolution = ?, resolved_at = ?
-     WHERE fact_id = ? AND resolution = 'pending'`,
-    [resolutionFor[decision], nowSec, factId],
-  );
-  recordAudit({ actor, scope: decision, action: 'review_decision', factId });
+  // MEM-12: resolution update and its mandatory audit are one atomic write group.
+  atomicWriteGroup(() => {
+    db.run(
+      `UPDATE fact_conflicts SET resolution = ?, resolved_at = ?
+       WHERE fact_id = ? AND resolution = 'pending'`,
+      [resolutionFor[decision], nowSec, factId],
+    );
+    recordAudit({ actor, scope: decision, action: 'review_decision', factId });
+  });
 
   if (decision === 'flag') {
     // Contested: stays in review, visible to the operator queue.

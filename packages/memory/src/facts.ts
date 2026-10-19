@@ -3,7 +3,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { getDatabase } from './database.js';
+import { getDatabase, atomicWriteGroup } from './database.js';
 import { generateEmbedding, serializeEmbedding, deserializeEmbedding, generateHyDEExpansion, blendEmbeddings, resolveEmbeddingProvider, PRODUCTION_EMBEDDING_DIMENSION } from './embeddings.js';
 import { invalidateGraphCache } from './graph.js';
 import { rerankResults } from './reranker.js';
@@ -117,51 +117,57 @@ export async function storeFact(
     updatedAt: new Date().toISOString(),
   };
 
-  // Insert fact
-  db.run(
-    `INSERT INTO facts (id, persona, entity, key, value, text, category, decay_class, importance, source,
-                        created_at, expires_at, confidence, metadata)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      id,
-      persona,
-      input.entity,
-      input.key || null,
-      safeValue,
-      text,
-      input.category || 'fact',
-      decay,
-      input.importance || 1.0,
-      input.source || 'manual',
-      now,
-      expiresAt,
-      input.confidence || 1.0,
-      metadata ? JSON.stringify(metadata) : null,
-    ]
-  );
-
-  // Generate and store embedding if vector search is enabled
+  // Generate the embedding BEFORE the atomic write group: provider calls are
+  // soft-fail and must never run between the mutation and its mandatory audit.
+  let embeddingRow: { serialized: Buffer; model: string } | null = null;
   if (config.vectorEnabled) {
     try {
       const embedding = await generateEmbedding(text, config);
-      const serialized = serializeEmbedding(embedding);
       const { model } = resolveEmbeddingProvider(config);
-
-      db.run(
-        'INSERT INTO fact_embeddings (fact_id, embedding, model) VALUES (?, ?, ?)',
-        [id, serialized, model]
-      );
+      embeddingRow = { serialized: serializeEmbedding(embedding), model };
     } catch (error) {
       console.warn('Failed to generate embedding:', error);
     }
   }
 
-  // Every stored fact enters the promotion pipeline at the capture stage.
-  db.run(
-    `INSERT INTO fact_promotions (id, fact_id, stage, decided_by) VALUES (?, ?, 'capture', ?)`,
-    [randomUUID(), id, actor],
-  );
-  recordAudit({ actor, scope: persona, action: 'store', factId: id });
+  // MEM-12: fact insert, embedding insert, promotion entry, and mandatory
+  // audit are one atomic write group. An audit failure rolls everything back
+  // instead of leaving a durable unaudited fact.
+  atomicWriteGroup(() => {
+    db.run(
+      `INSERT INTO facts (id, persona, entity, key, value, text, category, decay_class, importance, source,
+                          created_at, expires_at, confidence, metadata)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        persona,
+        input.entity,
+        input.key || null,
+        safeValue,
+        text,
+        input.category || 'fact',
+        decay,
+        input.importance || 1.0,
+        input.source || 'manual',
+        now,
+        expiresAt,
+        input.confidence || 1.0,
+        metadata ? JSON.stringify(metadata) : null,
+      ]
+    );
+    if (embeddingRow) {
+      db.run(
+        'INSERT INTO fact_embeddings (fact_id, embedding, model) VALUES (?, ?, ?)',
+        [id, embeddingRow.serialized, embeddingRow.model]
+      );
+    }
+    // Every stored fact enters the promotion pipeline at the capture stage.
+    db.run(
+      `INSERT INTO fact_promotions (id, fact_id, stage, decided_by) VALUES (?, ?, 'capture', ?)`,
+      [randomUUID(), id, actor],
+    );
+    recordAudit({ actor, scope: persona, action: 'store', factId: id });
+  });
 
   invalidateGraphCache();
   return entry;
@@ -517,20 +523,25 @@ export function deleteFact(id: string, options: { actor: string }): boolean {
   const scope = resolveScope(options.actor, 'deleteFact');
   const predicate = scopeSql(scope);
   const db = getDatabase();
-  const result = db.run(
-    `DELETE FROM facts WHERE id = ? AND ${predicate.sql}`,
-    [id, ...predicate.params],
-  );
-  if (result.changes > 0) {
-    recordAudit({
-      actor: scope.actor,
-      scope: scope.personas.join(','),
-      action: 'delete',
-      factId: id,
-    });
-    invalidateGraphCache();
-  }
-  return result.changes > 0;
+  // MEM-12: delete and its mandatory audit are one atomic write group.
+  const deleted = atomicWriteGroup(() => {
+    const result = db.run(
+      `DELETE FROM facts WHERE id = ? AND ${predicate.sql}`,
+      [id, ...predicate.params],
+    );
+    if (result.changes > 0) {
+      recordAudit({
+        actor: scope.actor,
+        scope: scope.personas.join(','),
+        action: 'delete',
+        factId: id,
+      });
+      return true;
+    }
+    return false;
+  });
+  if (deleted) invalidateGraphCache();
+  return deleted;
 }
 
 /**
@@ -627,11 +638,14 @@ export function forgetFact(
     `SELECT id FROM facts WHERE id = ? AND ${NOT_FORGOTTEN_SQL} AND ${predicate.sql}`,
   ).get(id, ...predicate.params);
   if (!visible) return false;
-  db.run(
-    `INSERT INTO fact_forgotten (fact_id, forgotten_by, reason, retention_score) VALUES (?, ?, ?, ?)`,
-    [id, scope.actor, options.reason ?? null, options.retentionScore ?? null],
-  );
-  recordAudit({ actor: scope.actor, scope: scope.personas.join(','), action: 'forget', factId: id });
+  // MEM-12: forget marker and its mandatory audit are one atomic write group.
+  atomicWriteGroup(() => {
+    db.run(
+      `INSERT INTO fact_forgotten (fact_id, forgotten_by, reason, retention_score) VALUES (?, ?, ?, ?)`,
+      [id, scope.actor, options.reason ?? null, options.retentionScore ?? null],
+    );
+    recordAudit({ actor: scope.actor, scope: scope.personas.join(','), action: 'forget', factId: id });
+  });
   invalidateGraphCache();
   return true;
 }
@@ -644,18 +658,22 @@ export function restoreFact(id: string, options: { actor: string }): boolean {
   const scope = resolveScope(options.actor, 'restoreFact');
   const predicate = scopeSql(scope);
   const db = getDatabase();
-  const result = db.run(
-    `DELETE FROM fact_forgotten
-     WHERE fact_id = ?
-       AND fact_id IN (SELECT id FROM facts WHERE ${predicate.sql})`,
-    [id, ...predicate.params],
-  );
-  if (result.changes > 0) {
-    recordAudit({ actor: scope.actor, scope: scope.personas.join(','), action: 'restore', factId: id });
-    invalidateGraphCache();
-    return true;
-  }
-  return false;
+  // MEM-12: restore and its mandatory audit are one atomic write group.
+  const restored = atomicWriteGroup(() => {
+    const result = db.run(
+      `DELETE FROM fact_forgotten
+       WHERE fact_id = ?
+         AND fact_id IN (SELECT id FROM facts WHERE ${predicate.sql})`,
+      [id, ...predicate.params],
+    );
+    if (result.changes > 0) {
+      recordAudit({ actor: scope.actor, scope: scope.personas.join(','), action: 'restore', factId: id });
+      return true;
+    }
+    return false;
+  });
+  if (restored) invalidateGraphCache();
+  return restored;
 }
 
 /**
@@ -705,17 +723,22 @@ export function purgeForgottenFacts(options: {
   const predicate = scopeSql(scope);
   const db = getDatabase();
   const cutoff = Math.floor(Date.now() / 1000) - (options.retentionDays ?? DEFAULT_PURGE_RETENTION_DAYS) * 24 * 3600;
-  const result = db.run(
-    `DELETE FROM facts
-     WHERE id IN (SELECT fact_id FROM fact_forgotten WHERE forgotten_at < ?)
-       AND ${predicate.sql}`,
-    [cutoff, ...predicate.params],
-  );
-  if (result.changes > 0) {
-    recordAudit({ actor: scope.actor, scope: scope.personas.join(','), action: 'purge' });
-    invalidateGraphCache();
-  }
-  return result.changes;
+  // MEM-12: purge and its mandatory audit are one atomic write group.
+  const purged = atomicWriteGroup(() => {
+    const result = db.run(
+      `DELETE FROM facts
+       WHERE id IN (SELECT fact_id FROM fact_forgotten WHERE forgotten_at < ?)
+         AND ${predicate.sql}`,
+      [cutoff, ...predicate.params],
+    );
+    if (result.changes > 0) {
+      recordAudit({ actor: scope.actor, scope: scope.personas.join(','), action: 'purge' });
+      return result.changes as number;
+    }
+    return 0;
+  });
+  if (purged > 0) invalidateGraphCache();
+  return purged;
 }
 
 export interface DecaySweepResult {

@@ -18,6 +18,11 @@ import { logRoot } from '../host-roots.js';
 export interface RAGTelemetryRecord {
   ts: string;
   taskId?: string;
+  /**
+   * EXEC-05: retained for dashboard compatibility but no longer populated.
+   * Raw task text may carry secrets the memory defense layer never saw, so
+   * enrichment no longer emits it. Correlate via triggerKeywords instead.
+   */
   taskTextHead: string;
   triggered: boolean;
   triggerKeywords: string[];

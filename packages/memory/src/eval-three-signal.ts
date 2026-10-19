@@ -302,7 +302,7 @@ async function seedBank(config: MemoryConfig): Promise<SeededBank> {
   for (const g of GRAPH_GROUPS) {
     await storeFact({ actor: EVAL_ACTOR, entity: g.hub, key: 'fact', value: g.hubValue, importance: 0.6, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
     await storeFact({ actor: EVAL_ACTOR, entity: g.spoke, key: 'fact', value: g.spokeValue, importance: 0.9, category: 'fact', decay: 'stable', source: 'eval-fixture' }, config);
-    createEpisode({ summary: g.episode, outcome: 'resolved', entities: [g.hub, g.spoke] });
+    createEpisode({ actor: EVAL_ACTOR, summary: g.episode, outcome: 'resolved', entities: [g.hub, g.spoke] });
   }
   // Temporal: stale fact first with HIGHER importance.
   for (const g of UPDATE_GROUPS) {

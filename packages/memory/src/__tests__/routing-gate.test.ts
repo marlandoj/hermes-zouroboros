@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeEach, afterEach, beforeAll } from 'bun:test';
-import { execSync } from 'child_process';
-import { mkdtempSync, rmSync } from 'fs';
+import { describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } from 'bun:test';
+import { Database } from 'bun:sqlite';
+import { mkdtempSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import {
@@ -13,17 +13,28 @@ import {
 
 let tmpDir: string;
 let dbPath: string;
+let db: Database;
 
 beforeAll(() => {
   tmpDir = mkdtempSync(join(tmpdir(), 'zo-route-'));
   dbPath = join(tmpDir, 'shared-facts.db');
-  // Touch the file so existsSync passes; the gate will CREATE TABLE on first call.
-  execSync(`sqlite3 "${dbPath}" "CREATE TABLE IF NOT EXISTS _seed (id INTEGER);"`);
+  // Touch the DB so existsSync passes; the gate will CREATE TABLE on first call.
+  db = new Database(dbPath);
+  db.exec('CREATE TABLE IF NOT EXISTS _seed (id INTEGER);');
   process.env.ZOUROBOROS_MEMORY_DB = dbPath;
 });
 
+afterAll(() => {
+  db.close();
+  rmSync(tmpDir, { recursive: true, force: true });
+});
+
 beforeEach(() => {
-  execSync(`sqlite3 "${dbPath}" "DELETE FROM memory_routing_log;" 2>/dev/null || true`);
+  // The routing table is created lazily on first log; only clear it when present.
+  const exists = db.query(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='memory_routing_log'"
+  ).get();
+  if (exists) db.exec('DELETE FROM memory_routing_log;');
 });
 
 afterEach(() => {});
@@ -105,7 +116,7 @@ describe('logMemoryRoute + getRecentRoutingDecisions', () => {
 describe('auto-create regression (W3 lesson)', () => {
   test('routing log table is created lazily even if migration 016 never ran', () => {
     // Drop the table to simulate a DB that pre-dates migration 016.
-    execSync(`sqlite3 "${dbPath}" "DROP TABLE IF EXISTS memory_routing_log;"`);
+    db.exec('DROP TABLE IF EXISTS memory_routing_log;');
     _resetRoutingGateCache();
 
     // Logging must still succeed because routing-gate calls ensureRoutingTable.
@@ -117,11 +128,52 @@ describe('auto-create regression (W3 lesson)', () => {
     );
 
     // Verify the table now exists and contains the row.
-    const out = execSync(
-      `sqlite3 "${dbPath}" "SELECT COUNT(*) FROM memory_routing_log WHERE query='recovery test';"`,
-      { encoding: 'utf-8' }
-    ).trim();
-    expect(parseInt(out, 10)).toBe(1);
+    const row = db.query(
+      "SELECT COUNT(*) AS n FROM memory_routing_log WHERE query='recovery test'"
+    ).get() as { n: number };
+    expect(row.n).toBe(1);
+  });
+});
+
+describe('MEM-09: no shell interpretation in routing logs', () => {
+  test('query/actor/session metacharacters are stored as data, never executed', () => {
+    const sentinel = join(tmpDir, 'mem09-pwned');
+    const evilQuery = `x'; $(touch "${sentinel}") ; echo '`;
+    const evilActor = 'actor`touch "' + sentinel + '"`';
+    const evilSession = 'sess-$(touch "' + sentinel + '")';
+    const evilReason = `reason'; DROP TABLE memory_routing_log; --`;
+    logMemoryRoute(
+      evilQuery,
+      { kind: 'semantic', confidence: 0.5, reason: evilReason },
+      7,
+      0,
+      evilActor,
+      evilSession,
+    );
+
+    // The exact hostile strings round-trip verbatim.
+    const recent = getRecentRoutingDecisions(10);
+    const logged = recent.find(r => r.query === evilQuery);
+    expect(logged).toBeDefined();
+    expect(logged!.actor).toBe(evilActor);
+    expect(logged!.sessionId).toBe(evilSession);
+    expect(logged!.reason).toBe(evilReason);
+
+    // The shell never ran and the table still exists.
+    expect(existsSync(sentinel)).toBe(false);
+    const count = db.query('SELECT COUNT(*) AS n FROM memory_routing_log').get() as { n: number };
+    expect(count.n).toBeGreaterThan(0);
+  });
+
+  test('pipe characters survive the read path intact', () => {
+    // The old sqlite3-CLI read path split rows on '|', corrupting queries
+    // containing pipes. Bound-parameter reads return typed rows instead.
+    const q = 'deploy|rollback|status';
+    logMemoryRoute(q, { kind: 'semantic', confidence: 0.5, reason: 'pipes' }, 1, 0);
+    const recent = getRecentRoutingDecisions(10);
+    const found = recent.find(r => r.query === q);
+    expect(found).toBeDefined();
+    expect(found!.query).toBe(q);
   });
 });
 

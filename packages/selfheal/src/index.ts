@@ -82,7 +82,8 @@ async function storeEpisode(input: {
       vectorEnabled: false,
     });
     initialized = true;
-    createEpisode(input);
+    // MEM-10: selfheal records its own episodes under its own persona.
+    createEpisode({ actor: 'selfheal', ...input });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[selfheal] episode persistence failed: ${message}`);

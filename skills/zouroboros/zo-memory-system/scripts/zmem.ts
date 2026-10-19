@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { DEFAULT_CONFIG } from 'zouroboros-core';
 import {
-  closeDatabase, createEpisode, getDbStats, getEpisodeStats, initDatabase, searchEpisodes, searchFacts, storeFact,
+  closeDatabase, createEpisode, getDbStats, getEpisodeStats, initDatabase, resolveScope, searchEpisodes, searchFacts, storeFact,
 } from 'zouroboros-memory';
 import { paths, repoRoot, settings } from '../../../../integration/profile.ts';
 
@@ -24,8 +24,8 @@ const out = console.log.bind(console);
 const usage = `zmem — Zouroboros memory (portable profile store)
   store --actor A --entity E [--key K] --value V [--category C] [--decay D]
   search <query> --actor A [--limit N]
-  episode --summary S --outcome success|failure|resolved|ongoing [--entities a,b] [--duration-ms N]
-  episodes [--since 7d|ISO] [--until ISO] [--outcome O] [--limit N]
+  episode [--actor A] --summary S --outcome success|failure|resolved|ongoing [--entities a,b] [--duration-ms N]
+  episodes [--actor A] [--since 7d|ISO] [--until ISO] [--outcome O] [--limit N]
   stats
   where            print the database path in use`;
 
@@ -99,16 +99,23 @@ async function main(argv: string[]): Promise<number> {
       }
       case 'episode': {
         const outcome = choice<Outcome>(values.outcome, OUTCOME, 'outcome');
+        // MEM-10: episodes are actor-scoped. This operator CLI defaults to
+        // 'shared' explicitly (documented); pass --actor to scope otherwise.
+        const actor = values.actor ?? 'shared';
         if (!values.summary || !outcome) throw new Error('episode requires --summary and --outcome');
         const duration = values['duration-ms'] === undefined ? undefined : Number(values['duration-ms']);
         if (duration !== undefined && (!Number.isFinite(duration) || duration < 0)) throw new Error('--duration-ms must be a non-negative number');
         const entities = (values.entities ?? '').split(',').map((e) => e.trim()).filter(Boolean);
-        const episode = createEpisode({ summary: values.summary, outcome, entities, durationMs: duration });
+        const episode = createEpisode({ actor, summary: values.summary, outcome, entities, durationMs: duration });
         out(JSON.stringify({ id: episode.id, outcome: episode.outcome, entities }));
         return 0;
       }
       case 'episodes': {
-        const found = searchEpisodes({ since: timeArg(values.since), until: timeArg(values.until), outcome: choice<Outcome>(values.outcome, OUTCOME, 'outcome'), limit: limitOf(values.limit, 20) });
+        // MEM-10: with --actor, searches are scoped to the actor + shared.
+        // Without it this operator CLI keeps its historical see-everything
+        // behavior (the MCP surface is where fail-closed applies).
+        const scope = values.actor ? resolveScope(values.actor) : undefined;
+        const found = searchEpisodes({ since: timeArg(values.since), until: timeArg(values.until), outcome: choice<Outcome>(values.outcome, OUTCOME, 'outcome'), limit: limitOf(values.limit, 20) }, scope);
         out(JSON.stringify(found.map(({ id, summary, outcome, entities, createdAt }) => ({ id, summary, outcome, entities, createdAt }))));
         return 0;
       }

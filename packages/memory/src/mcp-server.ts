@@ -22,7 +22,7 @@ import { searchProcedures, getProcedure, getProcedureVersions, compareProcedureV
 import { applyDefense } from './defense.js';
 import { consolidateObservations, listObservations, getObservation, searchObservations } from './observations.js';
 import { defineMentalModel, readMentalModel, listMentalModels, refreshMentalModel, refreshDueMentalModels } from './mental-models.js';
-import { requireActor, resolveScope } from './scope.js';
+import { requireActor, resolveScope, type ScopePredicate } from './scope.js';
 import type { MemoryConfig } from 'zouroboros-core';
 
 // ============================================================================
@@ -95,11 +95,12 @@ const TOOLS: McpToolDefinition[] = [
   },
   {
     name: 'memory_episodes',
-    description: 'Search or create episodic memories',
+    description: 'Search or create episodic memories. Requires a caller identity (actor); episodes are stored under the actor\'s persona and searches are scoped to the actor plus the shared pool. Calls without an actor are rejected.',
     inputSchema: {
       type: 'object',
       properties: {
         action: { type: 'string', enum: ['search', 'create', 'entity'], description: 'Action to perform' },
+        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected.' },
         summary: { type: 'string', description: 'Episode summary (for create)' },
         outcome: { type: 'string', enum: ['success', 'failure', 'resolved', 'ongoing'] },
         entities: { type: 'array', items: { type: 'string' }, description: 'Related entities' },
@@ -107,7 +108,7 @@ const TOOLS: McpToolDefinition[] = [
         since: { type: 'string', description: 'ISO date filter (for search)' },
         limit: { type: 'number', description: 'Max results' },
       },
-      required: ['action'],
+      required: ['action', 'actor'],
     },
   },
   {
@@ -201,12 +202,13 @@ const TOOLS: McpToolDefinition[] = [
   },
   {
     name: 'memory_observations',
-    description: 'Work with observations — evidence-backed consolidated beliefs refined (not overwritten) as facts accumulate. Consolidate facts, list, show evidence, or search.',
+    description: 'Work with observations — evidence-backed consolidated beliefs refined (not overwritten) as facts accumulate. Consolidate facts, list, show evidence, or search. Requires a caller identity (actor); calls without one are rejected.',
     inputSchema: {
       type: 'object',
       properties: {
         action: { type: 'string', enum: ['consolidate', 'list', 'show', 'search'], description: 'Action to perform' },
-        persona: { type: 'string', description: 'Persona scope (default: all for consolidate; all for list)' },
+        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Visibility = own persona + shared pool.' },
+        persona: { type: 'string', description: 'Persona scope (default: the actor\'s scope). Must be within the actor\'s scope.' },
         min_proof: { type: 'number', description: 'Minimum corroborating facts required (default 2, consolidate only)' },
         use_llm: { type: 'boolean', description: 'Use LLM synthesis for belief text (default false = deterministic; consolidate only)' },
         status: { type: 'string', enum: ['active', 'contested', 'faded'], description: 'Filter by status (list only)' },
@@ -214,22 +216,23 @@ const TOOLS: McpToolDefinition[] = [
         query: { type: 'string', description: 'Search query (search only)' },
         limit: { type: 'number', description: 'Max results (default 50 list / 10 search)' },
       },
-      required: ['action'],
+      required: ['action', 'actor'],
     },
   },
   {
     name: 'memory_mental_models',
-    description: 'Standing answers to standing questions per persona. Reads are plain DB reads (zero tokens, no LLM); refreshes rewrite the answer in the background. Define, read, list, or refresh.',
+    description: 'Standing answers to standing questions per persona. Reads are plain DB reads (zero tokens, no LLM); refreshes rewrite the answer in the background. Define, read, list, or refresh. Requires a caller identity (actor); calls without one are rejected.',
     inputSchema: {
       type: 'object',
       properties: {
         action: { type: 'string', enum: ['define', 'read', 'list', 'refresh', 'refresh_due'], description: 'Action to perform' },
-        persona: { type: 'string', description: 'Persona scope (default shared)' },
+        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Visibility = own persona + shared pool.' },
+        persona: { type: 'string', description: 'Persona scope (default: the actor for define/read, the actor\'s scope for list). Must be within the actor\'s scope.' },
         question: { type: 'string', description: 'The standing question (define/read)' },
         refresh_interval_s: { type: 'number', description: 'Seconds between refreshes (define only, default 86400)' },
         id: { type: 'string', description: 'Mental model ID (refresh only; unique prefixes accepted)' },
       },
-      required: ['action'],
+      required: ['action', 'actor'],
     },
   },
 ];
@@ -237,6 +240,25 @@ const TOOLS: McpToolDefinition[] = [
 // ============================================================================
 // Tool Handlers
 // ============================================================================
+
+/**
+ * MEM-02: validate a caller-supplied persona against the actor's scope.
+ * Returns the persona to use, or undefined to mean "the whole actor scope".
+ * Throws when the caller asks for a persona outside their scope.
+ */
+function scopedPersona(
+  persona: unknown,
+  scope: ScopePredicate,
+  tool: string,
+): string | undefined {
+  if (persona === undefined || persona === null || persona === '') return undefined;
+  if (typeof persona !== 'string') throw new Error(`persona must be a string for ${tool}`);
+  const p = persona.trim();
+  if (!scope.personas.includes(p)) {
+    throw new Error(`persona '${p}' is outside the caller's scope for ${tool}`);
+  }
+  return p;
+}
 
 async function handleToolCall(
   name: string,
@@ -306,8 +328,11 @@ async function handleToolCall(
 
     case 'memory_episodes': {
       const action = args.action as string;
+      // MEM-10: episodes are actor-scoped end to end.
+      const scope = resolveScope(requireActor(args.actor, 'memory_episodes'), 'memory_episodes');
       if (action === 'create') {
         return createEpisode({
+          actor: scope.actor,
           summary: args.summary as string,
           outcome: (args.outcome as any) ?? 'ongoing',
           entities: (args.entities as string[]) ?? ['system'],
@@ -316,13 +341,14 @@ async function handleToolCall(
       if (action === 'entity') {
         return getEntityEpisodes(args.entity as string, {
           limit: args.limit as number | undefined,
+          scope,
         });
       }
       return searchEpisodes({
         since: args.since as string | undefined,
         outcome: args.outcome as string | undefined,
         limit: args.limit as number | undefined,
-      });
+      }, scope);
     }
 
     case 'cognitive_profile': {
@@ -416,30 +442,36 @@ async function handleToolCall(
 
     case 'memory_observations': {
       const action = args.action as string;
+      // MEM-02: actor scope end to end — no actor, no observations.
+      const scope = resolveScope(requireActor(args.actor, 'memory_observations'), 'memory_observations');
+      const persona = scopedPersona(args.persona, scope, 'memory_observations');
       if (action === 'consolidate') {
         return consolidateObservations({
-          persona: args.persona as string | undefined,
+          scope,
+          persona,
           minProof: args.min_proof as number | undefined,
           useLlm: (args.use_llm as boolean) ?? false,
         });
       }
       if (action === 'list') {
         return listObservations({
-          persona: args.persona as string | undefined,
+          scope,
+          persona,
           status: args.status as 'active' | 'contested' | 'faded' | undefined,
           limit: args.limit as number | undefined,
         });
       }
       if (action === 'show') {
         if (!args.id) throw new Error('id is required for show');
-        const full = getObservation(args.id as string);
+        const full = getObservation(args.id as string, scope);
         if (!full) throw new Error(`Observation not found: ${args.id}`);
         return full;
       }
       if (action === 'search') {
         if (!args.query) throw new Error('query is required for search');
         return searchObservations(args.query as string, {
-          persona: args.persona as string | undefined,
+          scope,
+          persona,
           limit: args.limit as number | undefined,
         });
       }
@@ -448,32 +480,36 @@ async function handleToolCall(
 
     case 'memory_mental_models': {
       const action = args.action as string;
+      // MEM-02: actor scope end to end — no actor, no mental models.
+      const scope = resolveScope(requireActor(args.actor, 'memory_mental_models'), 'memory_mental_models');
+      const persona = scopedPersona(args.persona, scope, 'memory_mental_models');
       if (action === 'define') {
         if (!args.question) throw new Error('question is required for define');
         return defineMentalModel({
-          persona: args.persona as string | undefined,
+          // Never silently 'shared': an omitted persona defines under the actor.
+          persona: persona ?? scope.actor,
           question: args.question as string,
           refreshIntervalS: args.refresh_interval_s as number | undefined,
         });
       }
       if (action === 'read') {
         if (!args.question) throw new Error('question is required for read');
-        const model = readMentalModel((args.persona as string) ?? 'shared', args.question as string);
+        const model = readMentalModel(persona ?? scope.actor, args.question as string);
         if (!model) return { defined: false, question: args.question };
         return model;
       }
       if (action === 'list') {
-        return listMentalModels({ persona: args.persona as string | undefined });
+        return listMentalModels({ scope, persona });
       }
       if (action === 'refresh') {
         if (!args.id) throw new Error('id is required for refresh');
-        const all = listMentalModels();
+        const all = listMentalModels({ scope });
         const target = all.find(m => m.id === args.id) ?? all.find(m => m.id.startsWith(args.id as string));
         if (!target) throw new Error(`Mental model not found: ${args.id}`);
-        return refreshMentalModel(target.id);
+        return refreshMentalModel(target.id, scope);
       }
       if (action === 'refresh_due') {
-        return refreshDueMentalModels();
+        return refreshDueMentalModels(scope);
       }
       throw new Error(`Unknown memory_mental_models action: ${action}`);
     }

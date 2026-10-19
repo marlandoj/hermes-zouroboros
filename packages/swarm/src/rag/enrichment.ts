@@ -285,12 +285,13 @@ export async function enrichTaskWithRAG(
   const startTime = Date.now();
   const triggered = shouldEnrichWithRAG(taskText);
   const triggerKeywords = matchedKeywords(taskText, RAG_TRIGGER_KEYWORDS);
-  const taskTextHead = taskText.slice(0, 120);
+  // EXEC-05: raw task text is never emitted to telemetry — it may carry
+  // secrets the memory defense layer never saw. The record keeps
+  // triggerKeywords for correlation instead of a text head.
   const collections = resolveCollections(options);
 
   if (!triggered) {
     void emitRAGTelemetry({
-      taskTextHead,
       triggered: false,
       triggerKeywords,
       collectionsQueried: collections,
@@ -321,7 +322,6 @@ export async function enrichTaskWithRAG(
       : undefined;
 
     void emitRAGTelemetry({
-      taskTextHead,
       triggered: true,
       triggerKeywords,
       collectionsQueried: collections,
@@ -346,7 +346,6 @@ export async function enrichTaskWithRAG(
   } catch (error) {
     const totalLatencyMs = Date.now() - startTime;
     void emitRAGTelemetry({
-      taskTextHead,
       triggered: true,
       triggerKeywords,
       collectionsQueried: collections,

@@ -281,7 +281,7 @@ function buildSummary(group: ObservationRow[]): string {
  */
 export function promoteObservations(
   config: MemoryConfig,
-  opts: { graceMs?: number; now?: number } = {}
+  opts: { graceMs?: number; now?: number; actor?: string } = {}
 ): PromotionResult {
   ensureMigrations(config);
   initDatabase(config);
@@ -322,6 +322,9 @@ export function promoteObservations(
     const sessionId = first.session_id ?? null;
 
     createEpisode({
+      // MEM-10: the promotion sweep is operator-run; the caller declares the
+      // episode owner (CLI defaults to 'shared' explicitly — see cli usage).
+      actor: opts.actor ?? 'shared',
       summary: buildSummary(group),
       outcome: 'ongoing',
       entities: [],

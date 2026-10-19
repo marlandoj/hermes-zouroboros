@@ -29,6 +29,8 @@ import { randomUUID } from 'crypto';
 import { getDatabase } from './database.js';
 import { llmCall } from './llm.js';
 import { reconcileLegacyHookObservations } from './event-observations.js';
+import { notForgottenSql } from './facts.js';
+import { scopeSql, type ScopePredicate } from './scope.js';
 
 export type ObservationStatus = 'active' | 'contested' | 'faded';
 
@@ -181,7 +183,7 @@ async function synthesizeBelief(entity: string, key: string | null, facts: FactR
  * unchanged beliefs only gain evidence rows and proof count.
  */
 export async function consolidateObservations(
-  options: { persona?: string; minProof?: number; useLlm?: boolean } = {},
+  options: { persona?: string; scope?: ScopePredicate; minProof?: number; useLlm?: boolean } = {},
 ): Promise<ConsolidateResult> {
   ensureObservationSchema();
   const db = getDatabase();
@@ -192,16 +194,26 @@ export async function consolidateObservations(
     SELECT id, persona, entity, key, value, importance, created_at, rowid
     FROM facts
     WHERE (expires_at IS NULL OR expires_at > CAST(strftime('%s','now') AS INTEGER))
+      AND ${notForgottenSql('id')}
   `;
   const params: string[] = [];
+  // MEM-02: consolidation only ever sees facts inside the actor's scope.
+  // An explicit persona narrows within the scope (validated by the caller).
+  if (options.scope) {
+    const s = scopeSql(options.scope);
+    sql += ` AND ${s.sql}`;
+    params.push(...s.params);
+  }
   if (options.persona) { sql += ' AND persona = ?'; params.push(options.persona); }
 
   const facts = db.query(sql).all(...params) as FactRow[];
 
-  // Group by (persona, entity, key)
+  // Group by (persona, entity, key). MEM-13: the tuple is JSON-encoded so
+  // field-boundary collisions are impossible — naive concatenation would merge
+  // e.g. persona "ab"+entity "cd" with persona "a"+entity "bcd".
   const groups = new Map<string, FactRow[]>();
   for (const f of facts) {
-    const gk = `${f.persona}${f.entity}${f.key ?? ''}`;
+    const gk = JSON.stringify([f.persona, f.entity, f.key ?? '']);
     const g = groups.get(gk);
     if (g) g.push(f); else groups.set(gk, [f]);
   }
@@ -209,9 +221,13 @@ export async function consolidateObservations(
   const now = Math.floor(Date.now() / 1000);
   const hasConflicts = tableExists('fact_conflicts');
 
+  // JSON keys of every (persona, entity, key) tuple that still has live facts.
+  const liveKeys = new Set<string>();
+
   for (const group of groups.values()) {
     const { persona, entity } = group[0];
     const key = group[0].key ?? '';
+    liveKeys.add(JSON.stringify([persona, entity, key]));
 
     const existing = db.query(
       'SELECT * FROM observations WHERE persona = ? AND entity = ? AND key = ?',
@@ -277,16 +293,48 @@ export async function consolidateObservations(
     }
   }
 
+  // MEM-03: observations whose supporting facts ALL vanished (forgotten or
+  // expired) leave no group behind, so the loop above never visits them. Fade
+  // them here — a derived belief must not outlive its evidence. Scoped to the
+  // run's filter so a persona-filtered consolidation never fades outside it.
+  {
+    let fadeSql = `SELECT id, persona, entity, key FROM observations WHERE status != 'faded'`;
+    const fadeParams: string[] = [];
+    if (options.scope) {
+      const s = scopeSql(options.scope);
+      fadeSql += ` AND ${s.sql}`;
+      fadeParams.push(...s.params);
+    }
+    if (options.persona) { fadeSql += ' AND persona = ?'; fadeParams.push(options.persona); }
+    const orphans = db.query(fadeSql).all(...fadeParams) as Array<{
+      id: string; persona: string; entity: string; key: string | null;
+    }>;
+    const fadeOne = db.prepare(`UPDATE observations SET status = 'faded', updated_at = ? WHERE id = ?`);
+    for (const o of orphans) {
+      if (!liveKeys.has(JSON.stringify([o.persona, o.entity, o.key ?? '']))) {
+        fadeOne.run(now, o.id);
+        result.faded++;
+      }
+    }
+  }
+
   return result;
 }
 
 export function listObservations(
-  options: { persona?: string; status?: ObservationStatus; limit?: number } = {},
+  options: { persona?: string; scope?: ScopePredicate; status?: ObservationStatus; limit?: number } = {},
 ): Observation[] {
   ensureObservationSchema();
   const db = getDatabase();
   let sql = 'SELECT * FROM observations WHERE 1=1';
   const params: (string | number)[] = [];
+  // MEM-02: when an actor scope is present it is the visibility boundary;
+  // an explicit persona only narrows within it (validated by the caller).
+  if (options.scope) {
+    const s = scopeSql(options.scope);
+    sql += ` AND ${s.sql}`;
+    params.push(...s.params);
+  }
   if (options.persona) { sql += ' AND persona = ?'; params.push(options.persona); }
   if (options.status) { sql += ' AND status = ?'; params.push(options.status); }
   sql += ' ORDER BY proof_count DESC, updated_at DESC LIMIT ?';
@@ -294,13 +342,22 @@ export function listObservations(
   return (db.query(sql).all(...params) as ObservationRow[]).map(rowToObservation);
 }
 
-export function getObservation(id: string): { observation: Observation; evidence: ObservationEvidence[] } | null {
+export function getObservation(
+  id: string,
+  scope?: ScopePredicate,
+): { observation: Observation; evidence: ObservationEvidence[] } | null {
   ensureObservationSchema();
   const db = getDatabase();
   const row = db.query('SELECT * FROM observations WHERE id = ?').get(id) as ObservationRow | null;
   if (!row) return null;
+  // MEM-02: observations outside the actor's scope do not exist for the caller.
+  if (scope && !scope.personas.includes(row.persona)) return null;
+  // MEM-03: evidence quotes from forgotten facts are withheld — showing them
+  // would resurface forgotten content through the derived artifact.
   const evidence = db.query(
-    'SELECT observation_id, fact_id, quote, created_at FROM observation_evidence WHERE observation_id = ? ORDER BY created_at DESC',
+    `SELECT observation_id, fact_id, quote, created_at FROM observation_evidence
+     WHERE observation_id = ? AND ${notForgottenSql('fact_id')}
+     ORDER BY created_at DESC`,
   ).all(id) as Array<{ observation_id: string; fact_id: string; quote: string; created_at: number }>;
   return {
     observation: rowToObservation(row),
@@ -310,13 +367,22 @@ export function getObservation(id: string): { observation: Observation; evidence
 
 export function searchObservations(
   query: string,
-  options: { persona?: string; limit?: number } = {},
+  options: { persona?: string; scope?: ScopePredicate; limit?: number } = {},
 ): Observation[] {
   ensureObservationSchema();
   const db = getDatabase();
   let sql = `SELECT * FROM observations WHERE (text LIKE ? OR entity LIKE ?) AND status != 'faded'`;
   const params: (string | number)[] = [`%${query}%`, `%${query}%`];
-  if (options.persona) { sql += ' AND (persona = ? OR persona = ?)'; params.push(options.persona, 'shared'); }
+  // MEM-02: actor scope is the visibility boundary, not an optional filter.
+  if (options.scope) {
+    const s = scopeSql(options.scope);
+    sql += ` AND ${s.sql}`;
+    params.push(...s.params);
+  } else if (options.persona) {
+    sql += ' AND (persona = ? OR persona = ?)';
+    params.push(options.persona, 'shared');
+  }
+  if (options.persona && options.scope) { sql += ' AND persona = ?'; params.push(options.persona); }
   sql += ' ORDER BY proof_count DESC, updated_at DESC LIMIT ?';
   params.push(options.limit ?? 10);
   return (db.query(sql).all(...params) as ObservationRow[]).map(rowToObservation);
