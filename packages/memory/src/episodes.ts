@@ -5,11 +5,14 @@
 import { randomUUID } from 'crypto';
 import { getDatabase } from './database.js';
 import { invalidateGraphCache } from './graph.js';
+import { requireActor, scopeSql, type ScopePredicate } from './scope.js';
 import type { EpisodicMemory, TemporalQuery } from 'zouroboros-core';
 
 type Outcome = 'success' | 'failure' | 'resolved' | 'ongoing';
 
 interface CreateEpisodeInput {
+  /** Required caller identity (fail-closed; MEM-10). The episode is stored under this persona. */
+  actor: string;
   summary: string;
   outcome: Outcome;
   entities: string[];
@@ -50,9 +53,11 @@ function syncEpisodeDocument(
 }
 
 /**
- * Create a new episode
+ * Create a new episode. MEM-10: the episode is stored under the actor's
+ * persona — episodes are actor-scoped, not global.
  */
 export function createEpisode(input: CreateEpisodeInput): EpisodicMemory {
+  const actor = requireActor(input.actor, 'createEpisode');
   const db = getDatabase();
   const id = randomUUID();
   const happenedAt = input.happenedAt || new Date();
@@ -63,10 +68,11 @@ export function createEpisode(input: CreateEpisodeInput): EpisodicMemory {
     : input.metadata;
 
   db.run(
-    `INSERT INTO episodes (id, summary, outcome, happened_at, duration_ms, procedure_id, metadata)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO episodes (id, persona, summary, outcome, happened_at, duration_ms, procedure_id, metadata)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
+      actor,
       input.summary,
       input.outcome,
       Math.floor(happenedAt.getTime() / 1000),
@@ -102,9 +108,10 @@ export function createEpisode(input: CreateEpisodeInput): EpisodicMemory {
 }
 
 /**
- * Search episodes with temporal filters
+ * Search episodes with temporal filters.
+ * MEM-10: with a scope, only episodes inside the actor's scope are returned.
  */
-export function searchEpisodes(query: TemporalQuery): EpisodicMemory[] {
+export function searchEpisodes(query: TemporalQuery, scope?: ScopePredicate): EpisodicMemory[] {
   const db = getDatabase();
   const nowSec = Math.floor(Date.now() / 1000);
 
@@ -118,6 +125,12 @@ export function searchEpisodes(query: TemporalQuery): EpisodicMemory[] {
     WHERE 1=1
   `;
   const params: (string | number)[] = [];
+
+  if (scope) {
+    const s = scopeSql(scope, 'e.persona');
+    sql += ` AND ${s.sql}`;
+    params.push(...s.params);
+  }
 
   if (query.since) {
     sql += ' AND e.happened_at >= ?';
@@ -180,14 +193,15 @@ export function searchEpisodes(query: TemporalQuery): EpisodicMemory[] {
 }
 
 /**
- * Get episodes for a specific entity
+ * Get episodes for a specific entity.
+ * MEM-10: with a scope, only episodes inside the actor's scope are returned.
  */
 export function getEntityEpisodes(
   entity: string,
-  options: { limit?: number; outcome?: Outcome } = {}
+  options: { limit?: number; outcome?: Outcome; scope?: ScopePredicate } = {}
 ): EpisodicMemory[] {
   const db = getDatabase();
-  const { limit = 10, outcome } = options;
+  const { limit = 10, outcome, scope } = options;
 
   const nowSec = Math.floor(Date.now() / 1000);
 
@@ -202,6 +216,12 @@ export function getEntityEpisodes(
     WHERE ee.entity = ?
   `;
   const params: (string | number)[] = [entity];
+
+  if (scope) {
+    const s = scopeSql(scope, 'e.persona');
+    sql += ` AND ${s.sql}`;
+    params.push(...s.params);
+  }
 
   if (outcome) {
     sql += ' AND e.outcome = ?';

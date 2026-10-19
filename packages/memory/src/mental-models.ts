@@ -31,6 +31,8 @@
 import { randomUUID } from 'crypto';
 import { getDatabase } from './database.js';
 import { llmCall } from './llm.js';
+import { notForgottenSql } from './facts.js';
+import { scopeSql, type ScopePredicate } from './scope.js';
 
 export interface MentalModel {
   id: string;
@@ -119,12 +121,21 @@ export function readMentalModel(persona: string, question: string): MentalModel 
   return row ? rowToMentalModel(row) : null;
 }
 
-export function listMentalModels(options: { persona?: string } = {}): MentalModel[] {
+export function listMentalModels(
+  options: { persona?: string; scope?: ScopePredicate } = {},
+): MentalModel[] {
   ensureMentalModelSchema();
   const db = getDatabase();
-  let sql = 'SELECT * FROM mental_models';
+  let sql = 'SELECT * FROM mental_models WHERE 1=1';
   const params: string[] = [];
-  if (options.persona) { sql += ' WHERE persona = ?'; params.push(options.persona); }
+  // MEM-02: actor scope is the visibility boundary; an explicit persona only
+  // narrows within it (validated by the caller).
+  if (options.scope) {
+    const s = scopeSql(options.scope);
+    sql += ` AND ${s.sql}`;
+    params.push(...s.params);
+  }
+  if (options.persona) { sql += ' AND persona = ?'; params.push(options.persona); }
   sql += ' ORDER BY refreshed_at DESC, created_at DESC';
   return (db.query(sql).all(...params) as MentalModelRow[]).map(rowToMentalModel);
 }
@@ -137,10 +148,13 @@ interface EvidenceRow { value: string; importance: number; created_at: number }
 
 function gatherEvidence(persona: string, limit = 40): EvidenceRow[] {
   const db = getDatabase();
+  // MEM-03: forgotten facts are not evidence — a refresh must not resurrect
+  // forgotten content into a standing answer.
   return db.query(`
     SELECT value, importance, created_at FROM facts
     WHERE (persona = ? OR persona = 'shared')
       AND (expires_at IS NULL OR expires_at > CAST(strftime('%s','now') AS INTEGER))
+      AND ${notForgottenSql('id')}
     ORDER BY importance DESC, created_at DESC
     LIMIT ?
   `).all(persona, limit) as EvidenceRow[];
@@ -151,11 +165,16 @@ function gatherEvidence(persona: string, limit = 40): EvidenceRow[] {
  * use an LLM; the read path never does. Falls back to a deterministic
  * evidence digest when the model call is unavailable.
  */
-export async function refreshMentalModel(id: string): Promise<MentalModel> {
+export async function refreshMentalModel(id: string, scope?: ScopePredicate): Promise<MentalModel> {
   ensureMentalModelSchema();
   const db = getDatabase();
   const row = db.query('SELECT * FROM mental_models WHERE id = ?').get(id) as MentalModelRow | null;
   if (!row) throw new Error(`Mental model not found: ${id}`);
+  // MEM-02: refreshing a model outside the actor's scope is not allowed —
+  // the refresh reads that persona's facts as evidence.
+  if (scope && !scope.personas.includes(row.persona)) {
+    throw new Error(`Mental model ${id} is outside the caller's scope`);
+  }
 
   const evidence = gatherEvidence(row.persona);
   const now = Math.floor(Date.now() / 1000);
@@ -190,15 +209,27 @@ export async function refreshMentalModel(id: string): Promise<MentalModel> {
   return rowToMentalModel(db.query('SELECT * FROM mental_models WHERE id = ?').get(id) as MentalModelRow);
 }
 
-/** Refresh every mental model whose refresh interval has elapsed. For cron. */
-export async function refreshDueMentalModels(): Promise<{ refreshed: number; skipped: number }> {
+/**
+ * Refresh every mental model whose refresh interval has elapsed. For cron.
+ * MEM-02: with a scope, only models inside the actor's scope are refreshed.
+ */
+export async function refreshDueMentalModels(
+  scope?: ScopePredicate,
+): Promise<{ refreshed: number; skipped: number }> {
   ensureMentalModelSchema();
   const db = getDatabase();
-  const rows = db.query(`
+  let sql = `
     SELECT * FROM mental_models
-    WHERE refreshed_at IS NULL
-       OR refreshed_at + refresh_interval_s <= CAST(strftime('%s','now') AS INTEGER)
-  `).all() as MentalModelRow[];
+    WHERE (refreshed_at IS NULL
+       OR refreshed_at + refresh_interval_s <= CAST(strftime('%s','now') AS INTEGER))
+  `;
+  const params: string[] = [];
+  if (scope) {
+    const s = scopeSql(scope);
+    sql += ` AND ${s.sql}`;
+    params.push(...s.params);
+  }
+  const rows = db.query(sql).all(...params) as MentalModelRow[];
   let refreshed = 0;
   for (const r of rows) {
     await refreshMentalModel(r.id);

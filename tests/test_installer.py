@@ -98,7 +98,11 @@ class Fixture:
     def run(self,*extra,build=False):
         argv=[sys.executable,str(INSTALLER),'--hermes-home',str(self.home),'--data-home',str(self.data),'--workspace',str(self.work)]
         if not build:argv.append('--skip-build')
-        return subprocess.run([*argv,*extra],env=self.env,capture_output=True,text=True,timeout=45)
+        # Per-invocation subprocess timeout (seconds). The 45 s default keeps CI
+        # fast; slower machines can raise it via HERMES_ZOUROBOROS_TEST_TIMEOUT
+        # (issue #15) without patching the suite.
+        timeout=int(os.environ.get('HERMES_ZOUROBOROS_TEST_TIMEOUT','45'))
+        return subprocess.run([*argv,*extra],env=self.env,capture_output=True,text=True,timeout=timeout)
 
     def limited_tools(self,npm_fail=False,pnpm_version=None):
         for name in ['python3','bash','bun','node','timeout']:

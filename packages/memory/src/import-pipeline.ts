@@ -10,9 +10,15 @@
  *   markdown — Generic markdown files
  *
  * Usage:
- *   bun import.ts --source chatgpt --path ~/export.json
- *   bun import.ts --source obsidian --path ~/Vault --dry-run
- *   bun import.ts --source markdown --path ~/notes/file.md
+ *   bun import.ts --source chatgpt --path ~/export.json --actor <persona>
+ *   bun import.ts --source obsidian --path ~/Vault --actor <persona> --dry-run
+ *   bun import.ts --source markdown --path ~/notes/file.md --actor <persona>
+ *
+ * MEM-04 — operator-only import path (deliberate): this script is run
+ * directly by the operator on their own machine, importing their own data.
+ * That invocation IS the consent. It is not exposed over MCP. Imported facts
+ * are stored under the --actor persona (fail-closed: no actor, no import) —
+ * never silently 'shared', so imported data is not visible to every actor.
  */
 
 import { Database } from "bun:sqlite";
@@ -66,7 +72,10 @@ async function getEmbedding(text: string): Promise<number[] | null> {
 }
 
 // --- Store fact ---
-async function storeFact(db: Database, fact: ImportedFact): Promise<boolean> {
+// MEM-04: imported facts are stored under the operator-supplied actor persona,
+// never silently 'shared'. The promotion entry mirrors storeFact so imports
+// participate in the normal lifecycle.
+async function storeFact(db: Database, actor: string, fact: ImportedFact): Promise<boolean> {
   try {
     const id = randomUUID();
     const now = Date.now();
@@ -76,8 +85,13 @@ async function storeFact(db: Database, fact: ImportedFact): Promise<boolean> {
     db.prepare(`
       INSERT INTO facts (id, persona, entity, key, value, text, category, decay_class,
                          importance, source, created_at, expires_at, last_accessed, confidence)
-      VALUES (?, 'shared', ?, ?, ?, ?, ?, 'stable', 1.0, ?, ?, ?, ?, 1.0)
-    `).run(id, fact.entity, fact.key, fact.value, fact.text, fact.category, fact.source, now, expiresAt, nowSec);
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'stable', 1.0, ?, ?, ?, ?, 1.0)
+    `).run(id, actor, fact.entity, fact.key, fact.value, fact.text, fact.category, fact.source, now, expiresAt, nowSec);
+
+    // Every stored fact enters the promotion pipeline at the capture stage.
+    db.prepare(
+      `INSERT INTO fact_promotions (id, fact_id, stage, decided_by) VALUES (?, ?, 'capture', ?)`
+    ).run(randomUUID(), id, actor);
 
     // Generate embedding
     const embedding = await getEmbedding(fact.text);
@@ -93,10 +107,10 @@ async function storeFact(db: Database, fact: ImportedFact): Promise<boolean> {
 }
 
 // --- Check for duplicate ---
-function isDuplicate(db: Database, entity: string, key: string | null, value: string): boolean {
+function isDuplicate(db: Database, actor: string, entity: string, key: string | null, value: string): boolean {
   const row = key
-    ? db.prepare("SELECT id FROM facts WHERE entity = ? AND key = ? AND value = ?").get(entity, key, value)
-    : db.prepare("SELECT id FROM facts WHERE entity = ? AND value = ?").get(entity, value);
+    ? db.prepare("SELECT id FROM facts WHERE persona = ? AND entity = ? AND key = ? AND value = ?").get(actor, entity, key, value)
+    : db.prepare("SELECT id FROM facts WHERE persona = ? AND entity = ? AND value = ?").get(actor, entity, value);
   return !!row;
 }
 
@@ -290,9 +304,16 @@ async function main() {
   const source = flags.source;
   const path = flags.path;
   const dryRun = boolFlags.has("dry-run");
+  // MEM-04: fail-closed actor requirement — no actor, no import.
+  const actor = (flags.actor || "").trim();
 
   if (!source || !path) {
-    console.error("Usage: bun import.ts --source <chatgpt|obsidian|markdown> --path <file|dir> [--dry-run]");
+    console.error("Usage: bun import.ts --source <chatgpt|obsidian|markdown> --path <file|dir> --actor <persona> [--dry-run]");
+    process.exit(1);
+  }
+
+  if (!actor) {
+    console.error("error: --actor is required (fail-closed; imported facts are stored under the actor's persona, never silently 'shared')");
     process.exit(1);
   }
 
@@ -301,7 +322,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`Importing from ${source}: ${path}${dryRun ? " (dry run)" : ""}\n`);
+  console.log(`Importing from ${source}: ${path}${dryRun ? " (dry run)" : ""} as actor '${actor}'\n`);
 
   // Parse source
   let facts: ImportedFact[];
@@ -354,13 +375,13 @@ async function main() {
   db.exec("PRAGMA journal_mode = WAL");
 
   for (const fact of facts) {
-    // Check for duplicates
-    if (isDuplicate(db, fact.entity, fact.key, fact.value)) {
+    // Check for duplicates (within the actor's persona)
+    if (isDuplicate(db, actor, fact.entity, fact.key, fact.value)) {
       result.factsSkipped++;
       continue;
     }
 
-    const stored = await storeFact(db, fact);
+    const stored = await storeFact(db, actor, fact);
     if (stored) {
       result.factsStored++;
       process.stdout.write(`  Stored: ${fact.entity}.${fact.key || "_"} (${result.factsStored}/${result.factsFound})\r`);

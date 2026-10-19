@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { initDatabase, closeDatabase, runMigrations } from '../database.js';
+import { initDatabase, closeDatabase, runMigrations, getDatabase } from '../database.js';
 import {
   storeFact,
   searchFacts,
@@ -256,5 +256,37 @@ describe('reversible forgetting (decay)', () => {
     expect(getFact(keep.id, { actor: 'researcher' })).not.toBeNull();
     // The forgotten fact is reversibly recoverable.
     expect(restoreFact(stale.id, { actor: 'researcher' })).toBe(true);
+  });
+});
+
+describe('MEM-12: mutation and mandatory audit are atomic', () => {
+  test('audit failure rolls back the fact insert', async () => {
+    const db = getDatabase();
+    db.exec('DROP TABLE memory_audit'); // break the audit substrate
+    await expect(
+      storeFact({ actor: 'mem12', entity: 'e', value: 'v' }, TEST_CONFIG)
+    ).rejects.toThrow();
+    // No durable unaudited fact may remain.
+    const rows = db.query(`SELECT id FROM facts WHERE entity = 'e'`).all();
+    expect(rows.length).toBe(0);
+  });
+
+  test('audit failure rolls back forget', async () => {
+    const entry = await storeFact({ actor: 'mem12', entity: 'e2', value: 'v2' }, TEST_CONFIG);
+    const db = getDatabase();
+    db.exec('DROP TABLE memory_audit');
+    expect(() => forgetFact(entry.id, { actor: 'mem12' })).toThrow();
+    const rows = db.query(`SELECT fact_id FROM fact_forgotten WHERE fact_id = ?`).all(entry.id);
+    expect(rows.length).toBe(0);
+  });
+
+  test('audit failure rolls back delete', async () => {
+    const entry = await storeFact({ actor: 'mem12', entity: 'e3', value: 'v3' }, TEST_CONFIG);
+    const db = getDatabase();
+    db.exec('DROP TABLE memory_audit');
+    expect(() => deleteFact(entry.id, { actor: 'mem12' })).toThrow();
+    // The fact survives because the whole write group rolled back.
+    const rows = db.query(`SELECT id FROM facts WHERE id = ?`).all(entry.id);
+    expect(rows.length).toBe(1);
   });
 });

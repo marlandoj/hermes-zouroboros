@@ -176,13 +176,27 @@ function proposalKey(actor: string, action: ProposedAction): string {
     .digest('hex');
 }
 
+/** One terminally-denied proposal, for operator visibility (EXEC-02). */
+export interface TerminalDenial {
+  proposalKey: string;
+  actor: string;
+  tool: string;
+  kind: string;
+  target: string | null;
+  reason: string;
+  decidedBy: string;
+  decidedAt: string;
+}
+
 /**
  * The decision gate: proposals in, records + verdicts out.
  *
  * One gate instance scopes one authority context (a session's tool calls, or
- * a transport's dispatches). Budgets and terminal denials are tracked per
- * instance AND persisted, so an in-process retry and a replayed proposal both
- * stay denied.
+ * a transport's dispatches). Budgets are tracked per instance; terminal
+ * denials are tracked per instance AND rebuilt from the record store on
+ * construction (EXEC-02), so an in-process retry and a replayed proposal in a
+ * later session both stay denied. Denial records are always durable full
+ * records, and listTerminalDenials() exposes the terminal set to operators.
  */
 export class DecisionGate {
   private readonly policy: TierPolicy;
@@ -200,6 +214,41 @@ export class DecisionGate {
     }
     this.policy = options.policy ?? DEFAULT_TIER_POLICY;
     this.granularity = options.granularity ?? 'fine';
+    // EXEC-02: terminal denials survive the session. Rebuild the denial set
+    // from durable denial records — a replayed proposal in a later session
+    // hits the terminal path instead of being re-evaluated. A store that
+    // cannot list its records fails construction (fail closed: the gate
+    // cannot establish what is terminally denied).
+    for (const record of options.store.records()) {
+      if (record.outcome === 'denied') {
+        this.deniedProposals.add(proposalKey(record.actor, record.proposed_action));
+      }
+    }
+  }
+
+  /**
+   * EXEC-02: operator visibility into terminal denials. One entry per
+   * terminally-denied proposal, carrying the latest denial record's
+   * who/what/why/when.
+   */
+  listTerminalDenials(): TerminalDenial[] {
+    const latest = new Map<string, DecisionRecord>();
+    for (const record of this.options.store.records()) {
+      if (record.outcome !== 'denied') continue;
+      const key = proposalKey(record.actor, record.proposed_action);
+      const prev = latest.get(key);
+      if (!prev || record.decided_at > prev.decided_at) latest.set(key, record);
+    }
+    return [...latest.entries()].map(([key, record]) => ({
+      proposalKey: key,
+      actor: record.actor,
+      tool: record.proposed_action.tool,
+      kind: record.proposed_action.kind,
+      target: record.proposed_action.target ?? null,
+      reason: record.reason,
+      decidedBy: record.decided_by,
+      decidedAt: record.decided_at,
+    }));
   }
 
   /** Stamp a live ACP session id onto subsequent records. */
@@ -281,25 +330,33 @@ export class DecisionGate {
       }, key);
     }
 
-    // Budget caps escalate (one-way) when exhausted.
+    // Budget caps escalate (one-way) when exhausted. EXEC-01: every destination
+    // tier's cap is re-checked through the monotonic chain auto → delegate →
+    // human, so an exhausted delegate budget cannot silently approve and a
+    // zero cap never grants. The human tier is uncapped but still requires a
+    // live approver, so escalation always terminates.
     let tier = policyTier;
-    const cap = tier === 'auto'
-      ? this.policy.budgets.maxAutoApprovals
-      : tier === 'delegate'
-        ? this.policy.budgets.maxDelegateApprovals
-        : Number.POSITIVE_INFINITY;
-    if (Number.isFinite(cap) && this.tierUse[tier] >= cap) {
-      const escalated = escalateTier(tier, tier === 'auto' ? 'delegate' : 'human');
+    const capFor = (t: ApprovalTier): number =>
+      t === 'auto'
+        ? this.policy.budgets.maxAutoApprovals
+        : t === 'delegate'
+          ? this.policy.budgets.maxDelegateApprovals
+          : Number.POSITIVE_INFINITY;
+    let cap = capFor(tier);
+    while (Number.isFinite(cap) && this.tierUse[tier] >= cap && tier !== 'human') {
+      const next = tier === 'auto' ? 'delegate' : 'human';
+      const escalated = escalateTier(tier, next);
       store.appendEvent(newDecisionEvent(decisionId, 'escalated', {
         from: tier,
         to: escalated,
         reason: `tier budget exhausted (${this.tierUse[tier]}/${cap})`,
       }));
       tier = escalated;
+      cap = capFor(tier);
     }
 
     const budget: DecisionRecord['budget'] = Number.isFinite(cap)
-      ? { tier: policyTier, used: this.tierUse[policyTier], cap }
+      ? { tier, used: this.tierUse[tier], cap }
       : undefined;
 
     // Grant logic, deny by default:

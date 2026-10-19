@@ -286,6 +286,11 @@ export function initDatabase(config: MemoryConfig): Database {
   // schema creates belief-observation indexes (see reconcile helper above).
   reconcileLegacyHookObservations(db);
   db.exec(SCHEMA_SQL);
+  // MEM-07: every startup path (MCP server, CLI, scripts) must see a migrated
+  // schema. initDatabase applies pending migrations idempotently; the narrow
+  // integration/mcp.ts path previously skipped them and failed against legacy
+  // decay CHECK constraints.
+  applyPendingMigrations(db);
 
   return db;
 }
@@ -318,27 +323,32 @@ export function isInitialized(): boolean {
 }
 
 /**
+ * MEM-12: run a mutation and its mandatory audit as one atomic write group.
+ * Executes `fn` inside a transaction on the singleton connection; an audit
+ * failure rolls the mutation back instead of leaving a durable unaudited
+ * change. `fn` must be synchronous — provider calls (embeddings) happen
+ * BEFORE entering the group.
+ */
+export function atomicWriteGroup<T>(fn: () => T): T {
+  return getDatabase().transaction(fn)();
+}
+
+/**
  * Run database migrations
  */
-export function runMigrations(config: MemoryConfig): void {
-  const database = initDatabase(config);
-  
-  // Migration tracking table
-  database.exec(`
-    CREATE TABLE IF NOT EXISTS _migrations (
-      id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL,
-      applied_at INTEGER DEFAULT (strftime('%s', 'now'))
-    );
-  `);
+interface Migration {
+  name: string;
+  sql: string;
+  /**
+   * Optional pre-apply check; throw to refuse the migration (fail-closed).
+   * Runs inside the migration's transaction, before any statement executes.
+   */
+  guard?: (database: Database) => void;
+}
 
-  // Get applied migrations
-  const applied = database.query('SELECT name FROM _migrations').all() as { name: string }[];
-  const appliedSet = new Set(applied.map(m => m.name));
-
-  // Define migrations
-  const migrations: { name: string; sql: string }[] = [
-    {
+// Define migrations (ordered; each runs once, tracked by name in _migrations)
+function getMigrations(): Migration[] {
+  return [    {
       name: '001_ensure_facts_persona_column',
       sql: `
         -- Add persona column if missing (idempotent via pragma check)
@@ -349,6 +359,24 @@ export function runMigrations(config: MemoryConfig): void {
     },
     {
       name: '002_backfill_facts_persona_shared',
+      // MEM-06: unknown ownership must never be widened silently. If any facts
+      // still have NULL persona, refuse and require an explicit operator
+      // decision instead of backfilling them to 'shared' unasked.
+      guard: (database) => {
+        const cols = database.query('PRAGMA table_info(facts)').all() as { name: string }[];
+        if (!cols.some(c => c.name === 'persona')) return;
+        const row = database.query(
+          'SELECT COUNT(*) AS n FROM facts WHERE persona IS NULL'
+        ).get() as { n: number };
+        if (row.n > 0 && process.env.HERMES_ZOUROBOROS_ALLOW_PERSONA_BACKFILL !== '1') {
+          throw new Error(
+            `[hermes-zouroboros] refusing migration 002_backfill_facts_persona_shared: ` +
+            `${row.n} fact(s) have NULL persona and would be silently widened to 'shared'. ` +
+            `Decide ownership explicitly first (see docs/operations.md "Persona backfill preflight"), ` +
+            `or set HERMES_ZOUROBOROS_ALLOW_PERSONA_BACKFILL=1 to backfill them to 'shared'.`
+          );
+        }
+      },
       sql: `UPDATE facts SET persona = 'shared' WHERE persona IS NULL;`,
     },
     {
@@ -570,18 +598,107 @@ export function runMigrations(config: MemoryConfig): void {
         CREATE INDEX IF NOT EXISTS idx_fact_forgotten_at ON fact_forgotten(forgotten_at);
       `,
     },
+    {
+      // MEM-10: episodes become actor-scoped. The column is added here (not in
+      // the base schema) so this migration is the single owner of the change;
+      // legacy rows keep 'shared'. The guard is defensive: the runner skips
+      // recorded migrations, so a present-but-unrecorded column would mean
+      // manual surgery — abort loudly rather than mis-record.
+      name: '103_episodes_persona',
+      guard: (database) => {
+        const cols = database.query(`PRAGMA table_info(episodes)`).all() as Array<{ name: string }>;
+        if (cols.some(c => c.name === 'persona')) {
+          throw new Error('103_episodes_persona: persona column already present but migration not recorded — refusing to mis-record');
+        }
+      },
+      sql: `
+        ALTER TABLE episodes ADD COLUMN persona TEXT NOT NULL DEFAULT 'shared';
+        CREATE INDEX IF NOT EXISTS idx_episodes_persona ON episodes(persona, happened_at DESC);
+      `,
+    },
   ];
+}
+
+function applyPendingMigrations(database: Database): void {
+  // Migration tracking table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS _migrations (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      applied_at INTEGER DEFAULT (strftime('%s', 'now'))
+    );
+  `);
+
+  // Get applied migrations
+  const applied = database.query('SELECT name FROM _migrations').all() as { name: string }[];
+  const appliedSet = new Set(applied.map(m => m.name));
+
+  // MEM-11: each migration's statements and its ledger insert run in a single
+  // transaction, so a failure can never leave a half-applied migration without
+  // its tracking row (or a tracking row without its statements).
+  const applyOne = database.transaction((migration: Migration) => {
+    if (migration.guard) migration.guard(database);
+    database.exec(migration.sql);
+    database.run('INSERT INTO _migrations (name) VALUES (?)', [migration.name]);
+  });
 
   // Apply pending migrations
-  for (const migration of migrations) {
+  for (const migration of getMigrations()) {
     if (!appliedSet.has(migration.name)) {
-      database.exec(migration.sql);
-      database.run(
-        'INSERT INTO _migrations (name) VALUES (?)',
-        [migration.name]
-      );
+      applyOne(migration);
     }
   }
+}
+
+/**
+ * Run database migrations
+ */
+export function runMigrations(config: MemoryConfig): void {
+  applyPendingMigrations(initDatabase(config));
+}
+
+export interface MigrationPreflight {
+  /** Migration names not yet applied to this database. */
+  pending: string[];
+  /** Facts with NULL persona (migration 002 refuses these without an explicit decision). */
+  nullPersonaFacts: number;
+  /** True when the facts table still carries the legacy decay CHECK vocabulary. */
+  legacyDecayCheck: boolean;
+}
+
+/**
+ * Advisory pre-upgrade report: what initDatabase would do to this store.
+ * Opens the database read-only and never migrates. Used by `doctor`.
+ */
+export function getMigrationPreflight(config: MemoryConfig): MigrationPreflight {
+  const all = getMigrations().map(m => m.name);
+  if (!existsSync(config.dbPath)) {
+    return { pending: [], nullPersonaFacts: 0, legacyDecayCheck: false };
+  }
+  const out: MigrationPreflight = { pending: all, nullPersonaFacts: 0, legacyDecayCheck: false };
+  let database: Database | null = null;
+  try {
+    database = new Database(config.dbPath, { readonly: true });
+    try {
+      const applied = database.query('SELECT name FROM _migrations').all() as { name: string }[];
+      const appliedSet = new Set(applied.map(m => m.name));
+      out.pending = all.filter(n => !appliedSet.has(n));
+    } catch {
+      // No ledger yet: everything is pending (out.pending already reflects that).
+    }
+    const cols = database.query('PRAGMA table_info(facts)').all() as { name: string }[];
+    if (cols.some(c => c.name === 'persona')) {
+      out.nullPersonaFacts =
+        (database.query('SELECT COUNT(*) AS n FROM facts WHERE persona IS NULL').get() as { n: number }).n ?? 0;
+    }
+    const ddl = database.query(
+      `SELECT sql FROM sqlite_master WHERE type='table' AND name='facts'`
+    ).get() as { sql: string } | null;
+    out.legacyDecayCheck = Boolean(ddl?.sql?.includes(`'permanent', 'long', 'medium', 'short'`));
+  } finally {
+    database?.close();
+  }
+  return out;
 }
 
 /**

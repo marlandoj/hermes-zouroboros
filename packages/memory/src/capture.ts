@@ -169,6 +169,7 @@ export async function autoCapture(
   // Store episodes
   for (const ep of extracted.episodes) {
     const stored = createEpisode({
+      actor: options.actor,
       summary: ep.summary,
       outcome: ep.outcome,
       entities: ep.entities,

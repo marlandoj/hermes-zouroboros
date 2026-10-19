@@ -1714,6 +1714,8 @@ export class ACPTransport implements ExecutorTransport {
       }
     }
     const adapter = this.spawnAdapter(env, options.workdir ?? getWorkspaceRoot());
+    // EXEC-04: register before exposure so shutdown() can stop active work.
+    this.activeAdapters.add(adapter);
 
     // Mirror the containment prestage degradation into the session stream:
     // spawnAdapter's env carries the stamp prepareFilesystemContainedSpawn
@@ -1810,6 +1812,7 @@ export class ACPTransport implements ExecutorTransport {
         idleTimedOut = true;
         if (sessionId) connection.cancel({ sessionId }).catch(() => {});
         terminateAdapterGroup(adapter, 'SIGTERM');
+        armKillEscalation();
       }, options.idleTimeoutMs);
     };
     const onUpdate = (update: SessionUpdate) => {
@@ -1825,10 +1828,27 @@ export class ACPTransport implements ExecutorTransport {
 
     // Total timeout and no-progress timeout enforcement.
     let timedOut = false;
+    // EXEC-03: hard-kill escalation + explicit deadline. The total/idle
+    // timers send best-effort cancel + SIGTERM; an adapter that ignores
+    // SIGTERM is SIGKILLed after killGraceMs, and the awaited race below
+    // carries a deadline rejection — an unresponsive adapter can never hold
+    // the session open past the hard deadline.
+    const killGraceMs = options.killGraceMs ?? 10_000;
+    const deadlineSlackMs = 5_000;
+    let deadlineExceeded = false;
+    let killTimer: ReturnType<typeof setTimeout> | undefined;
+    const armKillEscalation = () => {
+      if (killTimer || settled) return;
+      killTimer = setTimeout(() => {
+        timedOut = true;
+        terminateAdapterGroup(adapter, 'SIGKILL');
+      }, killGraceMs);
+    };
     const timeoutHandle = setTimeout(() => {
       timedOut = true;
       if (sessionId) connection.cancel({ sessionId }).catch(() => {});
       terminateAdapterGroup(adapter, 'SIGTERM');
+      armKillEscalation();
     }, options.timeoutMs);
     resetIdleTimeout();
 
@@ -1864,6 +1884,20 @@ export class ACPTransport implements ExecutorTransport {
     // The happy path and timeout path both kill the adapter, which fires 'exit'.
     // Swallow that late rejection so it never surfaces as an unhandled rejection.
     processDied.catch(() => {});
+
+    // Explicit deadline: even if the adapter ignores every signal and the
+    // process-death watchdog misfires, the race rejects instead of hanging.
+    let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
+    const hardDeadline = new Promise<never>((_, reject) => {
+      deadlineTimer = setTimeout(() => {
+        deadlineExceeded = true;
+        reject(new Error(
+          `ACP session exceeded hard deadline (${options.timeoutMs + killGraceMs + deadlineSlackMs}ms): ` +
+          `adapter did not exit after SIGTERM/SIGKILL escalation`
+        ));
+      }, options.timeoutMs + killGraceMs + deadlineSlackMs);
+    });
+    hardDeadline.catch(() => {}); // settled by the race; swallow late rejections like processDied
 
     try {
       const promptResult = await Promise.race([
@@ -1968,12 +2002,15 @@ export class ACPTransport implements ExecutorTransport {
           });
         })(),
         processDied,
+        hardDeadline,
       ]);
 
       client.flushPendingAgentMessage();
       client.flushPending('tool call ended without a terminal ACP update');
       settled = true;
       clearTimeout(timeoutHandle);
+      if (killTimer) clearTimeout(killTimer);
+      if (deadlineTimer) clearTimeout(deadlineTimer);
       if (idleTimeoutHandle) clearTimeout(idleTimeoutHandle);
       doneResolve();
 
@@ -2034,11 +2071,13 @@ export class ACPTransport implements ExecutorTransport {
       client.flushPendingAgentMessage();
       settled = true;
       clearTimeout(timeoutHandle);
+      if (killTimer) clearTimeout(killTimer);
+      if (deadlineTimer) clearTimeout(deadlineTimer);
       if (idleTimeoutHandle) clearTimeout(idleTimeoutHandle);
       doneReject(err);
 
       const durationMs = Date.now() - startTime;
-      const category = timedOut || idleTimedOut ? 'timeout' : 'runtime_error';
+      const category = timedOut || idleTimedOut || deadlineExceeded ? 'timeout' : 'runtime_error';
       this.circuitBreaker.recordFailure(category);
       client.flushPending(
         idleTimedOut ? 'ACP session idle timed out' : timedOut ? 'ACP session timed out' : 'ACP session failed',
@@ -2089,6 +2128,9 @@ export class ACPTransport implements ExecutorTransport {
       if (onProcExit) adapter.off('exit', onProcExit);
       if (onProcError) adapter.off('error', onProcError);
       await shutdownAdapterGroup(adapter);
+      // EXEC-04: unregister only after cleanup, so shutdown() during a hung
+      // session finds and stops this adapter.
+      this.activeAdapters.delete(adapter);
     }
   }
 

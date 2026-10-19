@@ -2952,8 +2952,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "de04200cefa7443681cb45c4751aa87861762b84937b3bb6c540f336f40f91da",
-      "adaptation": "Track 1 actor cutover: memory access now carries a required --actor caller identity (fail-closed)"
+      "distributedSha256": "f37327dd4af405b6f43c5fd1d01a946e18a012590012aa5cfc5ab2b21521ddbf",
+      "adaptation": "Track 1 actor cutover: memory access now carries a required --actor caller identity (fail-closed). MEM-10: episode create/search are actor-scoped (episode defaults to shared explicitly; episodes search scopes with --actor, unscoped without)."
     },
     {
       "path": "skills/zouroboros/zo-memory-system/SKILL.md",

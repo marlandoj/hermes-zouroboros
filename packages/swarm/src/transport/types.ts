@@ -20,6 +20,13 @@ export interface TransportOptions {
    * session update for this interval, allowing callers to fail over from a
    * wedged agent without shortening the total task budget. */
   idleTimeoutMs?: number;
+  /**
+   * EXEC-03: grace period between SIGTERM and the SIGKILL escalation on the
+   * timeout path. An adapter that ignores SIGTERM is SIGKILLed after this
+   * interval, so the awaited session race can never hang past
+   * timeoutMs + killGraceMs + an internal deadline slack. Defaults to 10_000.
+   */
+  killGraceMs?: number;
   workdir?: string;
   env?: Record<string, string>;
   context?: Record<string, unknown>;

@@ -218,6 +218,15 @@ HERMES_ZOUROBOROS_TEST_REAL_HERMES=1 HERMES_ZOUROBOROS_TEST_BUILD=1 \
   python3 -m unittest discover -s tests -p test_installer.py -v
 ```
 
+On slower machines each installer subprocess call may exceed the default 45-second
+timeout even though the installer is working correctly (cold caches, space-containing
+paths). Raise it without patching the suite:
+
+```bash
+HERMES_ZOUROBOROS_TEST_REAL_HERMES=1 HERMES_ZOUROBOROS_TEST_TIMEOUT=240 \
+  python3 -m unittest discover -s tests -p test_installer.py -v
+```
+
 Tests cover real MCP persistence, repeated setup (including twice-expired receipt
 retries, stable IDs/counts, unchanged ordinary-fact payloads/TTL, 30 newer historical
 receipts and 30 actual MCP-stored keyword matches crowding the original receipt,

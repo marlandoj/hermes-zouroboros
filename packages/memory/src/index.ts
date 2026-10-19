@@ -20,7 +20,9 @@ export {
   isInitialized,
   runMigrations,
   getDbStats,
+  getMigrationPreflight,
 } from './database.js';
+export type { MigrationPreflight } from './database.js';
 
 // Embeddings
 export {
