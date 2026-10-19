@@ -10,14 +10,17 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "bun": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./config": {
+      "bun": "./src/config/loader.ts",
       "import": "./dist/config/loader.js",
       "types": "./dist/config/loader.d.ts"
     },
     "./adapters": {
+      "bun": "./src/adapters/index.ts",
       "import": "./dist/adapters/index.js",
       "types": "./dist/adapters/index.d.ts"
     }
