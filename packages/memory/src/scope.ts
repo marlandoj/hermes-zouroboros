@@ -1,19 +1,18 @@
 /**
  * Scope resolution — the single choke point for persona/actor scoping.
  *
- * Track 1 (intelligence plane): every retrieval and mutation path in this
- * package resolves its SQL visibility predicate HERE. No module hand-rolls
+ * Every retrieval and mutation path in this package resolves its SQL
+ * visibility predicate HERE. No module hand-rolls
  * `(persona = ? OR persona = 'shared')` anymore; they call resolveScope()
- * and splice `scopeSql()` into their queries. This is the fix for the
- * definer-rights leak class: a path that forgets to scope now fails to
- * compile (actor is a required parameter) instead of silently widening.
+ * and splice `scopeSql()` into their queries.
  *
- * Fail-closed contract (operator decision Q2, 2026-10-14):
- *  - `actor` is caller-declared identity (MCP tool arg / function param).
- *  - requireActor() throws on missing/empty/non-string — there is no silent
- *    default to 'shared'. Callers that want shared visibility declare
- *    actor 'shared' explicitly, which is itself a legitimate first-party
- *    actor for cross-harness facts.
+ * Actor contract:
+ *  - `actor` is an optional caller-declared identity (MCP tool arg /
+ *    function param) used to scope visibility: an actor sees its own
+ *    persona plus the shared pool.
+ *  - A missing, empty, or non-string actor is NOT an error: it resolves
+ *    to the shared scope ('shared'), so plain single-user callers work
+ *    without declaring an identity.
  *  - Misattribution is detectable, not preventable, at this trust boundary
  *    (every MCP client is a first-party local harness): the memory_audit
  *    trail records actor + scope for every access.
@@ -22,16 +21,18 @@
 import { randomUUID } from 'crypto';
 import { getDatabase } from './database.js';
 
-/** Error code surfaced when a call arrives without a usable actor. */
-export class MissingActorError extends Error {
-  readonly code = 'MISSING_ACTOR';
-  constructor(context?: string) {
-    super(
-      `actor is required${context ? ` for ${context}` : ''}: ` +
-      `pass a non-empty actor identity (fail-closed; no default scope)`,
-    );
-    this.name = 'MissingActorError';
-  }
+/** Persona an actor-less call runs under: the cross-persona shared pool. */
+export const DEFAULT_ACTOR = 'shared';
+
+/**
+ * Normalize a caller-supplied actor: a non-empty string is trimmed and
+ * used as-is; anything else (missing, empty, non-string) resolves to the
+ * default shared actor.
+ */
+export function resolveActor(actor: unknown): string {
+  if (typeof actor !== 'string') return DEFAULT_ACTOR;
+  const trimmed = actor.trim();
+  return trimmed.length === 0 ? DEFAULT_ACTOR : trimmed;
 }
 
 /**
@@ -46,22 +47,12 @@ export interface ScopePredicate {
 }
 
 /**
- * Fail-closed actor validation. Throws MissingActorError unless `actor`
- * is a non-empty string after trimming. Returns the trimmed actor.
- */
-export function requireActor(actor: unknown, context?: string): string {
-  if (typeof actor !== 'string') throw new MissingActorError(context);
-  const trimmed = actor.trim();
-  if (trimmed.length === 0) throw new MissingActorError(context);
-  return trimmed;
-}
-
-/**
  * Build the scope for an actor: the actor's own persona plus the shared
- * pool. The ONLY place the visibility rule lives.
+ * pool. The ONLY place the visibility rule lives. An absent or unusable
+ * actor resolves to the shared scope.
  */
-export function resolveScope(actor: string, context?: string): ScopePredicate {
-  const a = requireActor(actor, context);
+export function resolveScope(actor: unknown): ScopePredicate {
+  const a = resolveActor(actor);
   const personas = a === 'shared' ? ['shared'] : [a, 'shared'];
   return { actor: a, personas, key: personas.join('||') };
 }
@@ -111,8 +102,8 @@ export function newCallId(): string {
 
 /**
  * Record an audit row. Deliberately NOT best-effort: if the audit substrate
- * is broken the operation fails (fail closed), because an unauditable
- * memory plane is the exact failure mode Track 1 exists to prevent.
+ * is broken the operation fails, because an unauditable memory plane is a
+ * substrate failure the caller should see, not silently absorb.
  */
 export function recordAudit(event: AuditEvent): void {
   const db = getDatabase();

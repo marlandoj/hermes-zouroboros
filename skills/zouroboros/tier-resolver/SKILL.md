@@ -74,12 +74,6 @@ weights are used otherwise. The skill tree is never written.
 
 ```bash
 bun "${HERMES_SKILL_DIR}/scripts/run-test-suite.ts"   # 50 synthetic prompts; floors: tier 84%, type 68%
-bun test "${HERMES_SKILL_DIR}/scripts"                # calibration + swarm decision gate tests
+bun test "${HERMES_SKILL_DIR}/scripts"                # calibration tests
 ```
 
-## Swarm decision gate
-
-Use the gate to decide whether a plan should become a swarm. It lives in the distribution package
-(`packages/swarm/src/routing/swarm-decision-gate.ts`) and is wrapped by
-`zo-swarm-orchestrator` (`swarm.ts gate "<plan>"`). It scores 7 signals: SWARM above 0.45,
-SUGGEST from 0.30 to 0.45, DIRECT below that. An explicit "use a swarm" forces SWARM.

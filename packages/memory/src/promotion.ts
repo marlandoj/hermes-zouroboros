@@ -19,13 +19,14 @@
  *   - merge: both facts stand; the new fact promotes.
  *   - flag: contested; the fact STAYS in review (visible but unpromoted).
  *
- * Fail-closed contract: every entry point requires an actor; illegal stage
- * transitions throw PromotionStateError; unknown facts throw.
+ * Actor contract: every entry point takes an actor (an absent actor runs
+ * under the shared scope); illegal stage transitions throw
+ * PromotionStateError; unknown facts throw.
  */
 
 import { randomUUID } from 'crypto';
 import { getDatabase, atomicWriteGroup } from './database.js';
-import { requireActor, resolveScope, scopeSql, recordAudit } from './scope.js';
+import { resolveActor, resolveScope, scopeSql, recordAudit } from './scope.js';
 import { forgetFact, notForgottenSql } from './facts.js';
 
 export type PromotionStage = 'capture' | 'extraction' | 'review' | 'promotion';
@@ -186,7 +187,7 @@ export interface AdvanceResult {
  *  - promotion → throws (terminal)
  */
 export function advancePromotion(factId: string, options: { actor: string }): AdvanceResult {
-  const scope = resolveScope(options.actor, 'advancePromotion');
+  const scope = resolveScope(options.actor);
   ensureConflictTable();
   const fact = loadVisibleFact(factId, scope);
   const stage = getPromotionStage(factId);
@@ -242,7 +243,7 @@ export interface SweepResult {
  * capture → promotion in one sweep. Review-stage facts are untouched.
  */
 export function sweepPromotions(options: { actor: string; dryRun?: boolean }): SweepResult {
-  const scope = resolveScope(options.actor, 'sweepPromotions');
+  const scope = resolveScope(options.actor);
   ensureConflictTable();
   const db = getDatabase();
   const predicate = scopeSql(scope, 'f.persona');
@@ -311,7 +312,7 @@ export interface ReviewQueueItem {
  * ever routed to review.
  */
 export function listReviewQueue(options: { actor: string; limit?: number }): ReviewQueueItem[] {
-  const scope = resolveScope(options.actor, 'listReviewQueue');
+  const scope = resolveScope(options.actor);
   ensureConflictTable();
   const db = getDatabase();
   const predicate = scopeSql(scope, 'f.persona');
@@ -366,8 +367,8 @@ export function resolveReview(
   decision: ReviewDecision,
   options: { actor: string },
 ): ReviewResolution {
-  const actor = requireActor(options.actor, 'resolveReview');
-  const scope = resolveScope(actor, 'resolveReview');
+  const actor = resolveActor(options.actor);
+  const scope = resolveScope(actor);
   ensureConflictTable();
   const db = getDatabase();
 

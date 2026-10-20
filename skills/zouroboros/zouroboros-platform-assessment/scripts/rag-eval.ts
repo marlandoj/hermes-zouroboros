@@ -12,7 +12,6 @@ const cases: [string, string][] = [
   ['circuit breaker cooldown and exponential backoff per failure category', 'packages/swarm/src/circuit/breaker.ts'],
   ['shell bridge that runs hermes one-shot with a kill timeout', 'integration/hermes-bridge.sh'],
   ['scan memory payload for secrets and redact before storage', 'packages/memory/src/defense.ts'],
-  ['swarm decision gate weighted signals and thresholds', 'packages/swarm/src/routing/swarm-decision-gate.ts'],
   ['sqlite VACUUM INTO snapshot backup', 'packages/core/src/backup.ts'],
 ];
 const { vectors, tokens } = await embed(openAiKey(), cases.map(c => c[0]));

@@ -3,7 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { DEFAULT_CONFIG } from 'zouroboros-core';
-import { initDatabase, closeDatabase, storeFact, searchFacts, getFact, getDbStats, requireActor } from 'zouroboros-memory';
+import { initDatabase, closeDatabase, storeFact, searchFacts, getFact, getDbStats, resolveActor } from 'zouroboros-memory';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -26,19 +26,19 @@ server.tool('workshop_status', 'Inspect local Zouroboros memory and execution mo
   memory: getDbStats(memoryConfig), swarmExecution: process.env.HERMES_ZOUROBOROS_ALLOW_SWARM === '1',
   factoryConfigured: Boolean(process.env.HERMES_ZOUROBOROS_BOARD_DIR && process.env.HERMES_ZOUROBOROS_MANIFEST),
 }));
-// Track 1 actor cutover: every memory tool requires a caller identity. The
-// schema keeps `actor` optional so pre-cutover clients reach requireActor and
-// fail closed with the MISSING_ACTOR code instead of an opaque schema error.
-server.tool('memory_store', 'Store a work fact or decision in SQLite memory under the calling actor. Requires a caller identity (actor); calls without one are rejected (MISSING_ACTOR). Do not store credentials.', {
-  actor: z.string().max(200).optional().describe('REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Use "shared" only for deliberately cross-persona facts.'),
+// Memory tools take an optional caller identity: `actor` scopes visibility
+// to the caller's persona plus the shared pool, and an absent actor runs
+// under the shared scope.
+server.tool('memory_store', 'Store a work fact or decision in SQLite memory under the calling actor (the shared scope when no actor is given). Do not store credentials.', {
+  actor: z.string().max(200).optional().describe('Optional caller identity (persona/seat). Defaults to the shared scope when omitted. Use "shared" only for deliberately cross-persona facts.'),
   entity: z.string().min(1).max(200), key: z.string().max(200).optional(), value: z.string().min(1).max(20000),
-}, async ({ actor, ...input }) => result(await storeFact({ actor: requireActor(actor, 'memory_store'), ...input, category: 'fact', source: 'hermes-zouroboros' }, memoryConfig)));
-server.tool('memory_search', 'Find work facts by keyword within the calling actor\'s scope (own persona + shared pool), optionally restricted to an exact ID that also matches the query and is unexpired. Requires a caller identity (actor); calls without one are rejected (MISSING_ACTOR). No remote embedding API is called.', {
-  actor: z.string().max(200).optional().describe('REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Visibility = own persona + shared pool.'),
+}, async ({ actor, ...input }) => result(await storeFact({ actor: resolveActor(actor), ...input, category: 'fact', source: 'hermes-zouroboros' }, memoryConfig)));
+server.tool('memory_search', 'Find work facts by keyword within the calling actor\'s scope (own persona + shared pool), optionally restricted to an exact ID that also matches the query and is unexpired. The shared scope applies when no actor is given. No remote embedding API is called.', {
+  actor: z.string().max(200).optional().describe('Optional caller identity (persona/seat). Defaults to the shared scope when omitted. Visibility = own persona + shared pool.'),
   query: z.string().min(1).max(2000), limit: z.number().int().min(1).max(30).default(10),
   id: z.string().min(1).max(200).optional(),
 }, async ({ actor, query, limit, id }) => {
-  const caller = requireActor(actor, 'memory_search');
+  const caller = resolveActor(actor);
   if (id === undefined) return result(searchFacts(query, { actor: caller, limit }));
   // searchFacts filters by ID before its result cap, with the same keyword,
   // scope and expiry semantics. getFact alone intentionally includes expired rows.

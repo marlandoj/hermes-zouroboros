@@ -8,7 +8,7 @@ import { parseArgs } from "node:util";
 import { SHIPPED_GOVERNING_ROOT } from "./governance-paths";
 
 export type ConstitutionPhase = "preflight" | "promotion";
-export type BlastRadius = "tiny" | "local" | "shared" | "high";
+export type ImpactRadius = "tiny" | "local" | "shared" | "high";
 
 export interface ConstitutionInput {
   operation: string;
@@ -17,7 +17,7 @@ export interface ConstitutionInput {
   modifiesModelWeights: boolean;
   reversible: boolean;
   rollbackPlan: string;
-  blastRadius: BlastRadius;
+  blastRadius: ImpactRadius;
   humanApproved: boolean;
   provenance: {
     rationale: string;

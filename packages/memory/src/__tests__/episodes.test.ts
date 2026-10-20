@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { initDatabase, closeDatabase, getDatabase } from '../database.js';
 import { createEpisode, searchEpisodes, getEntityEpisodes } from '../episodes.js';
-import { resolveScope, MissingActorError } from '../scope.js';
+import { resolveScope } from '../scope.js';
 import type { MemoryConfig } from 'zouroboros-core';
 
 const TEST_CONFIG: MemoryConfig = {
@@ -31,9 +31,10 @@ describe('MEM-10: episodes are actor-scoped', () => {
     expect(applied.some(m => m.name === '103_episodes_persona')).toBe(true);
   });
 
-  test('createEpisode requires an actor and stores under its persona', () => {
-    expect(() => (createEpisode as any)({ summary: 's', outcome: 'ongoing', entities: [] }))
-      .toThrow(MissingActorError);
+  test('createEpisode stores under the actor persona, defaulting to shared', () => {
+    const anon = (createEpisode as any)({ summary: 'anon episode', outcome: 'ongoing', entities: [] });
+    const anonRow = getDatabase().query(`SELECT persona FROM episodes WHERE id = ?`).get(anon.id) as { persona: string };
+    expect(anonRow.persona).toBe('shared');
     const ep = createEpisode({ actor: 'alice', summary: 'alice episode', outcome: 'success', entities: ['e1'] });
     const row = getDatabase().query(`SELECT persona FROM episodes WHERE id = ?`).get(ep.id) as { persona: string };
     expect(row.persona).toBe('alice');

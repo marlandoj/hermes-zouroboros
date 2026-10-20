@@ -16,7 +16,6 @@ import {
   extractionRules,
   PromotionStateError,
 } from '../promotion.js';
-import { MissingActorError } from '../scope.js';
 import type { MemoryConfig } from 'zouroboros-core';
 
 const TEST_CONFIG: MemoryConfig = {
@@ -84,12 +83,15 @@ describe('stage transitions', () => {
     expect(() => advancePromotion(other.id, { actor: ACTOR })).toThrow(PromotionStateError);
   });
 
-  test('actor is required everywhere', async () => {
+  test('a missing actor defaults to the shared scope', async () => {
     const entry = await storeFact({ actor: ACTOR, entity: 'e', value: 'some value' }, TEST_CONFIG);
-    expect(() => advancePromotion(entry.id, {} as never)).toThrow(MissingActorError);
-    expect(() => sweepPromotions({} as never)).toThrow(MissingActorError);
-    expect(() => listReviewQueue({} as never)).toThrow(MissingActorError);
-    expect(() => resolveReview(entry.id, 'merge', {} as never)).toThrow(MissingActorError);
+    // No actor error: the calls run under the shared scope, where the
+    // ACTOR-owned fact is simply out of scope (PromotionStateError),
+    // and scope-wide sweeps/queues run against the shared pool.
+    expect(() => advancePromotion(entry.id, {} as never)).toThrow(PromotionStateError);
+    expect(() => sweepPromotions({} as never)).not.toThrow();
+    expect(() => listReviewQueue({} as never)).not.toThrow();
+    expect(() => resolveReview(entry.id, 'merge', {} as never)).toThrow(PromotionStateError);
   });
 });
 

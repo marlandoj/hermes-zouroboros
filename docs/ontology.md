@@ -85,12 +85,10 @@ A `Campaign` is a validated DAG of `Task`s that the swarm executes only after an
 | `ChildTaskRecord` | Sub-work an executor delegated while running a task | `parentTaskId`, `status` (`success`, `failure`, `blocked`, `skipped`), `source` | `packages/swarm/src/types.ts` |
 | `RouteDecision` | The routing engine's choice of executor for a task | `executorId`, `compositeScore`, `breakdown`, `method` (`composite`, `fallback`) | `packages/swarm/src/routing/engine.ts` |
 | `RoutingSignal` | One scored input to routing | six-signal: `capability`, `health`, `complexityFit`, `history`, `procedure`, `temporal`; eight-signal adds `budget`, `role` | `routing/engine.ts` |
-| `SwarmDecisionGate` | Classifier deciding whether a request warrants a swarm at all | outputs `SWARM`, `DIRECT`, `SUGGEST`, `FORCE_SWARM` | `routing/swarm-decision-gate.ts` |
 | `CircuitBreaker` | Per-executor health state | `CLOSED`, `OPEN`, `HALF_OPEN`; failures by `ErrorCategory` | `packages/swarm/src/circuit/breaker.ts` |
 | `Role` | A named job bound to an executor and model | `executorId`, `model`, `budgetCapUSD`, `successCriteria` | `packages/swarm/src/roles/registry.ts` |
 | `Budget` | Spend envelope for a swarm | `totalBudgetUSD`, `perExecutorLimits`, `hardCapAction` (`pause`, `abort`, `downgrade`) | `packages/swarm/src/budget/governor.ts` |
 | `StagnationEvent` | Detected lack of progress during a run | `no_output`, `repetitive_output`, `progress_plateau`, `timeout_approaching` | `packages/swarm/src/stagnation/detector.ts` |
-| `DecisionRow` | Hash-chained ledger entry for a routing or review decision | `traceId`, `harness`, `modelId`, `status`, `prevHash`, `hash` | `packages/swarm/src/ledger/decision-ledger.ts` |
 | `ControlPlaneTask` | Durable queue row with leases, approval and idempotency (`TaskRecord`) | `state`, `attempts`, `max_attempts`, `requires_approval`, `idempotency_key` | `packages/control-plane/src/queue/task-queue.ts` |
 | `HealerChain` | Ordered model fallbacks the agent-model-healer may move a job through | last rung must be open-weight; `healingEnabled` off by default | `skills/zouroboros/agent-model-healer` |
 
@@ -171,7 +169,7 @@ Governance is a ten-article `Constitution` enforced by gates that return `ALLOW`
 | `Capability` / `CapabilityHandle` | Scoped, time-boxed grant of authority to perform operations on a resource | `operations[]`, `effect` (`read`, `write`), `not_before`, `expires_at`, parent handle | `packages/capability-runtime/src/contracts/` |
 | `EffectClass` | How risky and recoverable a side effect is | `provider_idempotent_write`, `reconcilable_write`, `non_idempotent_write`, `destructive_write`, `compensating_write` | `capability-runtime/src/policy/effect-classes.ts` |
 
-The repo has no numbered autonomy levels; the only graded scales are `BlastRadius` and the `off`, `shadow`, `enforce` gate modes.
+The repo has no numbered autonomy levels; the only graded scales are the constitution gate's `ImpactRadius` and the `off`, `shadow`, `enforce` gate modes.
 
 ## Skills, personas, self-improvement and provenance
 

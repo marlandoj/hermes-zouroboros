@@ -7,8 +7,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { repoRoot } from '../integration/profile.ts';
 
-// Track 1 actor cutover: every memory tool call declares its caller identity. The server is
-// fail-closed (MISSING_ACTOR without one) — see the rejection cases at the bottom.
+// Memory tools take an optional caller identity: a declared actor scopes
+// visibility to that persona plus the shared pool; without one, calls run
+// under the shared scope — see the default-scope cases at the bottom.
 const ACTOR = 'hermes-fixture';
 
 test('Hermes-compatible MCP completes handshake, memory round trip and reviewable campaign', async () => {
@@ -89,8 +90,8 @@ test('memory_search exact ID reaches a crowded fact without altering ordinary ke
       expect(exact[0].tags).toEqual(['fact']);
       expect(db.query('SELECT * FROM facts ORDER BY id').all()).toEqual(before);
       const tool = (await client.listTools()).tools.find(tool => tool.name === 'memory_search')!;
-      // `actor` stays schema-optional so pre-cutover clients reach the fail-closed
-      // MISSING_ACTOR rejection instead of an opaque schema error.
+      // `actor` stays schema-optional: actor-less clients run under the
+      // shared scope rather than failing schema validation.
       expect(tool.inputSchema.required).toEqual(['query']);
       expect(tool.inputSchema.properties).toHaveProperty('id');
       expect(tool.inputSchema.properties).toHaveProperty('actor');
@@ -151,22 +152,25 @@ test('memory_search rejects invalid ID and retains query/limit validation', asyn
   });
 });
 
-test('memory tools fail closed without a usable actor (MISSING_ACTOR)', async () => {
+test('memory tools default to the shared scope without a usable actor', async () => {
   await withMemory(async client => {
     await store(client, 'known');
-    const missingActor = [
-      {}, { actor: '' }, { actor: '   ' }, { actor: 123 }, { actor: null },
-    ];
-    for (const extra of missingActor) {
-      for (const [name, arguments_] of [
-        ['memory_search', { query: 'copper', ...extra }],
-        ['memory_store', { entity: 'fixture', key: 'decision', value: 'copper widgets', ...extra }],
-      ] as const) {
-        const result = await client.callTool({ name, arguments: arguments_ as Record<string, unknown> });
-        expect(result.isError).toBe(true);
-        expect(JSON.stringify(result.content)).toContain('actor');
-      }
+    // Missing/empty/whitespace actor: the call runs under the shared scope
+    // instead of being rejected; the ACTOR-owned fact is invisible there.
+    for (const extra of [{}, { actor: '' }, { actor: '   ' }]) {
+      const anonSearch = await client.callTool({ name: 'memory_search', arguments: { query: 'copper', ...extra } });
+      expect(anonSearch.isError).not.toBe(true);
+      expect(JSON.stringify(anonSearch.content)).not.toContain('copper widgets');
     }
+    // A non-string actor is a schema error, not a scope decision.
+    for (const extra of [{ actor: 123 }, { actor: null }]) {
+      const bad = await client.callTool({ name: 'memory_search', arguments: { query: 'copper', ...extra } as Record<string, unknown> });
+      expect(bad.isError).toBe(true);
+    }
+    // Storing without an actor lands in the shared pool, visible to any scope.
+    const anonStore = await client.callTool({ name: 'memory_store', arguments: { entity: 'fixture', key: 'decision', value: 'shared widgets' } });
+    expect(anonStore.isError).not.toBe(true);
+    expect(await search(client, { query: 'shared widgets', actor: 'some-other-persona' })).toHaveLength(1);
     // A declared actor still works, and visibility is actor + shared pool only.
     expect(await search(client, { query: 'copper' })).toHaveLength(1);
     expect(await search(client, { query: 'copper', actor: 'some-other-persona' })).toEqual([]);

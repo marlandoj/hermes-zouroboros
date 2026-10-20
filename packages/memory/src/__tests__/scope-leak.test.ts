@@ -1,11 +1,11 @@
 /**
- * Track 1 regression tests: the definer-rights scope-leak class.
+ * Regression tests: the definer-rights scope-leak class.
  *
- * Before Track 1, searchFactsGraphBoosted's entity fetch had NO persona
- * filter: any actor could pull another persona's facts through the graph
- * arm. These tests pin the fix — cross-actor facts must not leak through
- * any graph-arm surface — and the fail-closed actor requirement at the MCP
- * boundary.
+ * searchFactsGraphBoosted's entity fetch once had NO persona filter: any
+ * actor could pull another persona's facts through the graph arm. These
+ * tests pin the fix — cross-actor facts must not leak through any
+ * graph-arm surface — and the actor-optional default-scope behavior at
+ * the MCP boundary (an absent actor runs under the shared scope).
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
@@ -18,7 +18,7 @@ import {
   invalidateGraphCache,
 } from '../graph.js';
 import { routeMemoryQuery } from '../routing-gate.js';
-import { resolveScope, MissingActorError } from '../scope.js';
+import { resolveScope } from '../scope.js';
 import { handleMessage } from '../mcp-server.js';
 import type { MemoryConfig } from 'zouroboros-core';
 
@@ -134,7 +134,7 @@ describe('graph-arm scope leak (regression)', () => {
   });
 });
 
-describe('fail-closed actor at the MCP boundary', () => {
+describe('actor-optional MCP boundary (default shared scope)', () => {
   async function callTool(name: string, args: Record<string, unknown>) {
     return (await handleMessage(
       { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } },
@@ -142,19 +142,25 @@ describe('fail-closed actor at the MCP boundary', () => {
     )) as { result?: { content?: Array<{ text: string }> }; error?: { message: string } };
   }
 
-  test('memory_store without actor fails closed with MISSING_ACTOR semantics', async () => {
+  test('memory_store without actor writes under the shared scope', async () => {
     const res = await callTool('memory_store', { entity: 'x', value: 'y' });
-    expect(res.error).toBeDefined();
-    expect(res.error!.message).toContain('actor is required');
-    // Nothing was written.
-    const count = getDatabase().query('SELECT COUNT(*) as c FROM facts').get() as { c: number };
-    expect(count.c).toBe(0);
+    expect(res.error).toBeUndefined();
+    const row = getDatabase().query('SELECT persona FROM facts').get() as { persona: string };
+    expect(row.persona).toBe('shared');
   });
 
-  test('memory_search without actor fails closed', async () => {
-    const res = await callTool('memory_search', { query: 'anything' });
-    expect(res.error).toBeDefined();
-    expect(res.error!.message).toContain('actor is required');
+  test('memory_search without actor searches only the shared scope', async () => {
+    await storeFact({ actor: 'financial-advisor', entity: 'n2', value: 'advisor note' }, TEST_CONFIG);
+    await storeFact({ actor: 'shared', entity: 'n3', value: 'shared note' }, TEST_CONFIG);
+    const res = await callTool('memory_search', { query: 'note', mode: 'keyword' });
+    expect(res.error).toBeUndefined();
+    const payload = JSON.parse(res.result!.content![0].text) as {
+      results: Array<{ value: string }>;
+      scope: { actor: string; personas: string[] };
+    };
+    expect(payload.scope).toEqual({ actor: 'shared', personas: ['shared'] });
+    expect(payload.results.map(r => r.value)).toContain('shared note');
+    expect(payload.results.map(r => r.value)).not.toContain('advisor note');
   });
 
   test('memory_search with actor returns scope metadata and scoped results', async () => {
@@ -172,17 +178,22 @@ describe('fail-closed actor at the MCP boundary', () => {
     expect(payload.results.map(r => r.value)).not.toContain('advisor note');
   });
 
-  test('memory_graph and memory_delete without actor fail closed', async () => {
+  test('memory_graph and memory_delete without actor run under the shared scope', async () => {
     const g = await callTool('memory_graph', { action: 'build' });
-    expect(g.error?.message).toContain('actor is required');
+    expect(g.error).toBeUndefined();
 
+    // The shared scope cannot delete another persona's fact: the delete
+    // reports the fact as not found (no scope disclosure) and it survives.
     const entry = await storeFact({ actor: 'researcher', entity: 'd', value: 'v' }, TEST_CONFIG);
     const d = await callTool('memory_delete', { id: entry.id });
-    expect(d.error?.message).toContain('actor is required');
+    expect(d.error?.message).toContain('Fact not found');
+    const count = getDatabase().query('SELECT COUNT(*) as c FROM facts WHERE id = ?').get(entry.id) as { c: number };
+    expect(count.c).toBe(1);
   });
 
-  test('requireActor rejects non-string actors', () => {
-    expect(() => resolveScope(42 as never)).toThrow(MissingActorError);
-    expect(() => resolveScope(null as never)).toThrow(MissingActorError);
+  test('resolveScope defaults non-string actors to the shared scope', () => {
+    expect(resolveScope(42 as never).actor).toBe('shared');
+    expect(resolveScope(null as never).actor).toBe('shared');
+    expect(resolveScope(undefined as never).personas).toEqual(['shared']);
   });
 });

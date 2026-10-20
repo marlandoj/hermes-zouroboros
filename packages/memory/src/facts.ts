@@ -8,7 +8,7 @@ import { generateEmbedding, serializeEmbedding, deserializeEmbedding, generateHy
 import { invalidateGraphCache } from './graph.js';
 import { rerankResults } from './reranker.js';
 import { applyDefense, DefenseBlockedError } from './defense.js';
-import { requireActor, resolveScope, scopeSql, recordAudit, newCallId } from './scope.js';
+import { resolveActor, resolveScope, scopeSql, recordAudit, newCallId } from './scope.js';
 import type { MemoryConfig, MemoryEntry, MemorySearchResult, DecayClass } from 'zouroboros-core';
 
 /** Retrieval paths must never surface reversibly-forgotten facts. */
@@ -53,7 +53,7 @@ function deduplicateResults(results: MemorySearchResult[]): MemorySearchResult[]
 }
 
 interface StoreFactInput {
-  /** Required caller identity (fail-closed; see scope.ts). */
+  /** Caller identity; an absent actor defaults to the shared scope (see scope.ts). */
   actor: string;
   entity: string;
   key?: string;
@@ -75,7 +75,7 @@ export async function storeFact(
   input: StoreFactInput,
   config: MemoryConfig
 ): Promise<MemoryEntry> {
-  const actor = requireActor(input.actor, 'storeFact');
+  const actor = resolveActor(input.actor);
   const persona = input.persona ?? actor;
   const db = getDatabase();
   const id = randomUUID();
@@ -194,7 +194,7 @@ export function searchFacts(
 ): MemoryEntry[] {
   const db = getDatabase();
   const { id, entity, category, limit = 10 } = options;
-  const scope = resolveScope(options.actor, 'searchFacts');
+  const scope = resolveScope(options.actor);
   const predicate = scopeSql(scope);
 
   const terms = query.split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS);
@@ -296,7 +296,7 @@ export async function searchFactsVector(
     throw new Error('Vector search is disabled. Enable it in configuration.');
   }
 
-  const scope = resolveScope(options.actor, 'searchFactsVector');
+  const scope = resolveScope(options.actor);
   const db = getDatabase();
   const { limit = 10, threshold = DEFAULT_VECTOR_SIMILARITY_THRESHOLD, useHyDE } = options;
 
@@ -394,7 +394,7 @@ export async function searchFactsHybrid(
   }
 ): Promise<MemorySearchResult[]> {
   const { limit = 10, vectorWeight = 0.7 } = options;
-  const actor = requireActor(options.actor, 'searchFactsHybrid');
+  const actor = resolveActor(options.actor);
   const callId = options.callId ?? newCallId();
   const shouldRerank = options.rerank ?? config.reranker?.enabled ?? false;
 
@@ -466,7 +466,7 @@ export async function searchFactsHybrid(
  * resolved scope; forgotten facts are invisible here like every other path.
  */
 export function getFact(id: string, options: { actor: string }): MemoryEntry | null {
-  const scope = resolveScope(options.actor, 'getFact');
+  const scope = resolveScope(options.actor);
   const predicate = scopeSql(scope);
   const db = getDatabase();
 
@@ -520,7 +520,7 @@ export function getFact(id: string, options: { actor: string }): MemoryEntry | n
  * silent no-op returning false — fail closed, no information disclosure.
  */
 export function deleteFact(id: string, options: { actor: string }): boolean {
-  const scope = resolveScope(options.actor, 'deleteFact');
+  const scope = resolveScope(options.actor);
   const predicate = scopeSql(scope);
   const db = getDatabase();
   // MEM-12: delete and its mandatory audit are one atomic write group.
@@ -631,7 +631,7 @@ export function forgetFact(
   id: string,
   options: { actor: string; reason?: string; retentionScore?: number },
 ): boolean {
-  const scope = resolveScope(options.actor, 'forgetFact');
+  const scope = resolveScope(options.actor);
   const predicate = scopeSql(scope);
   const db = getDatabase();
   const visible = db.query(
@@ -655,7 +655,7 @@ export function forgetFact(
  * fact's persona. Returns false when nothing was restored.
  */
 export function restoreFact(id: string, options: { actor: string }): boolean {
-  const scope = resolveScope(options.actor, 'restoreFact');
+  const scope = resolveScope(options.actor);
   const predicate = scopeSql(scope);
   const db = getDatabase();
   // MEM-12: restore and its mandatory audit are one atomic write group.
@@ -688,7 +688,7 @@ export function listForgottenFacts(options: { actor: string; limit?: number }): 
   reason: string | null;
   retentionScore: number | null;
 }> {
-  const scope = resolveScope(options.actor, 'listForgottenFacts');
+  const scope = resolveScope(options.actor);
   const predicate = scopeSql(scope, 'f.persona');
   const db = getDatabase();
   return db.query(`
@@ -719,7 +719,7 @@ export function purgeForgottenFacts(options: {
   actor: string;
   retentionDays?: number;
 }): number {
-  const scope = resolveScope(options.actor, 'purgeForgottenFacts');
+  const scope = resolveScope(options.actor);
   const predicate = scopeSql(scope);
   const db = getDatabase();
   const cutoff = Math.floor(Date.now() / 1000) - (options.retentionDays ?? DEFAULT_PURGE_RETENTION_DAYS) * 24 * 3600;
@@ -759,7 +759,7 @@ export function sweepDecay(options: {
   now?: number;
   dryRun?: boolean;
 }): DecaySweepResult {
-  const scope = resolveScope(options.actor, 'sweepDecay');
+  const scope = resolveScope(options.actor);
   const predicate = scopeSql(scope);
   const db = getDatabase();
   const nowSec = options.now ?? Math.floor(Date.now() / 1000);
