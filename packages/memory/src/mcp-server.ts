@@ -22,7 +22,7 @@ import { searchProcedures, getProcedure, getProcedureVersions, compareProcedureV
 import { applyDefense } from './defense.js';
 import { consolidateObservations, listObservations, getObservation, searchObservations } from './observations.js';
 import { defineMentalModel, readMentalModel, listMentalModels, refreshMentalModel, refreshDueMentalModels } from './mental-models.js';
-import { requireActor, resolveScope, type ScopePredicate } from './scope.js';
+import { resolveActor, resolveScope, type ScopePredicate } from './scope.js';
 import type { MemoryConfig } from 'zouroboros-core';
 
 // ============================================================================
@@ -60,29 +60,29 @@ interface McpToolDefinition {
 const TOOLS: McpToolDefinition[] = [
   {
     name: 'memory_store',
-    description: 'Store a fact in memory with optional embedding generation. Requires a caller identity (actor); calls without one are rejected.',
+    description: 'Store a fact in memory with optional embedding generation. An optional caller identity (actor) scopes the fact; calls without one store under the shared persona.',
     inputSchema: {
       type: 'object',
       properties: {
-        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Use "shared" only for deliberately cross-persona facts.' },
+        actor: { type: 'string', description: 'Optional caller identity (persona/seat). Defaults to the shared scope when omitted. Use "shared" only for deliberately cross-persona facts.' },
         entity: { type: 'string', description: 'The entity this fact is about' },
         value: { type: 'string', description: 'The fact content' },
         key: { type: 'string', description: 'Optional key for the fact' },
-        persona: { type: 'string', description: 'Persona the fact is stored under (defaults to the actor, never silently "shared")' },
+        persona: { type: 'string', description: 'Persona the fact is stored under (defaults to the actor, or "shared" when no actor is given)' },
         category: { type: 'string', enum: ['preference', 'fact', 'decision', 'convention', 'other', 'reference', 'project'] },
         decay: { type: 'string', enum: ['permanent', 'stable', 'active', 'session', 'checkpoint'] },
         importance: { type: 'number', description: 'Importance score (default 1.0)' },
       },
-      required: ['actor', 'entity', 'value'],
+      required: ['entity', 'value'],
     },
   },
   {
     name: 'memory_search',
-    description: 'Search facts by keyword or semantic similarity. Requires a caller identity (actor); results are scoped to the actor plus the shared pool.',
+    description: 'Search facts by keyword or semantic similarity. Results are scoped to the caller\'s actor (optional) plus the shared pool.',
     inputSchema: {
       type: 'object',
       properties: {
-        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Visibility = own persona + shared pool.' },
+        actor: { type: 'string', description: 'Optional caller identity (persona/seat). Defaults to the shared scope when omitted. Visibility = own persona + shared pool.' },
         query: { type: 'string', description: 'Search query' },
         entity: { type: 'string', description: 'Filter by entity' },
         category: { type: 'string', description: 'Filter by category' },
@@ -90,17 +90,17 @@ const TOOLS: McpToolDefinition[] = [
         mode: { type: 'string', enum: ['keyword', 'hybrid', 'deep'], description: 'Search mode (default hybrid): keyword (exact), hybrid (keyword + vector + graph RRF fusion), deep (hybrid + rerank + CoT answer)' },
         disposition: { type: 'object', description: 'Optional disposition knobs for deep-mode answering, each 0..1 (skepticism, literalism, empathy)', properties: { skepticism: { type: 'number' }, literalism: { type: 'number' }, empathy: { type: 'number' } } },
       },
-      required: ['actor', 'query'],
+      required: ['query'],
     },
   },
   {
     name: 'memory_episodes',
-    description: 'Search or create episodic memories. Requires a caller identity (actor); episodes are stored under the actor\'s persona and searches are scoped to the actor plus the shared pool. Calls without an actor are rejected.',
+    description: 'Search or create episodic memories. Episodes are stored under the actor\'s persona (the shared persona when no actor is given) and searches are scoped to the actor plus the shared pool.',
     inputSchema: {
       type: 'object',
       properties: {
         action: { type: 'string', enum: ['search', 'create', 'entity'], description: 'Action to perform' },
-        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected.' },
+        actor: { type: 'string', description: 'Optional caller identity (persona/seat). Defaults to the shared scope when omitted.' },
         summary: { type: 'string', description: 'Episode summary (for create)' },
         outcome: { type: 'string', enum: ['success', 'failure', 'resolved', 'ongoing'] },
         entities: { type: 'array', items: { type: 'string' }, description: 'Related entities' },
@@ -108,7 +108,7 @@ const TOOLS: McpToolDefinition[] = [
         since: { type: 'string', description: 'ISO date filter (for search)' },
         limit: { type: 'number', description: 'Max results' },
       },
-      required: ['action', 'actor'],
+      required: ['action'],
     },
   },
   {
@@ -127,17 +127,17 @@ const TOOLS: McpToolDefinition[] = [
   },
   {
     name: 'memory_graph',
-    description: 'Query the entity relationship graph. Requires a caller identity (actor); fact-derived entities are scoped to the actor.',
+    description: 'Query the entity relationship graph. Fact-derived entities are scoped to the caller\'s actor (optional; the shared scope by default).',
     inputSchema: {
       type: 'object',
       properties: {
-        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected.' },
+        actor: { type: 'string', description: 'Optional caller identity (persona/seat). Defaults to the shared scope when omitted.' },
         action: { type: 'string', enum: ['related', 'build'], description: 'Graph action' },
         entity: { type: 'string', description: 'Entity to find relations for' },
         depth: { type: 'number', description: 'Traversal depth (default 2)' },
         limit: { type: 'number', description: 'Max related entities (default 20)' },
       },
-      required: ['actor', 'action'],
+      required: ['action'],
     },
   },
   {
@@ -167,14 +167,14 @@ const TOOLS: McpToolDefinition[] = [
   },
   {
     name: 'memory_delete',
-    description: 'Delete a specific fact by ID. Cascades to embeddings, links, and activation. Requires a caller identity (actor); only facts within the actor scope can be deleted.',
+    description: 'Delete a specific fact by ID. Cascades to embeddings, links, and activation. Only facts within the caller\'s scope (the actor if given, else the shared scope) can be deleted.',
     inputSchema: {
       type: 'object',
       properties: {
-        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected.' },
+        actor: { type: 'string', description: 'Optional caller identity (persona/seat). Defaults to the shared scope when omitted.' },
         id: { type: 'string', description: 'The fact UUID to delete' },
       },
-      required: ['actor', 'id'],
+      required: ['id'],
     },
   },
   {
@@ -202,12 +202,12 @@ const TOOLS: McpToolDefinition[] = [
   },
   {
     name: 'memory_observations',
-    description: 'Work with observations — evidence-backed consolidated beliefs refined (not overwritten) as facts accumulate. Consolidate facts, list, show evidence, or search. Requires a caller identity (actor); calls without one are rejected.',
+    description: 'Work with observations — evidence-backed consolidated beliefs refined (not overwritten) as facts accumulate. Consolidate facts, list, show evidence, or search. Scoped to the caller\'s actor (optional) plus the shared pool.',
     inputSchema: {
       type: 'object',
       properties: {
         action: { type: 'string', enum: ['consolidate', 'list', 'show', 'search'], description: 'Action to perform' },
-        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Visibility = own persona + shared pool.' },
+        actor: { type: 'string', description: 'Optional caller identity (persona/seat). Defaults to the shared scope when omitted. Visibility = own persona + shared pool.' },
         persona: { type: 'string', description: 'Persona scope (default: the actor\'s scope). Must be within the actor\'s scope.' },
         min_proof: { type: 'number', description: 'Minimum corroborating facts required (default 2, consolidate only)' },
         use_llm: { type: 'boolean', description: 'Use LLM synthesis for belief text (default false = deterministic; consolidate only)' },
@@ -216,23 +216,23 @@ const TOOLS: McpToolDefinition[] = [
         query: { type: 'string', description: 'Search query (search only)' },
         limit: { type: 'number', description: 'Max results (default 50 list / 10 search)' },
       },
-      required: ['action', 'actor'],
+      required: ['action'],
     },
   },
   {
     name: 'memory_mental_models',
-    description: 'Standing answers to standing questions per persona. Reads are plain DB reads (zero tokens, no LLM); refreshes rewrite the answer in the background. Define, read, list, or refresh. Requires a caller identity (actor); calls without one are rejected.',
+    description: 'Standing answers to standing questions per persona. Reads are plain DB reads (zero tokens, no LLM); refreshes rewrite the answer in the background. Define, read, list, or refresh. Scoped to the caller\'s actor (optional) plus the shared scope.',
     inputSchema: {
       type: 'object',
       properties: {
         action: { type: 'string', enum: ['define', 'read', 'list', 'refresh', 'refresh_due'], description: 'Action to perform' },
-        actor: { type: 'string', description: 'REQUIRED caller identity (persona/seat). Fail-closed: calls without an actor are rejected. Visibility = own persona + shared pool.' },
+        actor: { type: 'string', description: 'Optional caller identity (persona/seat). Defaults to the shared scope when omitted. Visibility = own persona + shared pool.' },
         persona: { type: 'string', description: 'Persona scope (default: the actor for define/read, the actor\'s scope for list). Must be within the actor\'s scope.' },
         question: { type: 'string', description: 'The standing question (define/read)' },
         refresh_interval_s: { type: 'number', description: 'Seconds between refreshes (define only, default 86400)' },
         id: { type: 'string', description: 'Mental model ID (refresh only; unique prefixes accepted)' },
       },
-      required: ['action', 'actor'],
+      required: ['action'],
     },
   },
 ];
@@ -267,8 +267,8 @@ async function handleToolCall(
 ): Promise<unknown> {
   switch (name) {
     case 'memory_store': {
-      // Fail-closed (operator decision Q2): no actor, no write.
-      const scope = resolveScope(requireActor(args.actor, 'memory_store'), 'memory_store');
+      // Actor optional: an absent actor writes under the shared scope.
+      const scope = resolveScope(args.actor);
       const result = await storeFact({
         actor: scope.actor,
         entity: args.entity as string,
@@ -289,8 +289,8 @@ async function handleToolCall(
     }
 
     case 'memory_search': {
-      // Fail-closed (operator decision Q2): no actor, no read.
-      const scope = resolveScope(requireActor(args.actor, 'memory_search'), 'memory_search');
+      // Actor optional: an absent actor reads the shared scope.
+      const scope = resolveScope(args.actor);
       const scopeMeta = { actor: scope.actor, personas: scope.personas };
       const mode = (args.mode as string) ?? 'hybrid';
       if (mode === 'deep') {
@@ -329,7 +329,7 @@ async function handleToolCall(
     case 'memory_episodes': {
       const action = args.action as string;
       // MEM-10: episodes are actor-scoped end to end.
-      const scope = resolveScope(requireActor(args.actor, 'memory_episodes'), 'memory_episodes');
+      const scope = resolveScope(args.actor);
       if (action === 'create') {
         return createEpisode({
           actor: scope.actor,
@@ -367,7 +367,7 @@ async function handleToolCall(
     }
 
     case 'memory_graph': {
-      const scope = resolveScope(requireActor(args.actor, 'memory_graph'), 'memory_graph');
+      const scope = resolveScope(args.actor);
       const action = args.action as string;
       if (action === 'build') return buildEntityGraph(scope);
       return getRelatedEntities(args.entity as string, scope, {
@@ -407,7 +407,7 @@ async function handleToolCall(
     }
 
     case 'memory_delete': {
-      const actor = requireActor(args.actor, 'memory_delete');
+      const actor = resolveActor(args.actor);
       const id = args.id as string;
       if (!id) throw new Error('id is required');
       const deleted = deleteFact(id, { actor });
@@ -442,8 +442,8 @@ async function handleToolCall(
 
     case 'memory_observations': {
       const action = args.action as string;
-      // MEM-02: actor scope end to end — no actor, no observations.
-      const scope = resolveScope(requireActor(args.actor, 'memory_observations'), 'memory_observations');
+      // MEM-02: actor scope end to end — an absent actor uses the shared scope.
+      const scope = resolveScope(args.actor);
       const persona = scopedPersona(args.persona, scope, 'memory_observations');
       if (action === 'consolidate') {
         return consolidateObservations({
@@ -480,8 +480,8 @@ async function handleToolCall(
 
     case 'memory_mental_models': {
       const action = args.action as string;
-      // MEM-02: actor scope end to end — no actor, no mental models.
-      const scope = resolveScope(requireActor(args.actor, 'memory_mental_models'), 'memory_mental_models');
+      // MEM-02: actor scope end to end — an absent actor uses the shared scope.
+      const scope = resolveScope(args.actor);
       const persona = scopedPersona(args.persona, scope, 'memory_mental_models');
       if (action === 'define') {
         if (!args.question) throw new Error('question is required for define');

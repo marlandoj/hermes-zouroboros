@@ -36,7 +36,7 @@ export interface RoutingDecision {
 }
 
 export interface RouteOptions {
-  /** Required caller identity (fail-closed; see scope.ts). */
+  /** Caller identity; an absent actor defaults to the shared scope (see scope.ts). */
   actor: string;
   limit?: number;
   vectorWeight?: number;
@@ -187,7 +187,7 @@ export async function routeMemoryQuery(
   config: MemoryConfig,
   options: RouteOptions,
 ): Promise<MemorySearchResult[]> {
-  const scope = resolveScope(options.actor, 'routeMemoryQuery');
+  const scope = resolveScope(options.actor);
   const decision = classifyMemoryQuery(query);
   const start = Date.now();
   let results = await searchFactsHybrid(query, config, {

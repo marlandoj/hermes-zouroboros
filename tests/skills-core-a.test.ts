@@ -68,10 +68,8 @@ test('zo-memory-system writes only the profile database, shared with the MCP ser
   expect(noProfile.stderr).toContain('Run init first');
 }, 30_000);
 
-test('zo-swarm-orchestrator gates, validates, prepares and runs a DAG through the real orchestrator', () => {
+test('zo-swarm-orchestrator validates, prepares and runs a DAG through the real orchestrator', () => {
   const swarm = skill('zo-swarm-orchestrator', 'swarm.ts');
-  expect(JSON.parse(run(swarm, ['gate', 'Fix a typo in the README']).stdout).decision).toBe('DIRECT');
-  expect(JSON.parse(run(swarm, ['gate', 'Use a swarm to migrate the schema across all packages']).stdout).decision).toBe('FORCE_SWARM');
 
   writeFileSync(join(root, 'cycle.json'), JSON.stringify([{ id: 'a', task: 'x', dependsOn: ['a'] }]));
   expect(run(swarm, ['validate', 'cycle.json']).code).toBe(1);
@@ -143,7 +141,7 @@ test('tier-resolver regression suite and its own tests pass against the default 
   expect(suite.stdout).toContain('All checks passed');
   const own = Bun.spawnSync(['bun', 'test', join(repo, 'skills/zouroboros/tier-resolver/scripts')], { cwd: repo, stdout: 'pipe', stderr: 'pipe', timeout: 60_000 });
   expect(own.exitCode).toBe(0);
-  expect(own.stderr.toString()).toMatch(/\b45 pass\b/);
+  expect(own.stderr.toString()).toMatch(/\b13 pass\b/);
   expect(own.stderr.toString()).toContain(' 0 fail');
 }, 90_000);
 

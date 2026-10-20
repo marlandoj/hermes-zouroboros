@@ -5,13 +5,13 @@
 import { randomUUID } from 'crypto';
 import { getDatabase } from './database.js';
 import { invalidateGraphCache } from './graph.js';
-import { requireActor, scopeSql, type ScopePredicate } from './scope.js';
+import { resolveActor, scopeSql, type ScopePredicate } from './scope.js';
 import type { EpisodicMemory, TemporalQuery } from 'zouroboros-core';
 
 type Outcome = 'success' | 'failure' | 'resolved' | 'ongoing';
 
 interface CreateEpisodeInput {
-  /** Required caller identity (fail-closed; MEM-10). The episode is stored under this persona. */
+  /** Caller identity (MEM-10); an absent actor defaults to the shared scope. The episode is stored under this persona. */
   actor: string;
   summary: string;
   outcome: Outcome;
@@ -57,7 +57,7 @@ function syncEpisodeDocument(
  * persona — episodes are actor-scoped, not global.
  */
 export function createEpisode(input: CreateEpisodeInput): EpisodicMemory {
-  const actor = requireActor(input.actor, 'createEpisode');
+  const actor = resolveActor(input.actor);
   const db = getDatabase();
   const id = randomUUID();
   const happenedAt = input.happenedAt || new Date();

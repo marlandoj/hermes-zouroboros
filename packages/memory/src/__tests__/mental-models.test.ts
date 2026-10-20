@@ -7,7 +7,7 @@ import {
   refreshMentalModel,
   refreshDueMentalModels,
 } from '../mental-models.js';
-import { resolveScope, MissingActorError } from '../scope.js';
+import { resolveScope } from '../scope.js';
 import type { MemoryConfig } from 'zouroboros-core';
 
 // Refresh falls back to a deterministic digest when no model key is present;
@@ -95,8 +95,8 @@ describe('MEM-02: mental models are actor-scoped', () => {
     expect(refreshed.answer).toContain('No memory facts available yet');
   });
 
-  test('missing actor fails closed', () => {
-    expect(() => resolveScope('')).toThrow(MissingActorError);
-    expect(() => resolveScope('   ')).toThrow(MissingActorError);
+  test('missing actor resolves to the shared scope', () => {
+    expect(resolveScope('').actor).toBe('shared');
+    expect(resolveScope('   ').personas).toEqual(['shared']);
   });
 });

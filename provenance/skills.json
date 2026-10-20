@@ -703,7 +703,7 @@
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "ccc1a6ea2be1a256bbdfc0a7cd483c2baf3cb4ff746cecdcdea752e3cde1e871",
       "distributedSha256": "f28831eb68c12c75b4ca88a1c783da12cdf1d7b83193f69d08b8d84a8261b6c2",
-      "adaptation": "Rewritten operator-neutral: removed brand/funnel names, revenue target, persona identity and operator author handle; output moved from the skill dir to $ZOUROBOROS_WORKSPACE; the source .env.template (channel ID, handle, voice ID, site URL) is NOT shipped and is replaced by a names-only variable table; added educational/not-advice and human-approval content rules; Hermes frontmatter added."
+      "adaptation": "Rewritten operator-neutral: removed brand/funnel names, revenue target, persona identity and operator author handle; output moved from the skill dir to $ZOUROBOROS_WORKSPACE; the source .env.template (channel ID, handle, voice ID, site URL) is NOT shipped and is replaced by a names-only variable table; added educational/not-advice and human approval content rules; Hermes frontmatter added."
     },
     {
       "path": "skills/README.md",
@@ -2650,22 +2650,13 @@
       "adaptation": "Moved next to the resolver; reads the reviewed synthetic suite from assets/test-suite.json (JSON array) instead of tests/test-suite.jsonl; results file only with --out (never written into the skill tree). Floors unchanged (tier 84%, type 68%)."
     },
     {
-      "path": "skills/zouroboros/tier-resolver/scripts/swarm-decision-gate.test.ts",
-      "skill": "tier-resolver",
-      "sourcePath": "Skills/tier-resolver/tests/swarm-decision-gate.test.ts",
-      "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
-      "sourceSha256": "4f566b3e0c86921e5bfdb432ce6e790104855e5077559386105740a50a744179",
-      "distributedSha256": "9f910cdac471157a219fea4b66a5715658f84c419fb8f3166fab2298cb28f558",
-      "adaptation": "Replaced with the superset suite from packages/swarm/src/__tests__/routing/swarm-decision-gate.test.ts at the same source revision (adds the #850 explicit-request cases; 'trading service' instead of an operator project name); runs against the distribution package gate instead of a skill copy; two example prompts made generic (city, memory system)."
-    },
-    {
       "path": "skills/zouroboros/tier-resolver/SKILL.md",
       "skill": "tier-resolver",
       "sourcePath": "Skills/tier-resolver/SKILL.md",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "7b8ed58a21a181c0c18c30dc4bec6764c2a05fa18f700f2468bab2348083b6b6",
-      "distributedSha256": "f06f629bb6e0b2cae46cd5609308d59059f3444d2c9939d02f272ad2fac0fd35",
-      "adaptation": "Rewritten for Hermes: default host-free catalog (fast/balanced/deep, empty ids = profile model), operator catalog in ZOUROBOROS_CONFIG_DIR, feedback/weights only in ZOUROBOROS_STATE_DIR, regression suite; decision gate wired to packages/swarm. Removed host BYOK ids, persona names, OmniRoute/Zo routing and operator handle."
+      "distributedSha256": "9a7d6921869ed4ec950166e672761a1c53a0e4c175d4520c2a41d359abdb359e",
+      "adaptation": "Rewritten for Hermes: default host-free catalog (fast/balanced/deep, empty ids = profile model), operator catalog in ZOUROBOROS_CONFIG_DIR, feedback/weights only in ZOUROBOROS_STATE_DIR, regression suite; decision gate wired to packages/swarm. Removed host BYOK ids, persona names, OmniRoute/Zo routing and operator handle. The swarm decision gate section was removed 2026-10-20 (decision factory removed from the public repo)."
     },
     {
       "path": "skills/zouroboros/unstuck-lateral/references/architect.md",
@@ -3006,8 +2997,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "e2e6662106e4b456faea4c3f5f280bc2444e7d9a04b38936300262614bf25c7d",
-      "adaptation": "Distribution-authored wrapper: package decision gate, integration/tasks.ts validation, profile campaigns dir, run via integration/cli.ts swarm (opt-in). Replaces the source orchestrate-v4/v5 host scripts."
+      "distributedSha256": "730541d819af9ba585d8fcc6b903df6101ff42f286853760be6800ff82788e97",
+      "adaptation": "Distribution-authored wrapper: integration/tasks.ts validation, profile campaigns dir, run via integration/cli.ts swarm (opt-in). Replaces the source orchestrate-v4/v5 host scripts. The decision-gate subcommand was removed 2026-10-20 (decision factory removed from the public repo)."
     },
     {
       "path": "skills/zouroboros/zo-swarm-orchestrator/SKILL.md",
@@ -3015,8 +3006,8 @@
       "sourcePath": "Skills/zo-swarm-orchestrator/SKILL.md",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "3bc2ad52b13428b0e119ed423d371465faacd10d83ba09acdbc2e283c2fbb926",
-      "distributedSha256": "ff0d4aff179eb6c9c479105e6d0e782becc34f4710be8dfe01a2a423128f5139",
-      "adaptation": "Rewritten for Hermes: decision gate -> bounded task DAG (integration/tasks.ts contract) -> prepare -> operator opt-in run via integration/cli.ts swarm (hermes-vps workers). Removed Zo API executors, persona registry, host campaigns/examples, operator handle."
+      "distributedSha256": "19b365800a1a52a28b64ec7e3ca31a172889bdee08f509bd1e603383ad4c9944",
+      "adaptation": "Rewritten for Hermes: decision gate -> bounded task DAG (integration/tasks.ts contract) -> prepare -> operator opt-in run via integration/cli.ts swarm (hermes-vps workers). Removed Zo API executors, persona registry, host campaigns/examples, operator handle. The decision-gate workflow step was removed 2026-10-20 (decision factory removed from the public repo)."
     },
     {
       "path": "skills/zouroboros/zouroboros-evolve/scripts/evolve.ts",
@@ -3096,8 +3087,8 @@
       "sourcePath": "Skills/zouroboros-governance/scripts/constitution-gate.ts",
       "sourceRevision": "b6dff3e5e6c12070f90064f4146f9f08d8612d01",
       "sourceSha256": "4109239c2a8f4816abd7b51d6e0c5b17682099e4d697d640a0ad41d0917515a0",
-      "distributedSha256": "5a0ff0661e58636bcc3d8ff715dece56c6df6776a275aae065609cd91bf33983",
-      "adaptation": "Canonical root defaults to the shipped references/ (or ZOUROBOROS_GOVERNANCE_DOCS_DIR); workspace mirror check only when configured (mirrorMode not-configured otherwise); host workspace defaults removed. Promotion phase fails closed with IX-PROMOTION-AUTHORITY-UNAVAILABLE because the persona-attestation, operator-approval, provider-native issuer and authorization-ledger modules are not distributed; their imports and evidence helpers removed. Preflight articles I-X unchanged."
+      "distributedSha256": "dcb3814aac2dd457c1ed360b1908fd621a8871af19af5483f8553b0ab576b80a",
+      "adaptation": "Canonical root defaults to the shipped references/ (or ZOUROBOROS_GOVERNANCE_DOCS_DIR); workspace mirror check only when configured (mirrorMode not-configured otherwise); host workspace defaults removed. Promotion phase fails closed with IX-PROMOTION-AUTHORITY-UNAVAILABLE because the persona-attestation, operator-approval, provider-native issuer and authorization-ledger modules are not distributed; their imports and evidence helpers removed. Preflight articles I-X unchanged. The blast-radius type was renamed ImpactRadius in this distribution (2026-10-20)."
     },
     {
       "path": "skills/zouroboros/zouroboros-governance/scripts/governance-ledger.ts",
@@ -3627,8 +3618,8 @@
       "sourcePath": null,
       "sourceRevision": null,
       "sourceSha256": null,
-      "distributedSha256": "e79badeb96e435985da0801b1522d11875f22e5447f444a804d5908d279403b9",
-      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime"
+      "distributedSha256": "0017dff12f622c9e7732207fe1d112dfe18a40913524d1f20c9f39ca4acff799",
+      "adaptation": "Distribution-authored: platform assessment (introspect phase of the closed loop); harness/procedure written in this distribution, host specifics resolved at runtime. The routing case targeting the swarm decision-gate script was removed 2026-10-20 (decision factory removed from the public repo)."
     },
     {
       "path": "skills/zouroboros/zouroboros-platform-assessment/scripts/restore-drill.py",

@@ -1,6 +1,6 @@
 ---
 name: zo-swarm-orchestrator
-description: "Plan and run a Zouroboros swarm from Hermes: score whether a task warrants multi-agent orchestration (decision gate), write a bounded task DAG, validate it, save it for operator review, and execute it through one-shot Hermes workers only after explicit opt-in. Use for multi-step work that splits into independent or dependent subtasks."
+description: "Plan and run a Zouroboros swarm from Hermes: write a bounded task DAG, validate it, save it for operator review, and execute it through one-shot Hermes workers only after explicit opt-in. Use for multi-step work that splits into independent or dependent subtasks."
 version: 5.0.0-hermes.1
 author: Zouroboros
 license: MIT
@@ -21,17 +21,7 @@ in the configured workspace. Planning is free and local; execution is opt-in and
 
 ## Workflow
 
-1. **Score the plan.** Score the scoped plan, not just the request:
-
-   ```bash
-   bun "${HERMES_SKILL_DIR}/scripts/swarm.ts" gate "<scoped plan in one paragraph>"
-   ```
-
-   `decision` is `DIRECT` (do it yourself), `SUGGEST` (offer a swarm, default to direct),
-   `SWARM` or `FORCE_SWARM` (the user explicitly asked). A SWARM result still needs operator
-   approval before anything runs.
-
-2. **Write the task DAG** as a JSON array. Each task is
+1. **Write the task DAG** as a JSON array. Each task is
    `{ "id", "task", "priority"?, "dependsOn"?, "timeoutSeconds"? }`:
    - `id`: 1-64 characters of `[A-Za-z0-9_-]`, unique;
    - `task`: a self-contained instruction (the worker sees nothing else);
@@ -42,7 +32,7 @@ in the configured workspace. Planning is free and local; execution is opt-in and
    At most 20 tasks. No other fields are accepted: a task cannot pick its executor, model or host
    configuration.
 
-3. **Validate and prepare** a reviewable campaign file in the profile:
+2. **Validate and prepare** a reviewable campaign file in the profile:
 
    ```bash
    bun "${HERMES_SKILL_DIR}/scripts/swarm.ts" validate tasks.json
@@ -51,9 +41,9 @@ in the configured workspace. Planning is free and local; execution is opt-in and
 
    The `zouroboros` MCP server's `swarm_prepare` tool does the same from inside a session.
 
-4. **Show the campaign to the operator.** Execution needs their go-ahead.
+3. **Show the campaign to the operator.** Execution needs their go-ahead.
 
-5. **Run (operator opt-in only):**
+4. **Run (operator opt-in only):**
 
    ```bash
    HERMES_ZOUROBOROS_ALLOW_SWARM=1 bun "${HERMES_SKILL_DIR}/scripts/swarm.ts" run <taskFile>
@@ -63,7 +53,7 @@ in the configured workspace. Planning is free and local; execution is opt-in and
    does not retry, and prints a JSON summary (`ok`, per-task `success`, `output`, `error`).
    Workers run with `HERMES_ZOUROBOROS_ALLOW_SWARM=0`, so a worker cannot start another swarm.
 
-6. **Record the outcome** with the `zo-memory-system` skill (`zmem.ts episode ...`) if it should be
+5. **Record the outcome** with the `zo-memory-system` skill (`zmem.ts episode ...`) if it should be
    remembered.
 
 ## Writing good tasks

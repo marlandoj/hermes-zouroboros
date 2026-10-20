@@ -36,17 +36,6 @@ import {
   type AdapterSpawnSpec,
 } from './agent-containment.js';
 import { readManagedFactoryBoundary, prepareManagedFactorySpawn, assertManagedFactorySessionMode } from './factory-systemd-containment.js';
-import {
-  DecisionGate,
-  resolveDecisionOrigin,
-  type HumanApprover,
-  type TierPolicy,
-} from '../approval-tiers.js';
-import {
-  resolveDecisionRecordStore,
-  type DecisionRecordStore,
-  type ProposedAction,
-} from '../decision-record.js';
 const managedAdapters = new WeakSet<ChildProcess>();
 
 // Env vars to strip before spawning the ACP adapter (session detection suppression)
@@ -515,7 +504,6 @@ class SwarmClient implements Client {
 
   constructor(
     queue: SessionUpdate[] & { _notify?: () => void },
-    private decisionGate: DecisionGate | undefined,
     onUpdate?: (update: SessionUpdate) => void,
     private recorder?: FileCassetteRecorder,
     private onActivity?: () => void,
@@ -615,10 +603,7 @@ class SwarmClient implements Client {
   }
 
   async requestPermission(params: RequestPermissionRequest): Promise<RequestPermissionResponse> {
-    // Decision-factory enforcement point: every ACP permission request is
-    // proposed, tiered, and recorded BEFORE any allow option can be selected.
-    // No gate, a throwing gate, or a denial all resolve to 'cancelled'.
-    return gatedAcpPermission(this.decisionGate, params);
+    return selectAcpPermissionOption(params);
   }
 
   async writeTextFile(_params: any) { return {}; }
@@ -774,57 +759,6 @@ export function selectAcpPermissionOption(
   return { outcome: { outcome: 'selected', optionId: option.optionId } };
 }
 
-/** Translate an ACP permission request into a decision-factory proposal. */
-export function proposedActionFromPermissionRequest(
-  params: RequestPermissionRequest,
-): { action: ProposedAction; kind?: string } {
-  const toolCall = (params.toolCall ?? {}) as {
-    toolCallId?: unknown;
-    title?: unknown;
-    kind?: unknown;
-    rawInput?: unknown;
-    locations?: Array<{ path?: unknown }>;
-  };
-  const tool = typeof toolCall.title === 'string' && toolCall.title.trim()
-    ? toolCall.title
-    : typeof toolCall.kind === 'string' && toolCall.kind.trim()
-      ? toolCall.kind
-      : 'unknown-tool';
-  const kind = typeof toolCall.kind === 'string' ? toolCall.kind : undefined;
-  const location = toolCall.locations?.find(l => typeof l?.path === 'string')?.path;
-  const target = typeof location === 'string' ? location : readPathFromArgs(toolCall.rawInput);
-  return {
-    action: {
-      kind: 'tool_call',
-      tool,
-      ...(target ? { target } : {}),
-      summary: `ACP permission request: ${tool}${kind ? ` (${kind})` : ''}${target ? ` → ${target}` : ''}`,
-      ...(toolCall.rawInput !== undefined ? { rawInput: toolCall.rawInput } : {}),
-    },
-    ...(kind ? { kind } : {}),
-  };
-}
-
-/**
- * The structural permission seam: record and tier verdict first, allow option
- * second. Fail closed on every ambiguity — a missing gate, a throwing gate,
- * or a denial all return 'cancelled', and the adapter never gets the tool.
- */
-export function gatedAcpPermission(
-  gate: DecisionGate | undefined,
-  params: RequestPermissionRequest,
-): RequestPermissionResponse {
-  if (!gate) return { outcome: { outcome: 'cancelled' } };
-  try {
-    const { action, kind } = proposedActionFromPermissionRequest(params);
-    const record = gate.decide(action, kind);
-    if (record.outcome !== 'approved') return { outcome: { outcome: 'cancelled' } };
-    return selectAcpPermissionOption(params);
-  } catch {
-    return { outcome: { outcome: 'cancelled' } };
-  }
-}
-
 /**
  * Extract token usage from an ACP prompt result. The SDK `Usage` field is
  * @experimental (v0.18.0) and may be absent. A count of 0 is treated as absent
@@ -864,16 +798,6 @@ export interface ACPTransportConfig {
   };
   /** Local skill suggestion, staged: shadow (observe only), canary, or live injection. Off unless explicitly enabled. */
   wayfinder?: WayfinderShadowConfig;
-  /**
-   * Decision-factory overrides. Enforcement itself is structural and cannot
-   * be disabled here — this only swaps the record store, the tier policy, or
-   * wires a human approver for the human tier.
-   */
-  decisions?: {
-    store?: DecisionRecordStore;
-    policy?: TierPolicy;
-    humanApprover?: HumanApprover;
-  };
 }
 
 type JsonMcpServer = {
@@ -1615,72 +1539,7 @@ export class ACPTransport implements ExecutorTransport {
     const env = this.buildEnv(options);
     env.SWARM_EXECUTOR_ID = this.entry.id;
 
-    // Decision factory: the executor dispatch is itself a decision. One coarse
-    // `delegated` record is created and approved BEFORE any adapter spawns;
-    // denial fails the task with no spawn. Both lanes traverse this one seam —
-    // the factory lane is recognized by its containment env markers (locked Q4).
     const traceId = options.env?.ZO_TRACE_ID ?? process.env.ZO_TRACE_ID;
-    const decisionOrigin = resolveDecisionOrigin(env);
-    let decisionStore: DecisionRecordStore | undefined;
-    let dispatchRecord: ReturnType<DecisionGate['decide']> | undefined;
-    try {
-      decisionStore = this.config.decisions?.store ?? resolveDecisionRecordStore(env);
-      const dispatchGate = new DecisionGate({
-        store: decisionStore,
-        actor: task.persona,
-        origin: decisionOrigin,
-        authority: 'delegate',
-        policy: this.config.decisions?.policy,
-        granularity: 'coarse',
-        ...(traceId ? { traceId } : {}),
-        taskId: task.id,
-        ...(this.config.decisions?.humanApprover ? { humanApprover: this.config.decisions.humanApprover } : {}),
-      });
-      dispatchRecord = dispatchGate.decide({
-        kind: 'executor_dispatch',
-        tool: this.entry.id,
-        target: options.workdir ?? getWorkspaceRoot(),
-        summary: `dispatch task ${task.id} to executor '${this.entry.id}' as persona '${task.persona}' (${decisionOrigin} lane)`,
-      });
-    } catch (error) {
-      doneResolve();
-      return {
-        task,
-        success: false,
-        error: `decision factory refused executor dispatch (fail closed): ${error instanceof Error ? error.message : String(error)}`,
-        durationMs: Date.now() - startTime,
-        retries: 0,
-      };
-    }
-    if (!decisionStore || !dispatchRecord || dispatchRecord.outcome !== 'approved') {
-      doneResolve();
-      return {
-        task,
-        success: false,
-        error: dispatchRecord
-          ? `decision factory denied executor dispatch (decision ${dispatchRecord.decision_id}): ${dispatchRecord.reason}`
-          : 'decision factory produced no dispatch record (fail closed)',
-        durationMs: Date.now() - startTime,
-        retries: 0,
-      };
-    }
-    // Per-tool permission gate for this session, delegated by the approved
-    // dispatch record. Factory-origin sessions record coarsely (events on the
-    // parent record for approvals; denials always get a full record); swarm
-    // sessions record one fine-grained record per tool decision.
-    const toolGate = new DecisionGate({
-      store: decisionStore,
-      actor: task.persona,
-      origin: decisionOrigin,
-      authority: 'delegate',
-      policy: this.config.decisions?.policy,
-      granularity: decisionOrigin === 'factory' ? 'coarse' : 'fine',
-      parentDecisionId: dispatchRecord.decision_id,
-      ...(traceId ? { traceId } : {}),
-      taskId: task.id,
-      ...(this.config.allowedTools?.length ? { allowedTools: this.config.allowedTools } : {}),
-      ...(this.config.decisions?.humanApprover ? { humanApprover: this.config.decisions.humanApprover } : {}),
-    });
     // Wayfinder, staged: shadow ranks out of band and never touches the prompt.
     // canary/live resolve the pick synchronously and inject it into the prompt,
     // but only with WAYFINDER_LIVE_INJECT=1 — without the flag, or on a
@@ -1823,7 +1682,7 @@ export class ACPTransport implements ExecutorTransport {
         // Observation is untrusted and must never fail the session.
       }
     };
-    const client = new SwarmClient(queue, toolGate, onUpdate, recorder, resetIdleTimeout);
+    const client = new SwarmClient(queue, onUpdate, recorder, resetIdleTimeout);
     const connection = new ClientSideConnection((_agent: Agent) => client, stream);
 
     // Total timeout and no-progress timeout enforcement.
@@ -1917,7 +1776,6 @@ export class ACPTransport implements ExecutorTransport {
             mcpServers: managedAdapters.has(adapter) ? [] : loadAcpMcpServers(this.config.mcpConfig, { workdir: cwd, env }),
           });
           sessionId = sessionResult.sessionId;
-          toolGate.bindSession(sessionId);
           // The managed boundary pins Codex's ACP mode; a fallback to any other mode fails closed before a prompt.
           if (managedAdapters.has(adapter)) assertManagedFactorySessionMode(sessionResult);
 

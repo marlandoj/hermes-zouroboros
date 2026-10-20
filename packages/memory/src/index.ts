@@ -56,14 +56,14 @@ export {
   DEFAULT_RETENTION_THRESHOLD,
 } from './facts.js';
 
-// Scope (Track 1 intelligence plane choke point)
+// Scope (actor scoping choke point)
 export {
   resolveScope,
-  requireActor,
+  resolveActor,
+  DEFAULT_ACTOR,
   scopeSql,
   recordAudit,
   newCallId,
-  MissingActorError,
   type ScopePredicate,
 } from './scope.js';
 

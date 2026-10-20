@@ -579,7 +579,7 @@
       "trackedAtRevision": true,
       "triage": "portable",
       "disposition": "adapted",
-      "reason": "Rewritten operator-neutral: brand, funnel, revenue target and persona identity removed; .env.template (channel ID, handle, voice ID, site URL) not shipped and replaced by a names-only variable table; not-advice and human-approval rules added. The source has no pipeline scripts, so the skill is an orchestration guide.",
+      "reason": "Rewritten operator-neutral: brand, funnel, revenue target and persona identity removed; .env.template (channel ID, handle, voice ID, site URL) not shipped and replaced by a names-only variable table; not-advice and human approval rules added. The source has no pipeline scripts, so the skill is an orchestration guide.",
       "distributedAs": [
         "skills/media/smart-money"
       ]
@@ -621,7 +621,7 @@
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
       "disposition": "adapted",
-      "reason": "Resolver and calibration shipped with portable paths: hand-written default catalog (empty ids = Hermes profile model), operator catalog in ZOUROBOROS_CONFIG_DIR, feedback/tuned weights only in ZOUROBOROS_STATE_DIR. Never shipped: data/feedback.jsonl, data/models.json, data/external-models.json, data/weights.json (built-in reference weights used). Decision gate wired to packages/swarm (synced to the pin). Reviewed synthetic tests/test-suite.jsonl shipped as assets/test-suite.json. Not shipped: Zo/OmniRoute routing scripts (zo-ask-route, catalog-sync, model-route hooks, deprecated resolvers) and model-routing-policy.test.ts (tests the host catalog + Zo route). Own tests + regression floors run in CI.",
+      "reason": "Resolver and calibration shipped with portable paths: hand-written default catalog (empty ids = Hermes profile model), operator catalog in ZOUROBOROS_CONFIG_DIR, feedback/tuned weights only in ZOUROBOROS_STATE_DIR. Never shipped: data/feedback.jsonl, data/models.json, data/external-models.json, data/weights.json (built-in reference weights used). Reviewed synthetic tests/test-suite.jsonl shipped as assets/test-suite.json. Not shipped: Zo/OmniRoute routing scripts (zo-ask-route, catalog-sync, model-route hooks, deprecated resolvers) and model-routing-policy.test.ts (tests the host catalog + Zo route). Own tests + regression floors run in CI.",
       "distributedAs": [
         "skills/zouroboros/tier-resolver"
       ]
@@ -754,7 +754,7 @@
       "trackedAtRevision": true,
       "triage": "adapt/core-runtime",
       "disposition": "adapted",
-      "reason": "Wired to the distribution: packages/swarm decision gate, integration/tasks.ts DAG contract, profile campaigns dir and the opt-in integration/cli.ts swarm runner (hermes-vps workers). Not shipped: orchestrate-v4/v5 host scripts, persona registry, host campaigns/examples/evaluations, data/. Offline e2e (fake Hermes through the real orchestrator) in tests/skills-core-a.test.ts.",
+      "reason": "Wired to the distribution: integration/tasks.ts DAG contract, profile campaigns dir and the opt-in integration/cli.ts swarm runner (hermes-vps workers). Not shipped: orchestrate-v4/v5 host scripts, persona registry, host campaigns/examples/evaluations, data/. Offline e2e (fake Hermes through the real orchestrator) in tests/skills-core-a.test.ts.",
       "distributedAs": [
         "skills/zouroboros/zo-swarm-orchestrator"
       ]

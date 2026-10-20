@@ -11,7 +11,6 @@ import {
   scoreRetention,
   DEFAULT_VECTOR_SIMILARITY_THRESHOLD,
 } from '../facts.js';
-import { MissingActorError } from '../scope.js';
 import type { MemoryConfig } from 'zouroboros-core';
 
 const TEST_CONFIG: MemoryConfig = {
@@ -109,20 +108,26 @@ describe('storeFact', () => {
   });
 });
 
-describe('fail-closed actor requirement', () => {
-  test('storeFact without actor throws MissingActorError', async () => {
-    await expect(
-      storeFact({ entity: 'x', value: 'y' } as never, TEST_CONFIG),
-    ).rejects.toBeInstanceOf(MissingActorError);
+describe('actor-optional default scope', () => {
+  test('storeFact without actor stores under the shared persona', async () => {
+    const entry = await storeFact({ entity: 'x', value: 'y' } as never, TEST_CONFIG);
+    // Stored in the shared pool: visible to any declared actor.
+    const seen = searchFacts('y', { actor: 'anyone' });
+    expect(seen.some(f => f.id === entry.id)).toBe(true);
   });
 
-  test('searchFacts without actor throws MissingActorError', () => {
-    expect(() => searchFacts('anything', {} as never)).toThrow(MissingActorError);
+  test('searchFacts without actor searches the shared scope', async () => {
+    await storeFact({ actor: 'researcher', entity: 'a', value: 'private note' }, TEST_CONFIG);
+    await storeFact({ actor: 'shared', entity: 'b', value: 'shared note' }, TEST_CONFIG);
+    const results = searchFacts('note', {} as never);
+    expect(results.map(r => r.value)).toContain('shared note');
+    expect(results.map(r => r.value)).not.toContain('private note');
   });
 
-  test('empty/whitespace actor is rejected — no silent default scope', () => {
-    expect(() => searchFacts('anything', { actor: '   ' })).toThrow(MissingActorError);
-    expect(() => searchFacts('anything', { actor: '' })).toThrow(MissingActorError);
+  test('empty/whitespace actor resolves to the shared scope', async () => {
+    await storeFact({ actor: 'shared', entity: 'c', value: 'pooled note' }, TEST_CONFIG);
+    expect(searchFacts('pooled', { actor: '   ' }).length).toBe(1);
+    expect(searchFacts('pooled', { actor: '' }).length).toBe(1);
   });
 });
 

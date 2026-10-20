@@ -21,9 +21,9 @@ import { fileURLToPath } from 'node:url';
 import { DEFAULT_CONFIG, type MemorySearchResult } from 'zouroboros-core';
 import { closeDatabase, extractQueryEntities, initDatabase, resolveScope, runMigrations, searchFacts, searchFactsGraphBoosted, storeFact } from 'zouroboros-memory';
 
-// Track 1 actor scoping: this eval stores and recalls synthetic fixtures in a
+// Actor scoping: this eval stores and recalls synthetic fixtures in a
 // scratch database, so everything runs under the deliberate cross-persona
-// 'shared' actor (fail-closed APIs require an explicit identity).
+// 'shared' actor.
 const EVAL_ACTOR = 'shared';
 
 export interface RecallFixtureSet {
@@ -53,7 +53,7 @@ function recall(query: string): string[] {
     }
   }
   const base = [...hits.values()].sort((a, b) => b.count - a.count || a.first - b.first).map((hit) => hit.result);
-  const scope = resolveScope(EVAL_ACTOR, 'memory-recall-eval');
+  const scope = resolveScope(EVAL_ACTOR);
   return searchFactsGraphBoosted(base, extractQueryEntities(query, scope), scope, { limit: TOP_K })
     .map((result) => `${result.entry.entity} ${result.entry.key ?? ''} ${result.entry.value}`.toLowerCase());
 }
