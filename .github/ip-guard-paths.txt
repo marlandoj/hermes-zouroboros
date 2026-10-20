@@ -1,0 +1,2 @@
+(^|/)packages/intelligence(/|$)
+(^|/)(decision-record|decision-ledger|swarm-decision-gate|approval-tiers|authority-eval|human-approval|acp-gate|decision-factory)\.(ts|tsx|js|jsx|mjs|md)$
