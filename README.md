@@ -149,11 +149,12 @@ This repository is the open-source Community Edition. The same Zouroboros worksh
 
 - **Memory** — memory_search: search everything the workshop remembers; memory_store: save a fact or decision; memory_episodes: recall past work sessions; memory_procedures: how-to knowledge that accumulates; cognitive_profile: the workshop's model of how you work.
 - **Swarm** — swarm_dispatch: hand a task to the AI build team (Claude Code, Codex, Gemini, and more, routed automatically); swarm_status: check running work; swarm_results: collect finished work; swarm_executors: team roster and health; swarm_doctor: diagnostics.
-- **Factory** — factory_run: the spec-to-build-to-verified lane; factory_smoke: quick end-to-end check; factory_status: lane status.
+- **Factory** — factory_run: the spec-to-build-to-verified lane; factory_smoke: quick end-to-end check; factory_status: lane status; factory_queue: every task bundle shipped to the factory — title, state (queued/running/done/failed), ship and finish times.
 - **Workshop** — workshop_guide: how the workshop works; onboarding_status: setup progress; workshop_update: pull the latest release.
 - **Make it yours** — workshop_add_executor: connect another AI subscription; workshop_set_model: models per executor; workshop_add_skill: adopt a skill (security-scanned first); workshop_add_mcp: adopt another MCP server (probed and classified first).
 - **Manage** — workshop_memory_config: retention/forgetting controls; workshop_schedule: recurring jobs; workshop_team: seats and invites.
-- **API access** — workshop_api_key: mint API keys for automation.
+- **Live views** — workshop_status: the whole workshop in one call — service states, executor roster, swarm activity, memory stats; bridge_inbox_list: task bundles waiting in the factory-dispatch bridge inbox (read-only).
+- **API & data** — workshop_api_key: mint API keys for automation; workshop_export: export everything — repo, memory, configs (secrets redacted) — as a tarball or GitHub branch; password re-auth required. No lock-in.
 
 **API access:** create an API key in chat (shown once; only a hash is stored) and call the same MCP endpoint with a Bearer key from scripts, cron jobs, or other agent orchestrators — no browser login needed. OAuth 2.0 with PKCE is the standard sign-in for interactive clients.
 
