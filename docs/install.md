@@ -13,9 +13,94 @@ profile first; it must already have `config.yaml`. No new provider login is
 needed to use the shared-memory tools.
 
 Review and obtain this source tree through the project's trusted distribution
-channel. The installer does not download or run an unpinned Hermes/Bun/Node
-bootstrap. It discovers PATH plus the user's `~/.local/bin` and `~/.bun/bin`.
-It requires the source's exact pnpm pin. If pnpm is missing, npm installs that
+channel. Every invocation inventories Hermes, Bun, Node, GNU `timeout`, Bash and
+Python before installation writes. Builds also inventory pnpm and, when its
+bootstrap needs it, npm. It reports all missing/incompatible tools together.
+It discovers PATH plus the user's `~/.local/bin` and `~/.bun/bin`.
+Compatible existing runtimes are retained. Existing incompatible/broken versions
+are reported; explicitly select compatible versions on PATH before retrying.
+
+By default Node and Bun are never downloaded. To opt in:
+
+```bash
+# Review the inventory/download plan without writing anything.
+bash scripts/install.sh --bootstrap-prerequisites --dry-run
+
+# Install missing supported runtimes, then continue workshop installation.
+bash scripts/install.sh --bootstrap-prerequisites
+```
+
+Automatic runtime setup supports **Linux x86_64 and arm64, glibc 2.28+,
+kernel 4.18+**. Alpine/musl, other architectures, macOS and Windows do not have
+an automatic path here. The workshop installer itself requires Linux. On x86_64
+the Bun baseline build still requires SSE4.2; an execution/version failure stops
+activation. Use an appropriate distro/runtime build on unsupported systems.
+Python's standard-library HTTPS, zip and gzip-tar support suffice; no curl,
+unzip, remote shell script or runtime package-manager installer is executed.
+
+`scripts/runtime-pins.json` pins Node **24.22.1** (with bundled npm) and Bun
+**1.3.12** (matching this source's CI baseline), per architecture. Node archives
+come from `nodejs.org`; Bun archives come from the official `oven-sh/bun` GitHub
+release. SHA-256 values were copied from the
+[Node manifest](https://nodejs.org/dist/v24.22.1/SHASUMS256.txt) and
+[Bun release asset digests](https://api.github.com/repos/oven-sh/bun/releases/tags/bun-v1.3.12).
+The checked-in digest is verified before extraction/execution; no live checksum
+fallback or bypass exists. This trusts the reviewed source pins and official
+release provenance; it is not independent signature verification. Maintainers
+must review the version, URLs, archive layout and hashes together when updating pins.
+
+Archives have bounded downloads/extraction and HTTPS redirect restrictions.
+Extraction rejects escaping paths, duplicate files, hardlinks/devices and
+unexpected symlinks; npm/npx links are recreated to fixed bundled targets.
+The optional corepack alias is not installed. Files receive private modes and
+ownership/link checks before execution. A staged `--version` must match the pin
+before publication to `DATA_HOME/tools/runtimes/NAME-VERSION-PLATFORM`.
+An exclusive per-runtime directory lock prevents concurrent setup. Downloads,
+integrity checks, extraction or version failures clean staging and activate
+nothing for that runtime. A completed runtime is retained if a later stage fails.
+After a crash, review a retained `.installing` directory before removing it;
+the installer never guesses that a lock is stale.
+
+Managed runtime bins are appended after existing PATH entries and validated
+before use on every rerun, even without the opt-in flag. No existing runtime or
+partial managed destination is overwritten. Keep the same data home on reruns.
+Only the installer and its child processes get these PATH additions; shell
+profiles and `~/.local/bin` are never edited. To use a managed runtime directly
+in a later shell, explicitly add its printed data-home
+`tools/runtimes/NAME-VERSION-PLATFORM/bin` directory to that shell's PATH.
+No interactive prompt is used: the flag is the consent in CI/noninteractive use.
+`--dry-run` and `--check` override it and never download or install anything.
+
+OS packages and Hermes remain operator-managed. Missing manual prerequisites
+block runtime downloads too. Review and run the appropriate distro command
+yourself; the installer never invokes sudo or a system package manager:
+
+| Distro | Suggested prerequisite package command |
+| --- | --- |
+| Debian / Ubuntu | `sudo apt-get install python3 bash coreutils ca-certificates` |
+| Fedora / RHEL | `sudo dnf install python3 bash coreutils ca-certificates` |
+| Arch | `sudo pacman -S python bash coreutils ca-certificates` |
+| Alpine / musl | `sudo apk add python3 bash coreutils ca-certificates nodejs npm` (select a compatible Bun separately) |
+
+On ordinary Fedora Workstation/Server, an OS-managed Node/npm alternative is
+`sudo dnf install nodejs`, followed by `node --version` and `npm --version`.
+Fedora bundles npm with Node; consult the
+[Fedora Node guide](https://developer.fedoraproject.org/tech/languages/nodejs/nodejs.html)
+for release-specific packages if the selected command/version is absent.
+Silverblue/Kinoite use the Fedora Atomic/Toolbx package workflow rather than
+host `dnf`; choose the environment explicitly before installing packages.
+If a compatible Node already exists but npm is missing, install its matching
+npm yourself; the opt-in flag does not replace Node just to obtain npm.
+
+Verify package versions meet the requirements; older distro repositories may
+need an operator-selected supported distribution/repository. These commands do
+not claim to install a compatible Hermes or Bun. Obtain a **reviewed, pinned
+Hermes release** from [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)
+and follow that version's installation/setup instructions for the selected
+profile. This installer does not run an unpinned Hermes checkout, configure
+provider accounts, copy credentials, or change your OS packages.
+
+The installer requires the source's exact pnpm pin. If pnpm is missing, npm installs that
 pin into workshop-private `tools/pnpm-VERSION`, with lifecycle scripts disabled.
 Before bootstrap/use, it rejects unsafe directory hierarchies, non-owned or
 group/world-writable private prefix contents, and links escaping the prefix.
@@ -59,7 +144,8 @@ Hermes home.
 
 ## What it does
 
-1. Checks runtime versions, selected profile, saved state, and connection conflicts.
+1. Inventories prerequisites, optionally bootstraps missing supported runtimes,
+   then checks the selected profile, saved state, and connection conflicts.
 2. Installs frozen-lockfile dependencies with lifecycle scripts disabled, builds,
    and typechecks using the existing `scripts/setup.sh`.
 3. Initializes workshop settings/isolated worker home only if not already present.
@@ -89,7 +175,7 @@ Hermes home.
    exact duplicates exist, the oldest by creation time (then ID) is reused;
    others are retained unchanged. JSON `installerReceipt` reports its ID,
    `matchingRecords` count, and permanent lifetime. An already-permanent receipt
-   is not refreshed. `--check` neither looks up nor writes/promotes receipts.
+   is not refreshed. `--check` neither starts MCP nor looks up/writes/promotes receipts.
 7. Checks database ownership and mode 0600; emits a JSON result with paths,
    verification outcomes, activation instructions, and capability boundaries.
 
@@ -130,18 +216,26 @@ bash scripts/install.sh
 # Use an already-built tree (no dependency download/build).
 bash scripts/install.sh --skip-build
 
-# Check the existing connection; no configuration changes or saved facts.
+# Statically inspect the existing installation; no locks, startup or writes.
 bash scripts/install.sh --check
 ```
 
-`--dry-run` does not build, download tools, initialize the workshop, start the
-MCP server, or change its configuration. `--check` performs a real MCP handshake
-and status call; normal server startup opens the existing database and can run
-its initialization/migrations or create/update SQLite sidecars. It also acquires
-the installer locks. It is a non-installing health check, not a promise that
-server startup performs no filesystem writes. The JSON verification explicitly
-reports `startupFilesystemWritesPossible: true`. It does not search/update facts
-or claim a fresh memory round trip; the reported `memoryRoundTrip` is null.
+`--dry-run` does not build, download tools, initialize the workshop, acquire locks,
+start MCP, or change configuration. With planned missing runtimes it prints the
+inventory/download plan and reports `profileChecksDeferred: true`; profile and
+connection checks must wait until installation. Missing manual prerequisites
+or incompatible existing versions still return nonzero with the full inventory.
+
+`--check` is now a **static inspection**: runtime inventory/version probes,
+read-only Hermes configuration queries, profile/state/path safety, built-source
+presence and exact saved MCP settings. It never acquires installer locks,
+bootstraps, opens SQLite or starts MCP, even with `--bootstrap-prerequisites`.
+Its JSON reports `staticCheck: true`, `startupFilesystemWritesPossible: false`
+and `memoryRoundTrip: null`. As with previews, selected executables are trusted
+to honor their version/config read commands; no installer filesystem writes
+are made. It cannot prove live MCP discovery or database health. A normal
+installation performs that verification, or run `hermes mcp test zouroboros`
+explicitly when you intend to start the server and permit SQLite startup writes.
 
 A successful CLI handshake is not proof that an already-open chat has adopted
 new tools. Start a new normal chat or explicitly use `/reload-mcp`; then ask for
@@ -207,6 +301,7 @@ instructions if a backup is needed.
 pnpm test
 pnpm run typecheck
 bash -n scripts/install.sh
+python3 -m unittest discover -s tests -p test_prerequisites.py -v
 
 # Optional qualification against the installed real Hermes CLI, in scratch
 # profiles only. No model/voice/provider requests are made.
@@ -241,3 +336,12 @@ fixtures also cover unsafe directory/sidecar/prefix state, late operator entries
 advisory locks, malformed nested config, timeout/readback failures, tagged cleanup,
 and interrupted subprocess process groups. Real-Hermes qualification is explicitly
 opt-in and uses disposable homes; it does not qualify a live profile.
+
+The stdlib-only `test_prerequisites.py` suite runs without installed Bun/Hermes
+and uses synthetic archives, fake download responses and mocked commands. It
+covers complete inventories, incompatible/missing tools, pnpm opt-out/trust,
+platform limits, official URLs/redirects, download limits/failures, integrity,
+archive traversal/links/duplicates, fixed npm aliases, staged version checks,
+collision/concurrency preservation, PATH ordering, reruns, noninteractive use,
+and non-mutating previews/checks. It does not install or execute real runtimes.
+POSIX ownership and process-group tests still require the Linux installer suite.

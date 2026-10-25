@@ -143,6 +143,7 @@ try {
     def close(self): self.temp.cleanup()
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'scripts'))
 INSTALLER = ROOT / 'scripts' / 'install.py'
 spec = importlib.util.spec_from_file_location('operator_installer', INSTALLER)
 installer = importlib.util.module_from_spec(spec)
@@ -360,14 +361,15 @@ class InstallerTests(unittest.TestCase):
             self.assertIn('unresolved',result.stderr)
         finally:fixture.close()
 
-    def test_existing_matching_connection_is_not_disabled_on_check_failure(self):
+    def test_static_check_does_not_start_or_disable_matching_connection(self):
         fixture=Fixture()
         try:
             self.assertEqual(fixture.run().returncode,0)
             before=fixture.config.read_bytes()
             fixture.env['INSTALL_TEST_FAIL_TEST']='1'
             result=fixture.run('--check')
-            self.assertNotEqual(result.returncode,0)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertTrue(json.loads(result.stdout)['verification']['staticCheck'])
             self.assertEqual(fixture.config.read_bytes(),before)
         finally:fixture.close()
 
@@ -699,7 +701,7 @@ try {
             result=fixture.run('--check')
             self.assertEqual(result.returncode,0,result.stderr)
             self.assertIsNone(json.loads(result.stdout)['verification']['memoryRoundTrip'])
-            self.assertTrue(json.loads(result.stdout)['verification'].get('startupFilesystemWritesPossible'))
+            self.assertFalse(json.loads(result.stdout)['verification']['startupFilesystemWritesPossible'])
             self.assertEqual(fixture.config.read_bytes(),before)
             with sqlite3.connect(fixture.data/'memory.db') as db:self.assertEqual(db.execute('SELECT * FROM facts').fetchall(),rows)
         finally:fixture.close()
