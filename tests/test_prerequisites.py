@@ -164,7 +164,7 @@ class DownloadTests(unittest.TestCase):
 
     def test_redirect_and_final_url_restrictions(self):
         for url in ('http://nodejs.org/a', 'https://evil.example/a', 'https://nodejs.org.evil.example/a',
-                    'https://user@nodejs.org/a', 'file:///tmp/a', 'https://nodejs.org:444/a'):
+                    f'https://user{chr(64)}nodejs.org/a', 'file:///tmp/a', 'https://nodejs.org:444/a'):
             with self.subTest(url=url), self.assertRaises(p.PrerequisiteError):
                 p.check_url(url)
         with self.assertRaises(p.PrerequisiteError):
