@@ -7,7 +7,10 @@ never reads/copies credential files, invokes a model, or starts swarm workers.
 import argparse
 from contextlib import contextmanager
 import copy
-import fcntl
+try:
+    import fcntl
+except ImportError:  # --help and an actionable platform error also work elsewhere.
+    fcntl = None
 import hashlib
 import json
 import os
@@ -19,6 +22,7 @@ import stat
 import subprocess
 import sys
 import uuid
+import prerequisites
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ['factory_intake', 'memory_search', 'memory_store', 'swarm_prepare', 'workshop_status']
@@ -36,9 +40,11 @@ def parser():
     result.add_argument('--workspace', help='Workshop project directory; existing settings are preserved')
     result.add_argument('--skip-build', action='store_true', help='Use an already built source tree')
     result.add_argument('--no-bootstrap-pnpm', action='store_true', help='Do not install missing pinned pnpm')
+    result.add_argument('--bootstrap-prerequisites', action='store_true',
+                        help='Opt in to SHA-256 verified pinned Node/Bun downloads in user-owned workshop tools on supported Linux; never sudo, replace runtimes or install Hermes')
     mode = result.add_mutually_exclusive_group()
     mode.add_argument('--dry-run', action='store_true', help='Inspect and print the plan without installation writes')
-    mode.add_argument('--check', action='store_true', help='Check without saving facts or changing configuration; locks and SQLite startup may write filesystem state')
+    mode.add_argument('--check', action='store_true', help='Statically inspect the existing installation without downloads, locks, MCP startup, opening SQLite or filesystem writes')
     return result
 
 
@@ -93,13 +99,6 @@ def executable(name, env):
     if not value:
         raise InstallError(f'Missing prerequisite: {name}. Install it for this user and put it on PATH.')
     return str(Path(value).absolute())
-
-
-def version_tuple(text):
-    match = re.search(r'(\d+)\.(\d+)\.(\d+)', text)
-    if not match:
-        raise InstallError('Could not determine a runtime version.')
-    return tuple(map(int, match.groups()))
 
 
 def get_server(hermes, env):
@@ -203,16 +202,20 @@ def ensure_pnpm(env, data, allow_bootstrap):
         env['PATH'] = str(private / 'bin') + os.pathsep + env['PATH']
         manager = executable('pnpm', env)
     check_private_prefix(private)
-    # A user-selected PATH executable is trusted only after ownership/mode checks.
+    check_pnpm_executable(manager)
+    _, version, _ = command([manager, '--version'], env, 'Checking pinned pnpm')
+    if version.strip() != pin:
+        raise InstallError(f'pnpm version differs from source pin {pin}; no existing package manager will be overwritten. Put the correct version on PATH.')
+
+
+def check_pnpm_executable(manager):
+    # Used by inventory too: never execute an untrusted pnpm to get its version.
     check_directory(Path(manager).absolute().parent, ancestors=True, allow_root=True)
     target = Path(manager).resolve(strict=True)
     check_directory(target.parent, ancestors=True, allow_root=True)
     info = target.stat()
     if not stat.S_ISREG(info.st_mode) or info.st_uid not in {0, os.getuid()} or info.st_mode & 0o022:
         raise InstallError('pnpm executable is not trusted; review its ownership and permissions before use.')
-    _, version, _ = command([manager, '--version'], env, 'Checking pinned pnpm')
-    if version.strip() != pin:
-        raise InstallError(f'pnpm version differs from source pin {pin}; no existing package manager will be overwritten. Put the correct version on PATH.')
 
 
 def check_directory(path, ancestors=False, allow_root=False):
@@ -336,17 +339,57 @@ def cleanup_new_connection(hermes, env, bun, data, tag, candidates, verify_locks
 
 
 def install(args):
+    if sys.platform != 'linux':
+        raise InstallError('The workshop installer supports Linux only; use a Linux development environment. No prerequisites were installed.')
     env = os.environ.copy()
     home = Path.home()
     env['PATH'] = os.pathsep.join([str(home / '.local/bin'), str(home / '.bun/bin'), env.get('PATH', '')])
+    data = Path(os.path.abspath(Path(args.data_home or env.get('HERMES_ZOUROBOROS_HOME') or Path(env.get('XDG_DATA_HOME') or home / '.local/share') / 'hermes-zouroboros').expanduser()))
+    check_state_files(data)
+    prerequisites.add_private_paths(env, data, check_directory)
+    build = not args.skip_build and not args.check
+    # Preserve private pnpm validation before any version probe, including previews.
+    package_pin = json.loads((ROOT / 'package.json').read_text())['packageManager']
+    check_private_prefix(data / 'tools' / package_pin.replace('@', '-'))
+    rows = prerequisites.inventory(env, data, build, not args.no_bootstrap_pnpm, command, check_pnpm_executable)
+    missing_runtimes = [row for row in rows if row['name'] in ('node', 'bun') and row['status'] == 'missing']
+    target = None
+    if args.bootstrap_prerequisites and missing_runtimes:
+        try:
+            target = prerequisites.target_platform()
+        except prerequisites.PrerequisiteError as exc:
+            print(prerequisites.format_inventory(rows), file=sys.stderr)
+            raise InstallError(str(exc) + '\n' + prerequisites.guidance()) from None
+        for row in missing_runtimes:
+            row.update(status='bootstrap', detail=f'Opt-in pinned {prerequisites.PINS[row["name"]]["version"]} in workshop-private tools')
+        # Bundled npm accompanies a missing Node; do not download Node just for npm.
+        if any(row['name'] == 'node' for row in missing_runtimes):
+            for row in rows:
+                if row['name'] == 'npm' and row['status'] == 'missing':
+                    row.update(status='bootstrap', detail='Bundled with pinned Node')
+    problems = prerequisites.unresolved(rows)
+    if problems:
+        raise InstallError(prerequisites.format_inventory(rows) + '\n' + prerequisites.guidance())
+    print(prerequisites.format_inventory(rows), file=sys.stderr)
+    # --check/--dry-run never enter bootstrap, including with the opt-in flag.
+    if args.check and missing_runtimes:
+        raise InstallError('Missing runtimes; --check never installs prerequisites.\n' + prerequisites.guidance())
+    if args.dry_run and missing_runtimes:
+        print(json.dumps({'ok': True, 'dryRun': True, 'prerequisites': rows,
+                          'plan': {'bootstrapOnlyPreview': True, 'profileChecksDeferred': True,
+                                   'dataHome': str(data), 'build': build}, 'workers': False, 'sampling': False}))
+        return
+    for row in missing_runtimes:
+        prerequisites.bootstrap(row['name'], data, target, env, command, check_directory)
+    if missing_runtimes:
+        prerequisites.add_private_paths(env, data, check_directory)
+        rows = prerequisites.inventory(env, data, build, not args.no_bootstrap_pnpm, command, check_pnpm_executable)
+        if prerequisites.unresolved(rows):
+            raise InstallError(prerequisites.format_inventory(rows) + '\n' + prerequisites.guidance())
+        print(f'Private runtimes ready. This installer uses them automatically on reruns with --data-home {data}. '
+              'Shell profiles were not changed.', file=sys.stderr)
     hermes = executable('hermes', env)
     bun = executable('bun', env)
-    node = executable('node', env)
-    executable('timeout', env)
-    for binary, minimum, name in [(node, (20, 0, 0), 'Node'), (bun, (1, 3, 12), 'Bun')]:
-        _, out, _ = command([binary, '--version'], env, f'Checking {name}')
-        if version_tuple(out) < minimum:
-            raise InstallError(f'{name} is too old; this source requires at least {".".join(map(str, minimum))}.')
     if args.hermes_home:
         env['HERMES_HOME'] = str(Path(args.hermes_home).expanduser().resolve())
     _, config_out, _ = command([hermes, 'config', 'path'], env, 'Resolving active Hermes profile')
@@ -355,7 +398,6 @@ def install(args):
         raise InstallError('Selected Hermes profile must already have config.yaml. Run Hermes setup for that profile first.')
     config = config.resolve()
     env['HERMES_HOME'] = str(config.parent)
-    data = Path(os.path.abspath(Path(args.data_home or env.get('HERMES_ZOUROBOROS_HOME') or Path(env.get('XDG_DATA_HOME') or home / '.local/share') / 'hermes-zouroboros').expanduser()))
     if data == config.parent or data / 'hermes' == config.parent:
         raise InstallError('Use a normal Hermes home separate from the workshop state and its isolated worker home.')
     env['HERMES_ZOUROBOROS_HOME'] = str(data)
@@ -366,23 +408,35 @@ def install(args):
     check_connection(server, bun, data)
     plan = {'source': str(ROOT), 'hermesHome': str(config.parent), 'dataHome': str(data), 'workspace': str(work), 'initialize': not initialized, 'build': not args.skip_build and not args.check, 'connect': server is None}
     if args.dry_run:
-        print(json.dumps({'ok': True, 'dryRun': True, 'plan': plan, 'workers': False, 'sampling': False}))
+        print(json.dumps({'ok': True, 'dryRun': True, 'plan': plan, 'prerequisites': rows, 'workers': False, 'sampling': False}))
         return
     if args.check and (not initialized or server is None or not (data / 'memory.db').is_file()):
         raise InstallError('No complete installation to check. Run the installer without --check first.')
+    if args.check:
+        check_settings(server)
+        check_built_source()
+        print(json.dumps({'ok': True, 'plan': plan, 'prerequisites': rows,
+                          'verification': {'staticCheck': True, 'memoryRoundTrip': None,
+                                           'startupFilesystemWritesPossible': False,
+                                           'mcpHandshake': 'not run (static check)'}}))
+        return
     with install_locks(config, data) as verify_locks:
         unchanged_server(hermes, env, server)
         work, initialized = state_workspace(data, args.workspace, home)
         finish_install(args, env, hermes, bun, data, work, initialized, server, config, plan, verify_locks)
 
 
+def check_built_source():
+    for relative in ['node_modules/@modelcontextprotocol/sdk', 'packages/memory/dist/index.js', 'packages/swarm/dist/index.js']:
+        if not (ROOT / relative).exists():
+            raise InstallError('Source is not built; run the installer without --skip-build.')
+
+
 def finish_install(args, env, hermes, bun, data, work, initialized, server, config, plan, verify_locks):
     if not args.skip_build and not args.check:
         ensure_pnpm(env, data, not args.no_bootstrap_pnpm)
         command(['bash', str(ROOT / 'scripts/setup.sh')], env, 'Source dependency installation/build/typecheck', timeout=600)
-    for relative in ['node_modules/@modelcontextprotocol/sdk', 'packages/memory/dist/index.js', 'packages/swarm/dist/index.js']:
-        if not (ROOT / relative).exists():
-            raise InstallError('Source is not built; run the installer without --skip-build.')
+    check_built_source()
     check_state_files(data)
     verify_locks()
     work, initialized = state_workspace(data, args.workspace, Path.home())
@@ -462,7 +516,7 @@ def main():
     except KeyboardInterrupt:
         print('Installation interrupted; subprocess groups were stopped. Review any reported unresolved connection state.', file=sys.stderr)
         return 130
-    except (InstallError, OSError, ValueError) as exc:
+    except (InstallError, prerequisites.PrerequisiteError, OSError, ValueError) as exc:
         print(f'Installation stopped: {exc}', file=sys.stderr)
         return 1
     return 0

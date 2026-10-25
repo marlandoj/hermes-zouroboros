@@ -65,7 +65,7 @@ The default executor is Hermes. The bundled swarm library (`packages/swarm/`) ca
 
 ## Start here
 
-Prerequisites: a Linux host, Git, Node.js 20+, Bun 1.3.12+, Python 3.10+, GNU coreutils, and an installed/configured Hermes Agent. The installer can bootstrap missing pnpm at the exact source pin into workshop-private tools.
+Prerequisites: a Linux host, Git, Node.js 20+, Bun 1.3.12+, Python 3.10+, Bash, GNU coreutils, and an installed/configured Hermes Agent. The installer inventories prerequisites upfront. Opt in with `--bootstrap-prerequisites` to download pinned, SHA-256 verified missing Node/Bun runtimes into user-owned workshop tools on supported Linux; existing runtimes are preserved. Missing pnpm can be bootstrapped at the exact source pin. See [installation boundaries and distro guidance](docs/install.md#prerequisites).
 
 For shared memory and Zouroboros tools in your **normal Hermes chats**:
 
