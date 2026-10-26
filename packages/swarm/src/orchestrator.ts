@@ -57,11 +57,11 @@ import type { ProviderAdapter } from 'zouroboros-core';
 import { resolvePortableHarness, type ResolvedPortableHarness } from './executor/portability.js';
 import {
   consultSpecialists,
-  renderSpecialistOutputs,
   resolveSpecialistConsultMode,
   type SpecialistConsultEvidence,
   type SpecialistConsultPhase,
 } from './persona/specialist-consult.js';
+import { renderSpecialistAdvice, UPSTREAM_DATA_REMINDER } from './context/upstream-frame.js';
 
 const DEFAULT_PIPELINE_GATES: PipelineGateConfig = {
   seedValidation: true,
@@ -703,9 +703,11 @@ export class SwarmOrchestrator {
           specialistCostUsd: specialistCosts.get(candidate.id),
         }));
       }
-      const rendered = renderSpecialistOutputs(advice);
+      // Specialist output is model-written text: it reaches the task only as
+      // fenced, labelled data (see context/upstream-frame.ts).
+      const rendered = renderSpecialistAdvice(advice.evidence);
       if (advice.mode === 'enforce' && rendered) {
-        task.task = `## Specialist Advice\n${rendered}\n\n## Primary Task\n${task.task}`;
+        task.task = `${rendered}\n## Primary Task\n${task.task}\n\n${UPSTREAM_DATA_REMINDER}`;
       }
     }
 

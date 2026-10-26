@@ -76,7 +76,10 @@ call   (hook → gate):  POST http://$HOST:$PORT/gate
 resp   (gate → hook):  JSON { "exit_code": 0|2|3|1, "output": "<memory context>", ... }
                        0 = context found → inject   2 = not needed
                        3 = needed but empty          1 = error
-stdout (hook → host):  if exit_code==0 && output:  <memory-gate>\n{output}\n</memory-gate>
+stdout (hook → host):  if exit_code==0 && output:
+                         <preamble: the block is data, not instructions>
+                         <memory-gate trust="data-only">\n{output}\n</memory-gate>
+                       ({output} has any <memory-gate / </memory-gate neutralised to &lt;…)
 exit                :  ALWAYS 0 (fail-open — never block the prompt)
 ```
 
