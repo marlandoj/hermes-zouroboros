@@ -13,3 +13,4 @@ decision-factory
 human-approval
 approval-tiers
 acp-gate
+ShareDecisionRecordV1
