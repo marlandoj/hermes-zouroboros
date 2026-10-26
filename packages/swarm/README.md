@@ -23,7 +23,7 @@ pnpm add zouroboros-swarm
 
 ### ACP Adapter Prerequisites
 
-The swarm uses the [Agent Client Protocol (ACP)](https://github.com/agentclientprotocol) for Claude Code, Codex, Gemini, Hermes, OpenCode, and Kimi. Pi uses an isolated one-shot bridge. Install the required adapter binaries before running:
+The swarm uses the [Agent Client Protocol (ACP)](https://github.com/agentclientprotocol) for Claude Code, Codex, Gemini, Hermes, OpenCode, and Kimi. Pi uses a one-shot bridge (no session state; it is not an OS sandbox). Install the required adapter binaries before running:
 
 ```bash
 # Install all ACP adapters
@@ -44,7 +44,7 @@ bash packages/swarm/scripts/install-acp-adapters.sh --update
 | Hermes | `hermes acp --accept-hooks` | runtime source |
 | OpenCode | `opencode acp --pure` | `opencode-ai` |
 | Kimi | Kimi native ACP through `kimi-bridge.sh` | `kimi-cli` |
-| Pi | isolated bridge + Pi MCP adapter | `@earendil-works/pi-coding-agent` |
+| Pi | one-shot bridge + Pi MCP adapter | `@earendil-works/pi-coding-agent` |
 
 ## Quick Start
 
@@ -193,6 +193,13 @@ Create `~/.zouroboros/executors.json`:
   ]
 }
 ```
+
+## Known Issues
+
+- **A model named on a task can be overridden.** The model router in this release is frozen, and its fallback logic can replace the model a task asks for. If the routed executor does not accept that model (for example after a reroute to a different executor), the router substitutes the executor's static fallback or default model and records only a fallback reason. Tier aliases (light/mid/heavy) resolve through pins and the catalog, not to a fixed model. Set models explicitly: pin `executor` on the task, name a concrete model id that executor accepts rather than an alias, set `modelPins` in the executor registry for the tiers you rely on, and check `modelUsed` in the results file.
+- **Pi needs an MCP config, or its probe fails on a clean install.** The Pi bridge builds its MCP configuration from a `.mcp.json` in the task workspace (or a parent directory), or from the file named by `PI_MCP_CONFIG_PATH`. With neither, the Pi health probe fails and Pi is reported unhealthy. Create a `.mcp.json` in the workspace (`{"mcpServers": {}}` is enough) or set `PI_MCP_CONFIG_PATH` to an absolute path.
+
+Executors run with your user's privileges and credentials; see the executor trust model in the repository's [SECURITY.md](../../SECURITY.md).
 
 ## License
 
