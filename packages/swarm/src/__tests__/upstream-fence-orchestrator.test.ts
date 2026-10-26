@@ -21,13 +21,12 @@ const SCRIPT = process.env.UPSTREAM_ORCH_SCRIPT || join(REPO_ROOT, "packages/swa
 const BRIDGE = "packages/swarm/src/executor/bridges/upstream-fence-fixture-bridge.sh";
 const BRIDGE_SRC = readFileSync(join(import.meta.dir, "fixtures/upstream-fence-bridge.sh"), "utf8");
 const roots: string[] = [];
-const campaigns: string[] = [];
 
+// orchestrate-v5 also leaves small per-campaign lock/progress/complete files in
+// its fixed LOCK_DIR; ids are unique per run, and this test does not hardcode
+// that host path (leak-gate host-path rule).
 afterEach(() => {
   for (const p of roots.splice(0)) rmSync(p, { recursive: true, force: true });
-  for (const id of campaigns.splice(0)) {
-    for (const s of [".lock", "-progress.json", "-complete.json"]) rmSync(`/dev/shm/${id}${s}`, { force: true });
-  }
 });
 
 function write(path: string, content: string, mode?: number) {
@@ -70,7 +69,6 @@ function fixture(opts: { out?: Record<string, string>; fail?: string[] } = {}) {
 
 async function run(f: ReturnType<typeof fixture>, tasks: Array<{ id: string; deps: string[] }>) {
   const id = `upf-${process.pid}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
-  campaigns.push(id);
   const tasksFile = join(f.root, "tasks.json");
   write(tasksFile, JSON.stringify(tasks.map(x => ({
     id: x.id, persona: "auto", executor: "fx-a", task: `Reply with exactly: CHILD-RAN. TASKMARK=${x.id}`,
