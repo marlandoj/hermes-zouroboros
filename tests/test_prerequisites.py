@@ -71,6 +71,11 @@ class InventoryTests(unittest.TestCase):
         rows = self.collect(['hermes', 'bun', 'node', 'timeout', 'bash', 'python3', 'pnpm'])
         self.assertEqual(p.unresolved(rows), [])
 
+    def test_uutils_timeout_is_accepted(self):
+        rows = self.collect(['hermes', 'bun', 'node', 'timeout', 'bash', 'python3'],
+                            {'timeout': 'timeout (uutils coreutils) 0.1.0'}, build=False)
+        self.assertEqual(p.unresolved(rows), [])
+
     def test_incompatible_tools_are_all_reported(self):
         rows = self.collect(['node', 'bun', 'python3', 'timeout', 'pnpm'],
                             {'node': 'v18.20.1', 'bun': '1.0.0', 'python3': 'Python 3.9.0',

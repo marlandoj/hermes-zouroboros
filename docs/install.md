@@ -7,13 +7,13 @@ production factory or enable paid/unattended worker execution.
 
 ## Prerequisites
 
-Use an unprivileged Linux account with Python 3.10+, Bash, GNU `timeout`, Node
+Use an unprivileged Linux account with Python 3.10+, Bash, coreutils `timeout` (GNU or uutils), Node
 20+, Bun 1.3.12+, and Hermes Agent on PATH. Set up the selected normal Hermes
 profile first; it must already have `config.yaml`. No new provider login is
 needed to use the shared-memory tools.
 
 Review and obtain this source tree through the project's trusted distribution
-channel. Every invocation inventories Hermes, Bun, Node, GNU `timeout`, Bash and
+channel. Every invocation inventories Hermes, Bun, Node, coreutils `timeout`, Bash and
 Python before installation writes. Builds also inventory pnpm and, when its
 bootstrap needs it, npm. It reports all missing/incompatible tools together.
 It discovers PATH plus the user's `~/.local/bin` and `~/.bun/bin`.

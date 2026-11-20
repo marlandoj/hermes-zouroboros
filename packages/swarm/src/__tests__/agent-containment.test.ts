@@ -52,7 +52,15 @@ describe('agent filesystem containment', () => {
     expect(() => prepareFilesystemContainedSpawn({ command: '/bin/true', args: [] }, join(containmentRoot, 'job'), { ...env(containmentRoot), FACTORY_EXTERNAL_ROOT: external })).toThrow('pinned Factory profile');
   });
   const containmentAvailable = existsSync('/usr/bin/bwrap') && existsSync('/usr/bin/setpriv');
-  test.skipIf(!containmentAvailable)('binds only assigned linked Git metadata read-only', () => {
+  // prepareFilesystemContainedSpawn chowns the assigned worktree to the containment
+  // uid/gid (65534) before spawning — a privileged operation (the production supervisor
+  // runs as root). Where bwrap/setpriv exist but the test process is unprivileged — for
+  // example the GitHub Actions runner (uid 1001) on the ubuntu-26.04 image, which now
+  // ships bwrap where ubuntu-24.04 did not — chownSync fails with EPERM and every test
+  // that needs a successful prepare fails for an environmental reason. Gate those tests
+  // on the same root check the prestaged payload test below already uses.
+  const containmentChownAvailable = containmentAvailable && process.getuid?.() === 0;
+  test.skipIf(!containmentChownAvailable)('binds only assigned linked Git metadata read-only', () => {
     const item = fixture();
     const repo = join(item.root, 'repo');
     mkdirSync(repo);
@@ -92,7 +100,7 @@ describe('agent filesystem containment', () => {
     });
   });
 
-  test.skipIf(!containmentAvailable)('rootless spawn keeps the setpriv + bwrap --unshare-user shape', () => {
+  test.skipIf(!containmentChownAvailable)('rootless spawn keeps the setpriv + bwrap --unshare-user shape', () => {
     const item = fixture();
     const spawnEnv = env(item.containmentRoot);
     const spec = prepareFilesystemContainedSpawn(
@@ -114,7 +122,7 @@ describe('agent filesystem containment', () => {
     } finally { spec.closeAfterSpawn?.(); spec.cleanupAfterExit?.(); }
   });
 
-  test.skipIf(!containmentAvailable)('prestaged spawn prestages the userns via the python helper and binds /proc', () => {
+  test.skipIf(!containmentChownAvailable)('prestaged spawn prestages the userns via the python helper and binds /proc', () => {
     const item = fixture();
     const spawnEnv = env(item.containmentRoot);
     const spec = prepareFilesystemContainedSpawn(
@@ -173,7 +181,7 @@ describe('agent filesystem containment', () => {
     )).toThrow('must be inside');
   });
 
-  test.skipIf(!containmentAvailable)('runs as a rootless host user with only the assigned worktree writable', () => {
+  test.skipIf(!containmentChownAvailable)('runs as a rootless host user with only the assigned worktree writable', () => {
     const item = fixture();
     const spec = prepareFilesystemContainedSpawn(
       {
@@ -195,7 +203,7 @@ describe('agent filesystem containment', () => {
     expect(statSync(join(item.workdir, 'output.txt')).uid).toBe(65_534);
   });
 
-  test.skipIf(!containmentAvailable)('permits pnpm-style hard links only beneath node_modules', () => {
+  test.skipIf(!containmentChownAvailable)('permits pnpm-style hard links only beneath node_modules', () => {
     const item = fixture();
     const store = join(item.root, 'store-file');
     const dependency = join(item.workdir, 'node_modules', 'pkg', 'index.js');
@@ -209,7 +217,7 @@ describe('agent filesystem containment', () => {
     )).not.toThrow();
   });
 
-  test.skipIf(!containmentAvailable)('rejects hard links outside dependency trees', () => {
+  test.skipIf(!containmentChownAvailable)('rejects hard links outside dependency trees', () => {
     const item = fixture();
     const outside = join(item.root, 'outside');
     writeFileSync(outside, 'sensitive\n');

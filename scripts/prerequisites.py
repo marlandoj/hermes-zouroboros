@@ -109,8 +109,13 @@ def inventory(env, data, build, allow_pnpm, command, check_manager):
                     check_manager(path)
                 _, out, _ = command([path, '--version'], env, f'Checking {name}')
                 if name == 'timeout':
-                    if not out.startswith('timeout (GNU coreutils)'):
-                        raise PrerequisiteError('GNU coreutils timeout is required.')
+                    # GNU coreutils is the historical system timeout; Ubuntu 25.10+
+                    # ships uutils coreutils as the system coreutils instead, whose
+                    # timeout implements the same CLI for the only uses here
+                    # (`timeout <duration> <command>` in setup/verify scripts).
+                    # BusyBox and other limited timeouts stay rejected.
+                    if not out.startswith(('timeout (GNU coreutils)', 'timeout (uutils coreutils)')):
+                        raise PrerequisiteError('GNU or uutils coreutils timeout is required.')
                 elif name == 'python3':
                     if version(out.strip().removeprefix('Python ')) < (3, 10, 0):
                         raise PrerequisiteError('Python 3.10+ is required.')
