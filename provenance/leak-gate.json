@@ -261,6 +261,19 @@
       "reason": "This repository's own GitHub URL (CI badge, clone command, recorded CI receipts and PR links); the owner segment is the account the repository lives under, not content. Any other occurrence of the handle in these files still fails."
     },
     {
+      "id": "successor-repository-url",
+      "files": [
+        "README.md"
+      ],
+      "rules": [
+        "personal-data:operator-name-2"
+      ],
+      "context": {
+        "regex": "github\\.com/[A-Za-z0-9-]+/zouroboros-workshop(?![A-Za-z0-9-])"
+      },
+      "reason": "The deprecation banner links the successor repository; the owner segment is the account that repository lives under, not content. Only that URL is masked, only in README.md; any other occurrence of the handle still fails."
+    },
+    {
       "id": "recorded-upstream-repository",
       "files": [
         "provenance/workspace.json",

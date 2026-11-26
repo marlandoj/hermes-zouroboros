@@ -1,3 +1,6 @@
+> [!WARNING]
+> **This repository is deprecated and no longer maintained.** It has been superseded by **[zouroboros-workshop](https://github.com/marlandoj/zouroboros-workshop)**, the vendor-agnostic build. Existing clones keep working via GitHub redirects where applicable, but no further releases or fixes will land here.
+
 # Hermes × Zouroboros
 
 [![CI](https://github.com/marlandoj/hermes-zouroboros/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/marlandoj/hermes-zouroboros/actions/workflows/ci.yml)
